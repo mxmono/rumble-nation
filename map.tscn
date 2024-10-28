@@ -1,0 +1,249 @@
+[gd_scene load_steps=6 format=3 uid="uid://btakum1qc8ovv"]
+
+[ext_resource type="Texture2D" uid="uid://dtn405d2autni" path="res://icons/map.png" id="1_rg7fb"]
+[ext_resource type="Script" path="res://board.gd" id="1_upj78"]
+[ext_resource type="Script" path="res://territory.gd" id="2_1w8ia"]
+[ext_resource type="FontFile" uid="uid://bgwd66m3orfrw" path="res://fonts/VT323-Regular.ttf" id="2_g0uqw"]
+
+[sub_resource type="LabelSettings" id="LabelSettings_8fms1"]
+line_spacing = 0.0
+font = ExtResource("2_g0uqw")
+font_size = 48
+
+[node name="Map" type="Node2D"]
+script = ExtResource("1_upj78")
+
+[node name="Map" type="Sprite2D" parent="."]
+position = Vector2(463, 492)
+scale = Vector2(8.85938, 8.85938)
+texture = ExtResource("1_rg7fb")
+
+[node name="Territory1" type="Area2D" parent="Map"]
+position = Vector2(-60.8395, -27.5414)
+scale = Vector2(0.112875, 0.112875)
+script = ExtResource("2_1w8ia")
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="Map/Territory1"]
+position = Vector2(-79.9998, -99.9998)
+polygon = PackedVector2Array(128, 112, 127, 127, 110, 127, 85, 166, 86, 239, 99, 258, 170, 259, 186, 240, 189, 151, 171, 137, 169, 111, 158, 100, 135, 100)
+
+[node name="PieceContainer" type="Node2D" parent="Map/Territory1"]
+position = Vector2(46.0001, 85.9995)
+
+[node name="PointsLabel" type="Label" parent="Map/Territory1"]
+offset_left = 50.0
+offset_top = 17.0
+offset_right = 84.0
+offset_bottom = 50.0
+label_settings = SubResource("LabelSettings_8fms1")
+horizontal_alignment = 1
+
+[node name="Territory2" type="Area2D" parent="Map"]
+position = Vector2(-56.5502, -6.65961)
+scale = Vector2(0.112875, 0.112875)
+script = ExtResource("2_1w8ia")
+territory_index = 1
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="Map/Territory2"]
+position = Vector2(-64.9998, -75.9998)
+polygon = PackedVector2Array(139, 149, 79.9998, 78.9998, 65.9998, 77.9998, 65.9998, 118, 71.9998, 133, 73.9998, 200.999, 90.9998, 218.999, 140, 218.999, 143, 229.999, 209.999, 230.999, 254.999, 202.999, 255.999, 164, 247.999, 140, 178, 140, 167, 149)
+
+[node name="PieceContainer" type="Node2D" parent="Map/Territory2"]
+position = Vector2(55.9996, 89.9998)
+
+[node name="PointsLabel" type="Label" parent="Map/Territory2"]
+offset_left = 151.0
+offset_top = 80.9998
+offset_right = 179.0
+offset_bottom = 114.0
+label_settings = SubResource("LabelSettings_8fms1")
+horizontal_alignment = 1
+
+[node name="Territory3" type="Area2D" parent="Map"]
+position = Vector2(-59.5979, 14.6737)
+scale = Vector2(0.112875, 0.112875)
+script = ExtResource("2_1w8ia")
+territory_index = 2
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="Map/Territory3"]
+position = Vector2(-73.9998, -97.9998)
+polygon = PackedVector2Array(111, 125, 99.9997, 95.9998, 81.9998, 97.9998, 81.9998, 114, 72.9998, 116, 71.9998, 177, 98.9997, 228.999, 126, 229.999, 132, 220.999, 165, 220.999, 220.999, 190, 251.999, 153, 251.999, 123, 230.999, 96.9997, 191.999, 96.9997)
+
+[node name="PieceContainer" type="Node2D" parent="Map/Territory3"]
+position = Vector2(59.0003, 52)
+
+[node name="PointsLabel" type="Label" parent="Map/Territory3"]
+offset_left = 132.0
+offset_top = 23.9999
+offset_right = 160.0
+offset_bottom = 56.9999
+label_settings = SubResource("LabelSettings_8fms1")
+horizontal_alignment = 1
+
+[node name="Territory4" type="Area2D" parent="Map"]
+position = Vector2(-39.1675, -24.1552)
+scale = Vector2(0.112875, 0.112875)
+script = ExtResource("2_1w8ia")
+territory_index = 3
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="Map/Territory4"]
+position = Vector2(-81.9998, -95.9998)
+polygon = PackedVector2Array(143, 75.9998, 99.9997, 95.9998, 81.9998, 97.9998, 81.9998, 114, 77.9998, 117, 58.9999, 177, 83.9998, 219.999, 133, 234.999, 176, 241.999, 178, 268.999, 193, 269.999, 237.999, 218.999, 261.999, 172, 273.999, 103, 248.999, 88.9998, 167, 88.9998)
+
+[node name="PieceContainer" type="Node2D" parent="Map/Territory4"]
+position = Vector2(51.9996, 38)
+
+[node name="PointsLabel" type="Label" parent="Map/Territory4"]
+offset_left = 4.99974
+offset_top = 55.9999
+offset_right = 32.9997
+offset_bottom = 88.9999
+label_settings = SubResource("LabelSettings_8fms1")
+horizontal_alignment = 1
+
+[node name="Territory5" type="Area2D" parent="Map"]
+position = Vector2(-27.8801, -24.7196)
+scale = Vector2(0.112875, 0.112875)
+script = ExtResource("2_1w8ia")
+territory_index = 4
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="Map/Territory5"]
+position = Vector2(-49.9998, 60.9999)
+polygon = PackedVector2Array(142, -46.9998, 131, 21, 86.9997, 95.9998, 74.9998, 108, 54.9998, 122, 71.9998, 178, 63.9998, 352.999, 74.9998, 385.999, 168, 401.999, 166, 256.999, 214.999, 203, 214.999, 152, 212.999, 22.0001, 243.999, -49.9998, 218.999, -69.9997, 181.999, -69.9997)
+
+[node name="PieceContainer" type="Node2D" parent="Map/Territory5"]
+position = Vector2(66.0002, 189)
+
+[node name="PointsLabel" type="Label" parent="Map/Territory5"]
+offset_left = 121.0
+offset_top = 20.0
+offset_right = 149.0
+offset_bottom = 53.0
+label_settings = SubResource("LabelSettings_8fms1")
+horizontal_alignment = 1
+
+[node name="Territory6" type="Area2D" parent="Map"]
+position = Vector2(-9.59437, -22.8007)
+scale = Vector2(0.112875, 0.112875)
+script = ExtResource("2_1w8ia")
+territory_index = 5
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="Map/Territory6"]
+position = Vector2(-107, 55.9999)
+polygon = PackedVector2Array(137, -56.9998, 107, 10, 107, 142, 112, 190, 147, 190, 202.999, 258.999, 214.999, 264.999, 245.999, 234.999, 239.999, 172, 215, 119, 189, 52.9998, 184.999, -23.9999)
+
+[node name="PieceContainer" type="Node2D" parent="Map/Territory6"]
+position = Vector2(38.0001, 162)
+
+[node name="PointsLabel" type="Label" parent="Map/Territory6"]
+offset_left = 28.0
+offset_top = 31.9999
+offset_right = 56.0
+offset_bottom = 64.9999
+label_settings = SubResource("LabelSettings_8fms1")
+horizontal_alignment = 1
+
+[node name="Territory7" type="Area2D" parent="Map"]
+position = Vector2(-11.1746, 3.61199)
+scale = Vector2(0.112875, 0.112875)
+script = ExtResource("2_1w8ia")
+territory_index = 6
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="Map/Territory7"]
+position = Vector2(-121, 58.9999)
+polygon = PackedVector2Array(137, -47.9999, 97.9996, -7.99994, 88.9997, 52.9999, 92.9997, 151, 149, 148, 184.999, 131, 238.999, 126, 299.999, 128, 364.999, 139, 365.999, 83.9998, 244.999, 28.9999, 171.999, -47.9999)
+
+[node name="PieceContainer" type="Node2D" parent="Map/Territory7"]
+position = Vector2(33, 118)
+
+[node name="PointsLabel" type="Label" parent="Map/Territory7"]
+offset_left = -2.00001
+offset_top = 37.9999
+offset_right = 26.0
+offset_bottom = 70.9999
+label_settings = SubResource("LabelSettings_8fms1")
+horizontal_alignment = 1
+
+[node name="Territory8" type="Area2D" parent="Map"]
+position = Vector2(-0.903004, -19.5273)
+scale = Vector2(0.112875, 0.112875)
+script = ExtResource("2_1w8ia")
+territory_index = 7
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="Map/Territory8"]
+position = Vector2(-121, 58.9999)
+polygon = PackedVector2Array(125, -60.9998, 130, 49.9999, 185.999, 163, 180.999, 208.999, 153, 235.999, 276.999, 289.999, 305, 225.999, 314, 193.999, 302, 166.999, 279, 90.9995, 239, -0.000305176, 198, -54.0002)
+
+[node name="PieceContainer" type="Node2D" parent="Map/Territory8"]
+position = Vector2(85.9999, 149.999)
+
+[node name="PointsLabel" type="Label" parent="Map/Territory8"]
+offset_left = 48.0
+offset_top = 48.9996
+offset_right = 76.0
+offset_bottom = 97.9996
+label_settings = SubResource("LabelSettings_8fms1")
+horizontal_alignment = 1
+
+[node name="Territory9" type="Area2D" parent="Map"]
+position = Vector2(3.95061, -25.8483)
+scale = Vector2(0.112875, 0.112875)
+script = ExtResource("2_1w8ia")
+territory_index = 8
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="Map/Territory9"]
+position = Vector2(-81.9998, -95.9998)
+polygon = PackedVector2Array(196, 93.9998, 162, 117, 112, 147, 160, 213.999, 200, 306.999, 235.999, 413.999, 324.999, 352.999, 322.999, 278.999, 237.999, 226.999, 236.999, 162, 228.999, 110, 213.999, 92.9998)
+
+[node name="PieceContainer" type="Node2D" parent="Map/Territory9"]
+position = Vector2(156, 191.999)
+
+[node name="PointsLabel" type="Label" parent="Map/Territory9"]
+offset_left = 99.9998
+offset_top = 24.0
+offset_right = 128.0
+offset_bottom = 57.0
+label_settings = SubResource("LabelSettings_8fms1")
+horizontal_alignment = 1
+
+[node name="Territory10" type="Area2D" parent="Map"]
+position = Vector2(17.4956, 4.17636)
+scale = Vector2(0.112875, 0.112875)
+script = ExtResource("2_1w8ia")
+territory_index = 9
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="Map/Territory10"]
+position = Vector2(-81.9998, -95.9998)
+polygon = PackedVector2Array(197, 83.9998, 162, 117, 122, 142, 96.9998, 194, 73.9998, 292.999, 101, 304.999, 182, 313.999, 241.999, 303.999, 308.999, 297.999, 334.999, 272.999, 296.999, 216.999, 217.999, 159)
+
+[node name="PieceContainer" type="Node2D" parent="Map/Territory10"]
+position = Vector2(60.9997, 115)
+
+[node name="PointsLabel" type="Label" parent="Map/Territory10"]
+offset_left = 192.0
+offset_top = 144.0
+offset_right = 220.0
+offset_bottom = 177.0
+label_settings = SubResource("LabelSettings_8fms1")
+horizontal_alignment = 1
+
+[node name="Territory11" type="Area2D" parent="Map"]
+position = Vector2(25.0582, -28.1058)
+scale = Vector2(0.112875, 0.112875)
+script = ExtResource("2_1w8ia")
+territory_index = 10
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="Map/Territory11"]
+position = Vector2(-81.9998, -95.9998)
+polygon = PackedVector2Array(253.999, 144, 191, 101, 88.9998, 99.9998, 86.9998, 169, 171, 254.999, 234.999, 256.999, 261.999, 239.999, 261.999, 212.999, 261.999, 172)
+
+[node name="PieceContainer" type="Node2D" parent="Map/Territory11"]
+position = Vector2(84.9997, 73.9998)
+
+[node name="PointsLabel" type="Label" parent="Map/Territory11"]
+offset_left = 14.0
+offset_top = 16.0
+offset_right = 42.0
+offset_bottom = 49.0
+label_settings = SubResource("LabelSettings_8fms1")
+horizontal_alignment = 1

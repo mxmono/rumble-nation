@@ -1,0 +1,32 @@
+[gd_scene load_steps=3 format=3 uid="uid://bytjjtpjcxxe2"]
+
+[ext_resource type="Script" path="res://board.gd" id="1_0vpn1"]
+[ext_resource type="PackedScene" uid="uid://bb643ak1w087x" path="res://territory.tscn" id="2_hvaol"]
+
+[node name="Board" type="Node2D"]
+script = ExtResource("1_0vpn1")
+
+[node name="Territories" type="Node2D" parent="."]
+
+[node name="Territory" parent="Territories" instance=ExtResource("2_hvaol")]
+
+[node name="Territory2" parent="Territories" instance=ExtResource("2_hvaol")]
+position = Vector2(13, 213)
+
+[node name="Territory3" parent="Territories" instance=ExtResource("2_hvaol")]
+position = Vector2(54, 428)
+
+[node name="Territory4" parent="Territories" instance=ExtResource("2_hvaol")]
+position = Vector2(259, 154)
+
+[node name="Territory5" parent="Territories" instance=ExtResource("2_hvaol")]
+position = Vector2(342, 231)
+
+[node name="Territory6" parent="Territories" instance=ExtResource("2_hvaol")]
+position = Vector2(413, 136)
+
+[node name="Territory7" parent="Territories" instance=ExtResource("2_hvaol")]
+position = Vector2(428, 260)
+
+[node name="Territory8" parent="Territories" instance=ExtResource("2_hvaol")]
+position = Vector2(492, 200)
