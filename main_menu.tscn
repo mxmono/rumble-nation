@@ -1,0 +1,209 @@
+[gd_scene load_steps=3 format=3 uid="uid://is8a3bvf2un1"]
+
+[ext_resource type="Script" path="res://main_menu.gd" id="1_qjl8v"]
+
+[sub_resource type="GDScript" id="GDScript_bjmmi"]
+script/source = "extends PanelContainer
+
+@onready var num_players_option = $MarginContainer/VBoxContainer/GameSettings/NumPlayersOption
+
+func _ready() -> void:
+	
+	# connect buttons to variables
+	num_players_option.item_selected.connect(_on_num_players_option_selected)
+
+func _on_num_players_option_selected(selected_option):
+	Settings.num_players = selected_option + 2
+"
+
+[node name="MainMenu" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_qjl8v")
+
+[node name="PanelContainer" type="PanelContainer" parent="."]
+custom_minimum_size = Vector2(1280, 720)
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="VBoxContainer" type="VBoxContainer" parent="PanelContainer"]
+custom_minimum_size = Vector2(256, 256)
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 8
+theme_override_constants/separation = 6
+
+[node name="StartGameButton" type="Button" parent="PanelContainer/VBoxContainer"]
+layout_mode = 2
+text = "START GAME"
+
+[node name="SettingsButton" type="Button" parent="PanelContainer/VBoxContainer"]
+layout_mode = 2
+text = "SETTINGS"
+
+[node name="QuitButton" type="Button" parent="PanelContainer/VBoxContainer"]
+layout_mode = 2
+text = "QUIT"
+
+[node name="GameOptions" type="PanelContainer" parent="."]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -331.0
+offset_top = -231.0
+offset_right = 331.0
+offset_bottom = 65.0
+grow_horizontal = 2
+grow_vertical = 2
+script = SubResource("GDScript_bjmmi")
+
+[node name="MarginContainer" type="MarginContainer" parent="GameOptions"]
+layout_mode = 2
+theme_override_constants/margin_left = 30
+theme_override_constants/margin_top = 30
+theme_override_constants/margin_right = 30
+theme_override_constants/margin_bottom = 30
+
+[node name="VBoxContainer" type="VBoxContainer" parent="GameOptions/MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 40
+
+[node name="GameSettings" type="HBoxContainer" parent="GameOptions/MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 50
+
+[node name="Label" type="Label" parent="GameOptions/MarginContainer/VBoxContainer/GameSettings"]
+layout_mode = 2
+text = "Number of Players"
+
+[node name="NumPlayersOption" type="OptionButton" parent="GameOptions/MarginContainer/VBoxContainer/GameSettings"]
+layout_mode = 2
+selected = 0
+item_count = 3
+popup/item_0/text = "2"
+popup/item_1/text = "3"
+popup/item_1/id = 1
+popup/item_2/text = "4"
+popup/item_2/id = 2
+
+[node name="PlayerSettings" type="HBoxContainer" parent="GameOptions/MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 30
+
+[node name="Player0" type="VBoxContainer" parent="GameOptions/MarginContainer/VBoxContainer/PlayerSettings"]
+custom_minimum_size = Vector2(128, 0)
+layout_mode = 2
+
+[node name="Label" type="Label" parent="GameOptions/MarginContainer/VBoxContainer/PlayerSettings/Player0"]
+layout_mode = 2
+text = "Player 1"
+
+[node name="LineEdit" type="LineEdit" parent="GameOptions/MarginContainer/VBoxContainer/PlayerSettings/Player0"]
+layout_mode = 2
+text = "Player 1"
+placeholder_text = "Name"
+clear_button_enabled = true
+
+[node name="OptionButton" type="OptionButton" parent="GameOptions/MarginContainer/VBoxContainer/PlayerSettings/Player0"]
+layout_mode = 2
+item_count = 2
+popup/item_0/text = "cat"
+popup/item_1/text = "bird"
+popup/item_1/id = 1
+
+[node name="ColorPickerButton" type="ColorPickerButton" parent="GameOptions/MarginContainer/VBoxContainer/PlayerSettings/Player0"]
+layout_mode = 2
+text = "Color"
+color = Color(1, 0, 0, 1)
+edit_alpha = false
+
+[node name="Player1" type="VBoxContainer" parent="GameOptions/MarginContainer/VBoxContainer/PlayerSettings"]
+custom_minimum_size = Vector2(128, 0)
+layout_mode = 2
+
+[node name="Label" type="Label" parent="GameOptions/MarginContainer/VBoxContainer/PlayerSettings/Player1"]
+layout_mode = 2
+text = "Player 2"
+
+[node name="LineEdit" type="LineEdit" parent="GameOptions/MarginContainer/VBoxContainer/PlayerSettings/Player1"]
+layout_mode = 2
+text = "Player 2"
+placeholder_text = "Name"
+clear_button_enabled = true
+
+[node name="OptionButton" type="OptionButton" parent="GameOptions/MarginContainer/VBoxContainer/PlayerSettings/Player1"]
+layout_mode = 2
+item_count = 2
+popup/item_0/text = "cat"
+popup/item_1/text = "bird"
+popup/item_1/id = 1
+
+[node name="ColorPickerButton" type="ColorPickerButton" parent="GameOptions/MarginContainer/VBoxContainer/PlayerSettings/Player1"]
+layout_mode = 2
+text = "Color"
+color = Color(0, 0.517647, 0.819608, 1)
+edit_alpha = false
+
+[node name="Player2" type="VBoxContainer" parent="GameOptions/MarginContainer/VBoxContainer/PlayerSettings"]
+visible = false
+custom_minimum_size = Vector2(128, 0)
+layout_mode = 2
+
+[node name="Label" type="Label" parent="GameOptions/MarginContainer/VBoxContainer/PlayerSettings/Player2"]
+layout_mode = 2
+text = "Player 3"
+
+[node name="LineEdit" type="LineEdit" parent="GameOptions/MarginContainer/VBoxContainer/PlayerSettings/Player2"]
+layout_mode = 2
+text = "Player 3"
+placeholder_text = "Name"
+clear_button_enabled = true
+
+[node name="OptionButton" type="OptionButton" parent="GameOptions/MarginContainer/VBoxContainer/PlayerSettings/Player2"]
+layout_mode = 2
+item_count = 2
+popup/item_0/text = "cat"
+popup/item_1/text = "bird"
+popup/item_1/id = 1
+
+[node name="ColorPickerButton" type="ColorPickerButton" parent="GameOptions/MarginContainer/VBoxContainer/PlayerSettings/Player2"]
+layout_mode = 2
+text = "Color"
+color = Color(0.792773, 0.498224, 0.240032, 1)
+edit_alpha = false
+
+[node name="Player3" type="VBoxContainer" parent="GameOptions/MarginContainer/VBoxContainer/PlayerSettings"]
+visible = false
+custom_minimum_size = Vector2(128, 0)
+layout_mode = 2
+
+[node name="Label" type="Label" parent="GameOptions/MarginContainer/VBoxContainer/PlayerSettings/Player3"]
+layout_mode = 2
+text = "Player 4"
+
+[node name="LineEdit" type="LineEdit" parent="GameOptions/MarginContainer/VBoxContainer/PlayerSettings/Player3"]
+layout_mode = 2
+text = "Player 4"
+placeholder_text = "Name"
+clear_button_enabled = true
+
+[node name="OptionButton" type="OptionButton" parent="GameOptions/MarginContainer/VBoxContainer/PlayerSettings/Player3"]
+layout_mode = 2
+item_count = 2
+popup/item_0/text = "cat"
+popup/item_1/text = "bird"
+popup/item_1/id = 1
+
+[node name="ColorPickerButton" type="ColorPickerButton" parent="GameOptions/MarginContainer/VBoxContainer/PlayerSettings/Player3"]
+layout_mode = 2
+text = "Color"
+color = Color(0, 0.571416, 0.535173, 1)
+edit_alpha = false

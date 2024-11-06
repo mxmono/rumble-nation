@@ -14,18 +14,6 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_x8hjk")
 
-[node name="Menu" type="GridContainer" parent="."]
-layout_mode = 1
-anchors_preset = -1
-anchor_right = 0.307
-anchor_bottom = 0.185
-offset_right = -346.96
-offset_bottom = -102.2
-
-[node name="StartButton" type="Button" parent="Menu"]
-layout_mode = 2
-text = "Start"
-
 [node name="GameButtons" type="TabContainer" parent="."]
 layout_mode = 0
 offset_left = 1032.0
@@ -57,56 +45,78 @@ horizontal_alignment = 1
 autowrap_mode = 3
 
 [node name="DiceOption1" type="Button" parent="GameButtons/Dice"]
+visible = false
 layout_mode = 2
 offset_left = 24.0
 offset_top = 129.0
 offset_right = 160.0
 offset_bottom = 169.0
+disabled = true
 
 [node name="DiceOption1L" type="Button" parent="GameButtons/Dice"]
+visible = false
 layout_mode = 2
 offset_left = 168.0
 offset_top = 129.0
 offset_right = 208.0
 offset_bottom = 169.0
+disabled = true
 text = "L"
 
 [node name="DiceOption2" type="Button" parent="GameButtons/Dice"]
+visible = false
 layout_mode = 0
 offset_left = 24.0
 offset_top = 177.0
 offset_right = 160.0
 offset_bottom = 217.0
+disabled = true
 
 [node name="DiceOption2L" type="Button" parent="GameButtons/Dice"]
+visible = false
 layout_mode = 0
 offset_left = 168.0
 offset_top = 177.0
 offset_right = 208.0
 offset_bottom = 217.0
+disabled = true
 text = "L"
 
 [node name="DiceOption3L" type="Button" parent="GameButtons/Dice"]
+visible = false
 layout_mode = 0
 offset_left = 168.0
 offset_top = 225.0
 offset_right = 208.0
 offset_bottom = 265.0
+disabled = true
 text = "L"
 
 [node name="DiceOption3" type="Button" parent="GameButtons/Dice"]
+visible = false
 layout_mode = 0
 offset_left = 24.0
 offset_top = 225.0
 offset_right = 160.0
 offset_bottom = 265.0
+disabled = true
 
-[node name="Card" type="VSplitContainer" parent="GameButtons"]
+[node name="Card" type="VBoxContainer" parent="GameButtons"]
 visible = false
 layout_mode = 2
 metadata/_tab_index = 1
 
-[node name="Leader" type="VSplitContainer" parent="GameButtons"]
+[node name="ConfirmCardButton" type="Button" parent="GameButtons/Card"]
+layout_mode = 2
+disabled = true
+text = "Confirm"
+
+[node name="ResetCardButton" type="Button" parent="GameButtons/Card"]
+layout_mode = 2
+disabled = true
+text = "Reset"
+
+[node name="Leader" type="VBoxContainer" parent="GameButtons"]
 visible = false
 layout_mode = 2
 metadata/_tab_index = 2

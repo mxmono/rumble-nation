@@ -1,0 +1,45 @@
+[gd_scene load_steps=2 format=3 uid="uid://drhj1usffqkax"]
+
+[ext_resource type="Script" path="res://pause_menu.gd" id="1_wec7x"]
+
+[node name="PauseMenu" type="Control"]
+process_mode = 3
+layout_mode = 3
+anchors_preset = 0
+script = ExtResource("1_wec7x")
+
+[node name="PanelContainer" type="PanelContainer" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -108.0
+offset_top = -76.0
+offset_right = 108.0
+offset_bottom = 76.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="PanelContainer"]
+layout_mode = 2
+size_flags_horizontal = 4
+alignment = 1
+
+[node name="ResumeButton" type="Button" parent="PanelContainer/VBoxContainer"]
+layout_mode = 2
+text = "Resume
+"
+
+[node name="RestartButton" type="Button" parent="PanelContainer/VBoxContainer"]
+layout_mode = 2
+text = "Restart"
+
+[node name="ExitToStartButton" type="Button" parent="PanelContainer/VBoxContainer"]
+layout_mode = 2
+text = "Exit to Main Menu"
+
+[node name="ExitButton" type="Button" parent="PanelContainer/VBoxContainer"]
+layout_mode = 2
+text = "Quit"

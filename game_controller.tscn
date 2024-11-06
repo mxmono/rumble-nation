@@ -1,8 +1,18 @@
-[gd_scene load_steps=4 format=3 uid="uid://g5nmapmpmw6v"]
+[gd_scene load_steps=6 format=3 uid="uid://g5nmapmpmw6v"]
 
 [ext_resource type="Script" path="res://game_controller.gd" id="1_8uaah"]
+[ext_resource type="PackedScene" uid="uid://drhj1usffqkax" path="res://pause_menu.tscn" id="2_du5q5"]
 [ext_resource type="PackedScene" uid="uid://btakum1qc8ovv" path="res://map.tscn" id="3_2j6hj"]
 [ext_resource type="PackedScene" uid="uid://bhuosep1twjl0" path="res://control.tscn" id="3_5g63j"]
+
+[sub_resource type="GDScript" id="GDScript_t2318"]
+script/source = "extends Node
+
+@export var player_piece_icons = {
+	1: preload(\"res://icons/cat.webp\"),
+	2: preload(\"res://icons/bird.webp\"),
+}
+"
 
 [node name="GameController" type="Node2D"]
 script = ExtResource("1_8uaah")
@@ -19,5 +29,20 @@ offset_bottom = 58.0
 
 [node name="Map" parent="." instance=ExtResource("3_2j6hj")]
 position = Vector2(102, -139)
+
+[node name="MenuCanvas" type="CanvasLayer" parent="."]
+script = SubResource("GDScript_t2318")
+
+[node name="PauseMenu" parent="MenuCanvas" instance=ExtResource("2_du5q5")]
+visible = false
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
 
 [connection signal="dice_rolled" from="Control" to="." method="_on_dice_rolled"]
