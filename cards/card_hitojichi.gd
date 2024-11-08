@@ -17,7 +17,7 @@ func is_condition_met(player):
 		1. player must have pieces
 		2. within connected territories of current player, there must be pieces from another player
 	"""
-	var current_player_territories =Settings.players[player]["territories"]
+	var current_player_territories = Settings.players[player]["territories"]
 	
 	# if no territories, return false
 	if current_player_territories.size() == 0:
@@ -41,7 +41,7 @@ func get_valid_targets(player) -> Array:
 	for player_index in range(Settings.players.size()):
 		if player_index == player:  # skip self
 			continue
-		var opponent_territories = Settings.players[player]["territories"]
+		var opponent_territories = Settings.players[player_index]["territories"]
 		
 		# loop through all territories current player has and check connections
 		for player_territory_index in current_player_territories:
@@ -50,7 +50,7 @@ func get_valid_targets(player) -> Array:
 			# if anything in the connections has the opponent's pieces on, add to pool
 			for connection in connections:
 				if opponent_territories.has(connection):
-					valid_opponents.append(player_index + 1)
+					valid_opponents.append(player_index)
 					continue
 	
 	return valid_opponents

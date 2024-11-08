@@ -1,11 +1,9 @@
 extends Control
 
-signal dice_rolled()
-signal game_started()
-signal dice_selected(territory_index, deploy_count, is_leader)
+signal dice_rolled(dice_results: Array, move_options: Array)
+signal dice_selected(territory_index: int, deploy_count: int, is_leader: bool)
 signal roll_phase_done()
 
-var dice_move_options = []
 const DICE_BUTTONS_PARENT = "GameButtons/Dice/"
 const CARD_BUTTONS_PARENT = "GameButtons/Card/"
 @onready var roll_dice_button = get_node(DICE_BUTTONS_PARENT + "RollDiceButton")
@@ -16,24 +14,22 @@ const CARD_BUTTONS_PARENT = "GameButtons/Card/"
 @onready var dice_option2_leader = get_node(DICE_BUTTONS_PARENT + "DiceOption2L")
 @onready var dice_option3_leader = get_node(DICE_BUTTONS_PARENT + "DiceOption3L")
 @onready var dice_result_label = get_node(DICE_BUTTONS_PARENT + "ResultLabel")
-@onready var dice_buttons = [dice_option1, dice_option2, dice_option3]
-@onready var dice_buttons_leader = [dice_option1_leader, dice_option2_leader, dice_option3_leader]
+@onready var dice_option_buttons = [dice_option1, dice_option2, dice_option3]
+@onready var dice_option_buttons_leader = [dice_option1_leader, dice_option2_leader, dice_option3_leader]
+var dice_move_options = []
 
 # cards
 var cards = ["Kasei", "Monomi", "Hitojichi"]
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
-	# Connect the RollDiceButton signal to the dice roll function
+	# connect dice buttons
 	roll_dice_button.pressed.connect(_on_roll_dice_button_pressed)
-	dice_option1.pressed.connect(_on_dice_option_1_pressed)
-	dice_option2.pressed.connect(_on_dice_option_2_pressed)
-	dice_option3.pressed.connect(_on_dice_option_3_pressed)
-	dice_option1_leader.pressed.connect(_on_dice_option_1_leader_pressed)
-	dice_option2_leader.pressed.connect(_on_dice_option_2_leader_pressed)
-	dice_option3_leader.pressed.connect(_on_dice_option_3_leader_pressed)
+	for i in range(3):
+		dice_option_buttons[i].pressed.connect(_on_dice_option_selected.bind(i, false))
+		dice_option_buttons_leader[i].pressed.connect(_on_dice_option_selected.bind(i, true))
 	
-	# Deal cards based on number of players
+	# deal cards based on number of players
 	var n_cards = Settings.num_players + 1
 	var drawn_cards = []
 	cards.shuffle()
@@ -58,6 +54,8 @@ func _ready():
 		get_node("GameButtons/Card").move_child(new_card, 0)  # move before confirm and reset buttons
 
 func _process(delta):
+	
+	# disable confirm button before the full moves are taken
 	var card = get_node("/root/GameController").card_in_effect
 	if card != null:
 		if card.effect_index + 1 == card.effect.size():
@@ -65,97 +63,94 @@ func _process(delta):
 
 # Handle the dice roll button press
 func _on_roll_dice_button_pressed():
-	# clear button text
-	for button in [dice_option1, dice_option2, dice_option3]:
-		button.text = ""
-	var dice_results = []
-	var possible_moves = {}
-	dice_results = [roll_dice(), roll_dice(), roll_dice()]
+	
+	# roll the dice, get results, and possible moves
+	var dice_results = [roll_dice(), roll_dice(), roll_dice()]
 	dice_results.sort()
-	possible_moves = combine_dice(dice_results)
-	dice_result_label.text = "  ".join(dice_results)
+	var move_options = combine_dice(dice_results)
+	
+	# emit signal
+	dice_rolled.emit(dice_results, move_options)
 
-	# UI: show dice options and connect the click action
+func _on_dice_rolled(dice_results, move_options):
 	var current_player = get_node("/root/GameController").current_player
-	var i = 0
-	for territory_option in possible_moves:
-		var deploy_count = possible_moves[territory_option]
-		var territory_index = get_node("/root/GameController/Map").territory_points_to_index[territory_option]
-		dice_move_options.append({"territory_index": territory_index, "deploy": deploy_count})
-		var button = dice_buttons[i]
-		var button_leader = dice_buttons_leader[i]
+	self.dice_move_options = move_options
+	
+	# UI: display dice results
+	dice_result_label.text = "  ".join(dice_results)
+	for dice_button in dice_option_buttons:
+		dice_button.text = ""
+	
+	# UI: disable and hide option buttons before showing them based on moves
+	# otherwise, reroll phase will show all 3 all the time
+	for button in dice_option_buttons + dice_option_buttons_leader:
+		button.visible = false
+		button.disabled = true
+
+	# UI: show dice options and buttons
+	for i in range(move_options.size()):
+		var button = dice_option_buttons[i]
+		var button_leader = dice_option_buttons_leader[i]
 		
-		# only enable the button if the deploy is all soldier
-		# (eg can happen last round, deploy = 2 but with 1 leader, 1 solider left)
-		button.disabled = false
-		button_leader.disabled = false
-		if deploy_count > Settings.players[current_player]["soldier"]:
-			button.disabled = true
 		button.visible = true
 		button_leader.visible = true
-		i += 1
-		button.text = "Place " + str(deploy_count) + " on " + str(territory_option)
+		button.text =  "Place %s on %s" % [
+			str(move_options[i]["deploy_count"]), str(move_options[i]["territory_score"])
+		]
+		
+		# if leader already played, disable the leader button
+		if Settings.players[current_player]["leader"] <= 0:
+			button_leader.disabled = true
+		else:
+			button_leader.disabled = false
+		
+		# only enable the regular button if the deploy is all soldier
+		# (eg can happen last round, deploy = 2 but with 1 leader, 1 solider left)
+		if move_options[i]["deploy_count"] > Settings.players[current_player]["soldier"]:
+			button.disabled = true
+		else:
+			button.disabled = false
 	
-	dice_rolled.emit()
+	print("dice option 3 button visibile: ", dice_option3.visible, " disabled:", dice_option3.disabled)
 
-func roll_dice():
+func roll_dice() -> int:
 		randomize()
 		return randi() % 6 + 1
 
-func combine_dice(dice_results) -> Dictionary:
-	# Get current player for piece counting
+func combine_dice(dice_results: Array) -> Array:
 	var current_player = get_node("/root/GameController").current_player
-
-	# Calculate moves
-	var possible_territories = []
-	var possible_deploys = []
-	var possible_moves = {}
-	possible_territories = [
-		dice_results[0] + dice_results[1],
-		dice_results[0] + dice_results[2],
-		dice_results[1] + dice_results[2],
-	]
-	possible_deploys = [
-		(dice_results[2] + 1) / 2,
-		(dice_results[1] + 1) / 2,
-		(dice_results[0] + 1) / 2
-	]
+	var territory_points_to_index = get_node("/root/GameController/Map").territory_points_to_index
 	
-	# Combine options
+	# calculate all move options
+	var move_options = []
 	for i in range(3):
-		possible_moves[possible_territories[i]] = min(
-			possible_deploys[i],
+		# deploy count is bound by how many pieces are left
+		var deploy_count = (dice_results[i % 3] + 1) / 2
+		deploy_count = min(
+			deploy_count,
 			Settings.players[current_player]["soldier"] + Settings.players[current_player]["leader"]
 		)
+		var territory_score = dice_results[(i + 1) % 3] + dice_results[(i + 2) % 3]
+		var territory_index = territory_points_to_index[territory_score]
+		var option = {
+			"deploy_count": deploy_count,
+			"territory_score": territory_score, 
+			"territory_index": territory_index
+		}
+		# only add if the move is not repeated
+		if not move_options.has(option):
+			move_options.append(option)
 
-	return possible_moves
+	return move_options
 
-#region Handle rolled dice options
-func _on_dice_option_1_pressed():
-	_on_dice_option_selected(dice_move_options[0]["territory_index"], dice_move_options[0]["deploy"], false)
-
-func _on_dice_option_2_pressed():
-	_on_dice_option_selected(dice_move_options[1]["territory_index"], dice_move_options[1]["deploy"], false)
-
-func _on_dice_option_3_pressed():
-	_on_dice_option_selected(dice_move_options[2]["territory_index"], dice_move_options[2]["deploy"], false)
-
-func _on_dice_option_1_leader_pressed():
-		_on_dice_option_selected(dice_move_options[0]["territory_index"], dice_move_options[0]["deploy"], true)
-
-func _on_dice_option_2_leader_pressed():
-		_on_dice_option_selected(dice_move_options[1]["territory_index"], dice_move_options[1]["deploy"], true)
-		
-func _on_dice_option_3_leader_pressed():
-		_on_dice_option_selected(dice_move_options[2]["territory_index"], dice_move_options[2]["deploy"], true)
-
-func _on_dice_option_selected(territory_index, deploy_count, has_leader):
+func _on_dice_option_selected(i, has_leader):
 	var current_player = get_node("/root/GameController").current_player
-	dice_selected.emit(territory_index, deploy_count, has_leader)
-	# reset all options (declared as attribute)
-	dice_move_options = []
-	# Clear button text
-	for button in [dice_option1, dice_option2, dice_option3]:
-		button.text = ""
+	dice_selected.emit(
+		self.dice_move_options[i]["territory_index"],
+		self.dice_move_options[i]["deploy_count"],
+		has_leader,
+	)
+	
+	# reset all options
+	self.dice_move_options = []
 	roll_phase_done.emit()
-#endregion

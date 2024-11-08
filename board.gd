@@ -48,6 +48,7 @@ func _ready() -> void:
 
 # Randomly assign 2 to 12 to each territory
 func assign_points_to_territories():
+	# generate an array of randomized points
 	var points = Array(range(2, 13))  # 2 to 12
 	points.shuffle()
 	var i = 0
@@ -55,6 +56,7 @@ func assign_points_to_territories():
 		territory.set("territory_points", points[i])
 		territory.get_node("PointsLabel").text = str(points[i])
 		i += 1
+	
 	# assemble the territory array ordered by points value
 	for p in Array(range(2, 13)):
 		for t in $Map.get_children():

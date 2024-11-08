@@ -269,5 +269,3 @@ label_settings = SubResource("LabelSettings_8fms1")
 horizontal_alignment = 1
 
 [node name="Polygon2D" type="Polygon2D" parent="Map/Territory10"]
-
-[connection signal="territory_clicked" from="Map/Territory2" to="." method="_on_territory_clicked"]

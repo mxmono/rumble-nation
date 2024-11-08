@@ -25,7 +25,7 @@ func _ready() -> void:
 	self.pressed.connect(_on_card_selected)
 	
 func update_valid_targets():
-	var player_piece_icons = get_node("/root/GameController/MenuCanvas").player_piece_icons
+	var player_piece_icons = Settings.player_piece_icons
 
 	# draw eligible opponents in TargetHBox if condition met
 	var current_player = get_node("/root/GameController").current_player
@@ -46,7 +46,7 @@ func update_valid_targets():
 
 func _on_card_selected():
 	if Settings.num_players == 2:
-		self.selected_opponent = 3 - get_node("/root/GameController").current_player
+		self.selected_opponent = 1 - get_node("/root/GameController").current_player
 	
 	card_selected.emit(self)
 
@@ -84,8 +84,8 @@ func get_other_player_adjacent_territories(player, territory_index, other_player
 	"""Find territories other_player occupies that are adjacent to player territory."""
 	# get variables
 	var territory_connections = get_node("/root/GameController/Map").territory_connections
-	var player_territories = Settings.player[player]["territories"]
-	var other_player_territories = Settings.player[player]["territories"]
+	var player_territories = Settings.players[player]["territories"]
+	var other_player_territories = Settings.players[other_player]["territories"]
 	
 	# if territory_index is given, only look for adjacent to given territory
 	# otherwise, search all territories the player has

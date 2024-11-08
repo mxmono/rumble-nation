@@ -16,15 +16,16 @@ func _process(delta: float) -> void:
 			show()
 
 func _on_resume_button_pressed():
-	hide()  # Hide the pause menu
-	get_tree().paused = false  # Resume the game
+	hide()
+	get_tree().paused = false
 
 func _on_restart_button_pressed():
 	get_tree().paused = false
-	get_tree().reload_current_scene()  # Restart the current scene
+	get_tree().reload_current_scene()
 	
 func _on_exit_to_start_button_pressed():
+	get_tree().paused = false
 	get_tree().change_scene_to_file("res://main_menu.tscn")
 
 func _on_exit_button_pressed():
-	get_tree().quit()  # Exit the game
+	get_tree().quit()

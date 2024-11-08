@@ -135,10 +135,6 @@ func _on_card_selected(card):
 	
 	# highlight the first move
 	#if card.effect[0]["player"] == "current":
-	print(card.selected_opponent)
-	print(card.territory_func_mapping[card.effect[0]["territory"]].call(
-		current_player, null, card.selected_opponent
-	))
 	if self.territory_index in card.territory_func_mapping[card.effect[0]["territory"]].call(
 		current_player, null, card.selected_opponent
 	):

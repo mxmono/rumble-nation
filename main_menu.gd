@@ -31,7 +31,6 @@ func _on_start_game_button_pressed():
 	get_tree().change_scene_to_file("res://game_controller.tscn")
 
 func _on_num_players_option_selected(selected_option):
-
 	# UI: update player settings section (if only 2 players, only show configuration for 2)
 	if Settings.num_players == 2:
 		get_node(PLAYER_SETTINGS + "Player2").hide()
