@@ -1,12 +1,12 @@
 extends Node2D
 
-signal territory_clicked(territory_index)
+signal territory_clicked(territory_index, mouse_position)
 signal piece_placed(piece)
 
 @export var territory_name: String = self.name
 @export var territory_index: int = 0
 @export var territory_points: int = 0
-@export var player_piece_scale = Vector2(0.1, 0.1)
+@export var player_piece_scale = Vector2(2, 2)
 
 @export var territory_tally = []
 var piece_offset = Vector2(15, 0)
@@ -48,15 +48,10 @@ func _ready() -> void:
 	var board_scene = get_node("/root/GameController/Map")
 	board_scene.card_move_selected.connect(_on_card_move_selected)
 	board_scene.card_move_reverted.connect(_on_card_move_reverted)
-	
-	# get card selected signal to highlight those territories on the map
-	for card_button in get_node("/root/GameController/Control/GameButtons/Card").get_children():
-		if card_button.name.begins_with("Card"):
-			card_button.card_selected.connect(_on_card_selected)
 
-func highlight_territory():
-	visual_polygon.material = highlight_material
-	visual_polygon.color = Color(1, 1, 0, 0.5)
+#func highlight_territory():
+	#visual_polygon.material = highlight_material
+	#visual_polygon.color = Color(1, 1, 0, 0.5)
 
 func unhighlight_territory():
 	visual_polygon.material = original_material
@@ -83,11 +78,13 @@ func draw_piece_sprites():
 	for player in range(territory_tally.size()):
 		if player > num_players:
 			continue
-		var icon = Settings.player_piece_icons[player]
+		var icon = Settings.players[player]["icon"]
+		var color_adjustment = Settings.players[player]["color"]
 		for i in range(territory_tally[player]["soldier"]):
 			var piece_sprite = Sprite2D.new()
 			piece_sprite.scale = player_piece_scale
 			piece_sprite.texture = icon
+			piece_sprite.modulate = color_adjustment
 			piece_sprite.position = i * piece_offset +  (player) * player_piece_offset
 			piece_container.add_child(piece_sprite)
 
@@ -96,6 +93,7 @@ func draw_piece_sprites():
 			var leader_sprite = Sprite2D.new()
 			leader_sprite.scale = player_piece_scale * 1.5
 			leader_sprite.texture = icon
+			leader_sprite.modulate = color_adjustment
 			leader_sprite.position = Vector2(-30, 0) +  (player) * player_piece_offset
 			piece_container.add_child(leader_sprite)
 		
@@ -121,24 +119,13 @@ func get_piece_position(player, existing_n_pieces) -> Vector2:
 # Handles click events on the territory
 func _on_territory_click(viewport, event, shape_idx):
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
-		territory_clicked.emit(territory_index)
+		territory_clicked.emit(territory_index, event.global_position)
 
 func _on_dice_selected(territory_index, deploy_count, has_leader):
 	# only take action if this is the territory that got deployed
 	var current_player = get_node("/root/GameController").current_player
 	if self.territory_index == territory_index:
 		_on_deployed(current_player, territory_index, deploy_count, has_leader)
-
-func _on_card_selected(card):
-	# highlight which territories are eligible when a card is selected
-	var current_player = get_node("/root/GameController").current_player
-	
-	# highlight the first move
-	#if card.effect[0]["player"] == "current":
-	if self.territory_index in card.territory_func_mapping[card.effect[0]["territory"]].call(
-		current_player, null, card.selected_opponent
-	):
-		highlight_territory()
 
 func _on_deployed(player, territory_index, deploy_count, has_leader):
 	"""This function alone should handle changes between deployment states."""
@@ -180,19 +167,12 @@ func _on_card_move_selected(moves):
 		if self.territory_index == move[1]:
 			# update the tally and sprite
 			_on_deployed(move[0], self.territory_index, move[2], move[3])
-		
-	# UI: turn off the highlight TODO
-	unhighlight_territory() 
 
 func _on_card_move_reverted(moves):
 	 # move is an array of [player, territory_index, deploy_count, has_leader]s
 	for move in moves:
 		if self.territory_index == move[1]:
 			_on_deployed(move[0], self.territory_index, move[2], move[3])
-	
-	# UI: highlight territory again (retrigger effect when card first selected)
-	var card = get_node("/root/GameController").card_in_effect
-	_on_card_selected(card)
 
 func reinforce(num_players, player):
 	"""Reinforce to all adjacent territories."""

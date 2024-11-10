@@ -13,9 +13,9 @@ font_size = 20
 font_size = 13
 
 [node name="CardTemplate" type="Button"]
-custom_minimum_size = Vector2(232, 168)
+custom_minimum_size = Vector2(232, 128)
 offset_right = 232.0
-offset_bottom = 160.0
+offset_bottom = 128.0
 script = ExtResource("1_xhfe4")
 
 [node name="Background" type="TextureRect" parent="."]
@@ -61,9 +61,17 @@ offset_right = 224.0
 offset_bottom = 64.0
 
 [node name="TargetHBox" type="HBoxContainer" parent="."]
+visible = false
+clip_contents = true
 layout_mode = 0
 offset_left = 8.0
 offset_top = 120.0
 offset_right = 224.0
 offset_bottom = 160.0
 alignment = 1
+
+[node name="Button" type="Button" parent="TargetHBox"]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+text = "jkjijixxxxxxxxzzzzzzzzzzzzzzzzzzzzzzzzzz"
+text_overrun_behavior = 1

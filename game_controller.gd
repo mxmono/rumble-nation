@@ -179,6 +179,11 @@ func _on_card_selected(card):
 	
 	# UI: highlight the selected card
 	card.modulate = Color(1, 0, 0)
+	
+	# UI: disable all card buttons
+	for card_button in card_buttons:
+		if card_button.name.begins_with("Card"):
+			card_button.disabled = true
 
 func _on_card_move_selected(moves):
 	# moves is an array of [[player, territory_index, deploy_count, has_leader]]
@@ -344,7 +349,7 @@ func get_winning_player(scores, player_priority) -> int:
 	for i in range(scores.size()):
 		if scores[i] == max_value:
 			player_index.append(i)
-
+	
 	# if tie, check which player is out first, eg players [1, 2] tie
 	# then if the player priority is [2, 1], player 2 wins
 	if player_index.size() > 1:

@@ -14,10 +14,12 @@ func _ready() -> void:
 		player_settings.append(
 			{
 				"name": get_node(PLAYER_SETTINGS + "Player%s/LineEdit" % str(i)),
-				"color": get_node(PLAYER_SETTINGS + "Player%s/ColorPickerButton" % str(i)),
+				"icon": get_node(PLAYER_SETTINGS + "Player%s/Icon/OptionButton" % str(i)),
+				"color": get_node(PLAYER_SETTINGS + "Player%s/Icon/ColorPickerButton" % str(i)),
 			}
 		)
 		player_settings[i]["name"].text_changed.connect(_on_player_name_changed.bind(i))
+		player_settings[i]["icon"].item_selected.connect(_on_player_icon_changed.bind(i))
 		player_settings[i]["color"].color_changed.connect(_on_player_color_changed.bind(i))
 	
 	# connect buttons and updates
@@ -46,6 +48,9 @@ func _on_num_players_option_selected(selected_option):
 
 func _on_player_name_changed(name, i):
 	Settings.players[i]["name"] = name
+
+func _on_player_icon_changed(icon, i):
+	Settings.players[i]["icon"] = Settings.player_piece_icons[icon]
 
 func _on_player_color_changed(color, i):
 	Settings.players[i]["color"] = color

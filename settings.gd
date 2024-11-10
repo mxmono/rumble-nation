@@ -2,24 +2,30 @@ extends Node
 
 var num_players: int = 2
 var player_piece_icons = [
-	preload("res://icons/cat.webp"),
-	preload("res://icons/bird.webp"),
+	preload("res://icons/p1.png"),
+	preload("res://icons/p2.png"),
+	preload("res://icons/p3.png"),
+	preload("res://icons/p4.png"),
 ]
 var players = [
 	{
 		"name": "Player 1",
-		"color": "red",
+		"icon": player_piece_icons[0],
+		"color": Color("red"),
 	},
 	{
 		"name": "Player 2",
-		"color": "blue",
+		"icon": player_piece_icons[1],
+		"color": Color("blue"),
 	},
 	{
 		"name": "Player 3",
-		"color": "yellow",
+		"icon": player_piece_icons[2],
+		"color": Color("yellow"),
 	},
 	{
 		"name": "Player 4",
-		"color": "green",
+		"icon": player_piece_icons[3],
+		"color": Color("green"),
 	}
 ]

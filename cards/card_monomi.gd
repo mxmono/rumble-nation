@@ -6,8 +6,8 @@ func _ready() -> void:
 	card_name_jp = "物見"
 	description = "Move exactly one soldier to any adjacent territory."
 	effect = [
-		{"deploy": -1, "territory": "occupied", "player": "current"},
-		{"deploy": 1, "territory": "adjacent", "player": "current"},
+		{"deploy": -1, "territory": "occupied", "player": "current", "territory_selection_required": true},
+		{"deploy": 1, "territory": "adjacent", "player": "current", "territory_selection_required": true},
 	]
 	
 	super._ready()

@@ -1,0 +1,47 @@
+[gd_scene format=3 uid="uid://xyingiaqjyq1"]
+
+[node name="TargetPopUpWindow" type="Control"]
+custom_minimum_size = Vector2(256, 100)
+layout_mode = 3
+anchors_preset = 0
+offset_right = 256.0
+offset_bottom = 100.0
+
+[node name="PopUpPanel" type="PanelContainer" parent="."]
+layout_mode = 0
+offset_right = 256.0
+offset_bottom = 100.0
+
+[node name="MarginContainer" type="MarginContainer" parent="PopUpPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 10
+
+[node name="VBoxContainer" type="VBoxContainer" parent="PopUpPanel/MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Label" type="Label" parent="PopUpPanel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+text = "Select Target"
+
+[node name="TargetButtons" type="HBoxContainer" parent="PopUpPanel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+
+[node name="Button" type="Button" parent="PopUpPanel/MarginContainer/VBoxContainer/TargetButtons"]
+visible = false
+layout_mode = 2
+text = "player1"
+
+[node name="Button2" type="Button" parent="PopUpPanel/MarginContainer/VBoxContainer/TargetButtons"]
+visible = false
+layout_mode = 2
+text = "player2"
+
+[node name="Button3" type="Button" parent="PopUpPanel/MarginContainer/VBoxContainer/TargetButtons"]
+visible = false
+layout_mode = 2
+text = "player3"

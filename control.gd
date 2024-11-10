@@ -19,7 +19,8 @@ const CARD_BUTTONS_PARENT = "GameButtons/Card/"
 var dice_move_options = []
 
 # cards
-var cards = ["Kasei", "Monomi", "Hitojichi"]
+#var cards = ["Kasei", "Monomi", "Hitojichi", "Tsuihou", "Muhon", "Otori", "Suigun"]
+var cards = ["Suigun"]
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
@@ -52,14 +53,6 @@ func _ready():
 		i += 1
 		get_node("GameButtons/Card").add_child(new_card)
 		get_node("GameButtons/Card").move_child(new_card, 0)  # move before confirm and reset buttons
-
-func _process(delta):
-	
-	# disable confirm button before the full moves are taken
-	var card = get_node("/root/GameController").card_in_effect
-	if card != null:
-		if card.effect_index + 1 == card.effect.size():
-			get_node(CARD_BUTTONS_PARENT + "ConfirmCardButton").disabled = false
 
 # Handle the dice roll button press
 func _on_roll_dice_button_pressed():

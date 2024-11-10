@@ -2,12 +2,12 @@ extends "res://cards/card.gd"
 
 
 func _ready() -> void:
-	card_name = "HitoJichi"
+	card_name = "HitoJichi/Hostage"
 	card_name_jp = "人質"
 	description = "Move one soldier from another player to a connected territory you occupy."
 	effect = [
-		{"deploy": -1, "territory": "occupied_other_adjacent_to_self", "player": "other"},
-		{"deploy": 1, "territory": "adjacent_occupied", "player": "other"},
+		{"deploy": -1, "territory": "occupied_other_adjacent_to_self", "player": "other", "territory_selection_required": true},
+		{"deploy": 1, "territory": "adjacent_occupied", "player": "other", "territory_selection_required": true},
 	]
 	
 	super._ready()
@@ -50,7 +50,8 @@ func get_valid_targets(player) -> Array:
 			# if anything in the connections has the opponent's pieces on, add to pool
 			for connection in connections:
 				if opponent_territories.has(connection):
-					valid_opponents.append(player_index)
-					continue
+					if not valid_opponents.has(player_index):
+						valid_opponents.append(player_index)
+						continue
 	
 	return valid_opponents
