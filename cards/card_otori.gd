@@ -4,7 +4,7 @@ extends "res://cards/card.gd"
 func _ready() -> void:
 	card_name = "Otori / Decoy"
 	card_name_jp = "囮"
-	description = "Move one of your soldier and two of an opponent's soldier to any adjancent territory."
+	description = "Move one of your soldiers and two of an opponent's soldiers to any adjancent territory."
 	effect = [
 		{"deploy": -2, "territory": "_otori", "player": "other", "territory_selection_required": true},  # the first one needs to be "other" player
 		{"deploy": -1, "territory": "previous_selected", "player": "current", "territory_selection_required": false},

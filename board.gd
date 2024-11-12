@@ -28,7 +28,7 @@ signal card_move_reverted(moves) # move is an array of [player, territory_index,
 var board_state = []  # an array of territory tallies
 
 const CARD_ACTION_PARENT = "/root/GameController/Control/GameButtons/Card/ActionButtons/"
-@onready var card_finish_move_button = get_node(CARD_ACTION_PARENT + "FinishCardMoveButton")
+@onready var confirm_card_button = get_node(CARD_ACTION_PARENT + "ConfirmCardButton")
 @onready var reset_card_button = get_node(CARD_ACTION_PARENT + "ResetCardButton")
 
 func _ready() -> void:
@@ -53,8 +53,6 @@ func _ready() -> void:
 		card_button.card_selected.connect(_on_card_selected)
 	# connect reset card button
 	reset_card_button.pressed.connect(_on_card_reset)
-	# connect finish move button
-	card_finish_move_button.pressed.connect(_on_card_finish_move_button_pressed)
 
 	for territory in $Map.get_children():
 		territory_points_to_index[territory.get("territory_points")] = territory.get("territory_index")
@@ -155,8 +153,14 @@ func _on_territory_clicked(territory_index, mouse_position):
 					[player_to_deploy, territory_index, card.effect[card.effect_index]["deploy"], false]
 				)
 				
+				# emit staged moves if allows emit (for multi-step cards)
+				if card.effect[card.effect_index].get("emit"):
+					var moves_to_emit = get_unemitted_moves(card)
+					card_move_selected.emit(moves_to_emit)
+					print("emited early card move: ", str(moves_to_emit))
+				
 				# for cards like jouraku, the user can confirm halfway (not realizing full potential)
-				enable_early_finish_button_if_valid(card)
+				enable_early_action_button_if_valid(card)
 				
 				# once the action is queued (click is registered), unhighlight all territories
 				unhighlight_territories(self.territory_index_to_points.keys())
@@ -192,9 +196,11 @@ func _on_territory_clicked(territory_index, mouse_position):
 	
 				# if after clicking the territory, we have all sequence of moves, can emit the signals
 				elif card.effect_index == card.effect.size():
-					card_move_selected.emit(card.staged_moves)  # handles in game controller, territroy
+					
+					var moves_to_emit = get_unemitted_moves(card)
+					card_move_selected.emit(moves_to_emit)  # handles in game controller, territroy
+					
 					# unhiglight all territories
-					card_finish_move_button.disabled = true
 					unhighlight_territories(self.territory_index_to_points.keys())
 
 func _input(event):
@@ -254,15 +260,26 @@ func get_card_step_territories(card):
 	
 	return valid_territories
 
+# get which moves to emit, start from last unemitted move
+func get_unemitted_moves(card) -> Array:
+	var moves_to_emit = [card.staged_moves[0]]
+	
+	# otherwise, emit from last unemitted move to current move
+	if card.staged_moves.size() > 1:
+		for step in range(1, card.staged_moves.size()):
+			# if prev step has emit, restart from current step
+			if card.effect[step - 1].get("emit"):
+				moves_to_emit = [card.staged_moves[step]]
+			# if prev step is not emit, append current step
+			else:
+				moves_to_emit.append(card.staged_moves[step])
+	
+	return moves_to_emit
+
 # highlight relevant territories on card selection
 func _on_card_selected(card):
 	# highlight which territories are eligible when a card is selected
 	var current_player = get_node("/root/GameController").current_player
-	
-	# UI: enable finish move button if allowed
-	if card.early_finish_enabled:
-		card_finish_move_button.visible = true
-		card_finish_move_button.disabled = true
 	
 	# highlight the first move
 	var territories = card.territory_func_mapping[card.effect[0]["territory"]].call(
@@ -271,38 +288,31 @@ func _on_card_selected(card):
 	var player_color = Settings.players[current_player]["color"]
 	highlight_territories(territories, player_color)
 
-# when finishing move early, emit card moves and unhighlight territories
-func _on_card_finish_move_button_pressed():
-	var card = get_node("/root/GameController").card_in_effect
-	card_move_selected.emit(card.staged_moves)
-	card_finish_move_button.disabled = true
-	unhighlight_territories(self.territory_index_to_points.keys())
-
 func _on_card_reset():
 	# reverse deployment
 	var game_controller = get_node("/root/GameController")
 	var card = game_controller.card_in_effect
-	if game_controller.current_phase == game_controller.TurnPhase.CONFIRM_OR_RESET_CARD:
-		var revert_moves = []
-		# card_moves_stage is [[player, territory_index, deploy_count, has_leader], ...]
-		for i in range(card.staged_moves.size()):
-			var move = card.staged_moves[i]
-			revert_moves.append([move[0], move[1], -move[2], move[3]])
-		
-		# clear moves associated with the card itself and reset move count
-		card.staged_moves = []
-		card.effect_index = 0
-		card.selected_opponent = -1
-		card.last_selected_territory = -1
-		if get_parent().has_node("TargetPopUpWindow"):
-			$TargetPopUpWindow.queue_free()
-		
-		# emit revert signal
-		card_move_reverted.emit(revert_moves)
-		print("emitted revert:", revert_moves)
-		
-		# reintroduce effects on card selected (eg going back to card selected status)
-		_on_card_selected(card)
+	#if game_controller.current_phase == game_controller.TurnPhase.CONFIRM_OR_RESET_CARD:
+	var revert_moves = []
+	# card_moves_stage is [[player, territory_index, deploy_count, has_leader], ...]
+	for i in range(card.staged_moves.size()):
+		var move = card.staged_moves[i]
+		revert_moves.append([move[0], move[1], -move[2], move[3]])
+	
+	# clear moves associated with the card itself and reset move count
+	card.staged_moves = []
+	card.effect_index = 0
+	card.selected_opponent = -1
+	card.last_selected_territory = -1
+	if get_parent().has_node("TargetPopUpWindow"):
+		$TargetPopUpWindow.queue_free()
+	
+	# emit revert signal
+	card_move_reverted.emit(revert_moves)
+	print("emitted revert:", revert_moves)
+	
+	# reintroduce effects on card selected (eg going back to card selected status)
+	_on_card_selected(card)
 
 # UI:highlights territories eligible for dice moves
 func _on_dice_rolled(dice_results, move_options):
@@ -324,11 +334,7 @@ func _on_dice_rolled(dice_results, move_options):
 func _on_dice_selected(territory_index: int, deploy_count: int, is_leader: bool):
 	unhighlight_territories(self.territory_index_to_points.keys())
 
-func enable_early_finish_button_if_valid(card):
-	if card.early_finish_enabled:
-		if card.effect[card.effect_index]["finish_allowed"]:
-			card_finish_move_button.disabled = false
-			card_finish_move_button.visible = true
-		else:
-			card_finish_move_button.disabled = true
-			card_finish_move_button.visible = true
+func enable_early_action_button_if_valid(card):
+	if card.effect[card.effect_index].get("finish_allowed"):
+		confirm_card_button.disabled = false
+		reset_card_button.disabled = false

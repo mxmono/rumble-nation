@@ -6,7 +6,7 @@ func _ready() -> void:
 	card_name_jp = "退却"
 	description = "Return two of your soldiers to hand from any number of territories."
 	effect = [
-		{"deploy": -1, "territory": "occupied", "player": "current", "territory_selection_required": true},
+		{"deploy": -1, "territory": "occupied", "player": "current", "territory_selection_required": true, "emit": true},
 		{"deploy": -1, "territory": "occupied", "player": "current", "territory_selection_required": true},
 	]
 	

@@ -4,7 +4,7 @@ extends "res://cards/card.gd"
 func _ready() -> void:
 	card_name = "HitoJichi / Hostage"
 	card_name_jp = "人質"
-	description = "Move one soldier from another player to a connected territory you occupy."
+	description = "Move one opponent's soldier to a connected territory you occupy."
 	effect = [
 		{"deploy": -1, "territory": "occupied_other_adjacent_to_self", "player": "other", "territory_selection_required": true},
 		{"deploy": 1, "territory": "adjacent_occupied", "player": "other", "territory_selection_required": true},

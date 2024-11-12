@@ -196,8 +196,10 @@ func _on_card_move_selected(moves):
 	# moves is an array of [[player, territory_index, deploy_count, has_leader]]
 	# when player clicked on territories to apply effect of the card
 	# proceed to confirm or reset card
-	current_phase = TurnPhase.CONFIRM_OR_RESET_CARD
-	process_turn_phase()
+	# only do so if the card effect has fully finished, as signal can be emitted for multi-step midway
+	if card_in_effect.effect_index == card_in_effect.effect.size():
+		current_phase = TurnPhase.CONFIRM_OR_RESET_CARD
+		process_turn_phase()
 
 func _on_card_move_reverted(moves):
 	# go back to CARD phase where user needs to take actions to apply effect of card
@@ -280,6 +282,8 @@ func update_player_piece_count(player, deploy_count, has_leader):
 # Ends the player's turn and switches to the next player
 func end_turn():
 	print(Settings.players[self.current_player]["name"], "'s turn is over.")
+	# unhighlight territories
+	$Map.unhighlight_territories($Map.territory_index_to_points.keys())
 	
 	# Update player pieces and check if they are out
 	if Settings.players[self.current_player]["leader"] + Settings.players[self.current_player]["soldier"] <= 0:

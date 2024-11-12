@@ -31,13 +31,14 @@ func is_condition_met(player):
 func update_effect(player):
 	# special to this card: max number of times is total number of pieces in adjacent territories.
 	var max_deploy_times = get_max_deploy_times(player)
-	self.effect = []
+	if self.effect.size() == 1:  # reset the first time
+		self.effect = []
 	for i in range(max_deploy_times):
 		effect.append(
 			{"deploy": -1, "territory": "_jouraku", "player": "current", "territory_selection_required": true, "finish_allowed": false},
 		)
 		effect.append(
-			{"deploy": 1, "territory": "_kyo", "player": "current", "territory_selection_required": true, "finish_allowed": true},
+			{"deploy": 1, "territory": "_kyo", "player": "current", "territory_selection_required": true, "finish_allowed": true, "emit": true},
 		)
 
 func get_max_deploy_times(player) -> int:
