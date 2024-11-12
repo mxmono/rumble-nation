@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://ckaro4on1avuq"
-path="res://.godot/imported/bird.webp-94cf214e4b9151ac52348b52c01aa190.ctex"
+uid="uid://dph4hlajss8we"
+path="res://.godot/imported/lead2.png-162bd013305bcef22feadbc2fe9e43f0.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://icons/bird.webp"
-dest_files=["res://.godot/imported/bird.webp-94cf214e4b9151ac52348b52c01aa190.ctex"]
+source_file="res://icons/lead2.png"
+dest_files=["res://.godot/imported/lead2.png-162bd013305bcef22feadbc2fe9e43f0.ctex"]
 
 [params]
 

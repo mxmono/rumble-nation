@@ -6,7 +6,7 @@ signal piece_placed(piece)
 @export var territory_name: String = self.name
 @export var territory_index: int = 0
 @export var territory_points: int = 0
-@export var player_piece_scale = Vector2(2, 2)
+@export var player_piece_scale = Vector2(1.2, 1.2)
 
 @export var territory_tally = []
 var piece_offset = Vector2(15, 0)
@@ -22,7 +22,7 @@ var highlight_material  # Material used for highlighting with blend mode
 func _ready() -> void:
 	
 	for i in range(Settings.num_players):
-		territory_tally.append({"soldier": 0, "leader": 0})
+		territory_tally.append({"soldier": 0, "leader": 0, "reinforcement": 0})
 	
 	# Set the points of the visual Polygon2D to match the CollisionPolygon2D
 	visual_polygon.polygon = collision_polygon.polygon
@@ -78,43 +78,36 @@ func draw_piece_sprites():
 	for player in range(territory_tally.size()):
 		if player > num_players:
 			continue
+		
 		var icon = Settings.players[player]["icon"]
+		var icon_leader = Settings.players[player]["icon_leader"]
+		var icon_reinforcement = Settings.players[player]["icon_reinforce"]
+		
 		var color_adjustment = Settings.players[player]["color"]
 		for i in range(territory_tally[player]["soldier"]):
 			var piece_sprite = Sprite2D.new()
 			piece_sprite.scale = player_piece_scale
 			piece_sprite.texture = icon
-			piece_sprite.modulate = color_adjustment
-			piece_sprite.position = i * piece_offset +  (player) * player_piece_offset
+			#piece_sprite.modulate = color_adjustment
+			piece_sprite.position = i * piece_offset + player * player_piece_offset
 			piece_container.add_child(piece_sprite)
 
 		# draw leader in the front if there is a leader
 		if territory_tally[player]["leader"] > 0:
 			var leader_sprite = Sprite2D.new()
 			leader_sprite.scale = player_piece_scale * 1.5
-			leader_sprite.texture = icon
-			leader_sprite.modulate = color_adjustment
-			leader_sprite.position = Vector2(-30, 0) +  (player) * player_piece_offset
+			leader_sprite.texture = icon_leader
+			leader_sprite.position = Vector2(-30, 0) + player * player_piece_offset
 			piece_container.add_child(leader_sprite)
 		
-func add_reinforcement_sprite(player, n):
-	"""Given which player + pieces, draw the reinforcemnet sprites on territory. 
-	Relies on territory_tally before the pieces are added to tally."""
-	var icon = Settings.player_piece_icons[player]
-	var piece_container = $PieceContainer
-
-	for i in range(n):
-		var piece_sprite = Sprite2D.new()
-		piece_sprite.scale = player_piece_scale * 0.5
-		piece_sprite.texture = icon
-		piece_sprite.position = get_piece_position(
-			player, territory_tally[player]["soldier"]
-		) + piece_offset * i + Vector2(15, 0)
-		piece_container.add_child(piece_sprite)
-
-func get_piece_position(player, existing_n_pieces) -> Vector2:
-	var offset = piece_offset * existing_n_pieces + (player) * player_piece_offset
-	return Vector2(0, 0) + offset
+		# draw reinforcements
+		if territory_tally[player]["reinforcement"] > 0:
+			for i in range(territory_tally[player]["reinforcement"]):
+				var reinforce_sprite = Sprite2D.new()
+				reinforce_sprite.scale = player_piece_scale * 0.5
+				reinforce_sprite.texture = icon_reinforcement
+				reinforce_sprite.position = territory_tally[player]["soldier"] * piece_offset + i * piece_offset * 0.5 + player * player_piece_offset
+				piece_container.add_child(reinforce_sprite)
 
 # Handles click events on the territory
 func _on_territory_click(viewport, event, shape_idx):
@@ -195,8 +188,8 @@ func reinforce(num_players, player):
 
 func receive_reinforcements(pieces_to_reinforce, player):
 	"""Receive reinforcements at scoring phase."""
-	add_reinforcement_sprite(player, pieces_to_reinforce)
-	territory_tally[player]["soldier"] += pieces_to_reinforce
+	territory_tally[player]["reinforcement"] += pieces_to_reinforce
+	draw_piece_sprites()
 	print("territory %s with points %s received player %s's %s reinforcements" % 
 		[str(self.territory_index), str(self.territory_points), str(player), str(pieces_to_reinforce)]
 	)

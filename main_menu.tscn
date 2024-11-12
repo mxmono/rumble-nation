@@ -1,24 +1,14 @@
-[gd_scene load_steps=7 format=3 uid="uid://is8a3bvf2un1"]
+[gd_scene load_steps=10 format=3 uid="uid://is8a3bvf2un1"]
 
 [ext_resource type="Script" path="res://main_menu.gd" id="1_qjl8v"]
 [ext_resource type="Texture2D" uid="uid://dopnktebruu8u" path="res://icons/p1.png" id="2_1pqxm"]
+[ext_resource type="Texture2D" uid="uid://cvhkdf5tbnm6d" path="res://icons/char1.png" id="2_xeckm"]
 [ext_resource type="Texture2D" uid="uid://douhpl2uopg8k" path="res://icons/p2.png" id="3_hi3w4"]
+[ext_resource type="Texture2D" uid="uid://diftevdlg7cmx" path="res://icons/char2.png" id="3_yxxp8"]
 [ext_resource type="Texture2D" uid="uid://qxvj122ohety" path="res://icons/p3.png" id="4_ev16q"]
+[ext_resource type="Texture2D" uid="uid://dptoqt6vyo4of" path="res://icons/char3.png" id="4_tanc7"]
+[ext_resource type="Texture2D" uid="uid://cnn6iguti0pju" path="res://icons/char4.png" id="5_7knxw"]
 [ext_resource type="Texture2D" uid="uid://ciwkf7ti2n4vd" path="res://icons/p4.png" id="5_ok0q4"]
-
-[sub_resource type="GDScript" id="GDScript_bjmmi"]
-script/source = "extends PanelContainer
-
-@onready var num_players_option = $MarginContainer/VBoxContainer/GameSettings/NumPlayersOption
-
-func _ready() -> void:
-	
-	# connect buttons to variables
-	num_players_option.item_selected.connect(_on_num_players_option_selected)
-
-func _on_num_players_option_selected(selected_option):
-	Settings.num_players = selected_option + 2
-"
 
 [node name="MainMenu" type="Control"]
 layout_mode = 3
@@ -54,7 +44,7 @@ text = "SETTINGS"
 layout_mode = 2
 text = "QUIT"
 
-[node name="GameOptions" type="PanelContainer" parent="."]
+[node name="GameOptions" type="TabContainer" parent="."]
 layout_mode = 1
 anchors_preset = -1
 anchor_left = 0.5
@@ -67,28 +57,29 @@ offset_right = 331.0
 offset_bottom = 65.0
 grow_horizontal = 2
 grow_vertical = 2
-script = SubResource("GDScript_bjmmi")
+current_tab = 0
 
-[node name="MarginContainer" type="MarginContainer" parent="GameOptions"]
+[node name="Local" type="MarginContainer" parent="GameOptions"]
 layout_mode = 2
 theme_override_constants/margin_left = 30
 theme_override_constants/margin_top = 30
 theme_override_constants/margin_right = 30
 theme_override_constants/margin_bottom = 30
+metadata/_tab_index = 0
 
-[node name="VBoxContainer" type="VBoxContainer" parent="GameOptions/MarginContainer"]
+[node name="VBoxContainer" type="VBoxContainer" parent="GameOptions/Local"]
 layout_mode = 2
 theme_override_constants/separation = 40
 
-[node name="GameSettings" type="HBoxContainer" parent="GameOptions/MarginContainer/VBoxContainer"]
+[node name="GameSettings" type="HBoxContainer" parent="GameOptions/Local/VBoxContainer"]
 layout_mode = 2
 theme_override_constants/separation = 50
 
-[node name="Label" type="Label" parent="GameOptions/MarginContainer/VBoxContainer/GameSettings"]
+[node name="Label" type="Label" parent="GameOptions/Local/VBoxContainer/GameSettings"]
 layout_mode = 2
 text = "Number of Players"
 
-[node name="NumPlayersOption" type="OptionButton" parent="GameOptions/MarginContainer/VBoxContainer/GameSettings"]
+[node name="NumPlayersOption" type="OptionButton" parent="GameOptions/Local/VBoxContainer/GameSettings"]
 layout_mode = 2
 selected = 0
 item_count = 3
@@ -98,30 +89,203 @@ popup/item_1/id = 1
 popup/item_2/text = "4"
 popup/item_2/id = 2
 
-[node name="PlayerSettings" type="HBoxContainer" parent="GameOptions/MarginContainer/VBoxContainer"]
+[node name="PlayerSettings" type="HBoxContainer" parent="GameOptions/Local/VBoxContainer"]
 layout_mode = 2
 theme_override_constants/separation = 30
 
-[node name="Player0" type="VBoxContainer" parent="GameOptions/MarginContainer/VBoxContainer/PlayerSettings"]
+[node name="Player0" type="VBoxContainer" parent="GameOptions/Local/VBoxContainer/PlayerSettings"]
 custom_minimum_size = Vector2(128, 0)
 layout_mode = 2
 
-[node name="Label" type="Label" parent="GameOptions/MarginContainer/VBoxContainer/PlayerSettings/Player0"]
+[node name="Label" type="Label" parent="GameOptions/Local/VBoxContainer/PlayerSettings/Player0"]
 layout_mode = 2
 text = "Player 1"
 
-[node name="LineEdit" type="LineEdit" parent="GameOptions/MarginContainer/VBoxContainer/PlayerSettings/Player0"]
+[node name="LineEdit" type="LineEdit" parent="GameOptions/Local/VBoxContainer/PlayerSettings/Player0"]
 layout_mode = 2
-text = "Player 1"
+text = "Reddo"
 placeholder_text = "Name"
 clear_button_enabled = true
 
-[node name="Icon" type="HBoxContainer" parent="GameOptions/MarginContainer/VBoxContainer/PlayerSettings/Player0"]
+[node name="Icon" type="HBoxContainer" parent="GameOptions/Local/VBoxContainer/PlayerSettings/Player0"]
 layout_mode = 2
 
-[node name="OptionButton" type="OptionButton" parent="GameOptions/MarginContainer/VBoxContainer/PlayerSettings/Player0/Icon"]
+[node name="OptionButton" type="OptionButton" parent="GameOptions/Local/VBoxContainer/PlayerSettings/Player0/Icon"]
 layout_mode = 2
 size_flags_horizontal = 3
+selected = 0
+item_count = 4
+popup/item_0/icon = ExtResource("2_xeckm")
+popup/item_1/icon = ExtResource("3_yxxp8")
+popup/item_1/id = 1
+popup/item_2/icon = ExtResource("4_tanc7")
+popup/item_2/id = 2
+popup/item_3/icon = ExtResource("5_7knxw")
+popup/item_3/id = 3
+
+[node name="ColorPickerButton" type="ColorPickerButton" parent="GameOptions/Local/VBoxContainer/PlayerSettings/Player0/Icon"]
+visible = false
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Color"
+color = Color(1, 0, 0, 1)
+edit_alpha = false
+
+[node name="Player1" type="VBoxContainer" parent="GameOptions/Local/VBoxContainer/PlayerSettings"]
+custom_minimum_size = Vector2(128, 0)
+layout_mode = 2
+
+[node name="Label" type="Label" parent="GameOptions/Local/VBoxContainer/PlayerSettings/Player1"]
+layout_mode = 2
+text = "Player 2"
+
+[node name="LineEdit" type="LineEdit" parent="GameOptions/Local/VBoxContainer/PlayerSettings/Player1"]
+layout_mode = 2
+text = "Blu"
+placeholder_text = "Name"
+clear_button_enabled = true
+
+[node name="Icon" type="HBoxContainer" parent="GameOptions/Local/VBoxContainer/PlayerSettings/Player1"]
+layout_mode = 2
+
+[node name="OptionButton" type="OptionButton" parent="GameOptions/Local/VBoxContainer/PlayerSettings/Player1/Icon"]
+layout_mode = 2
+size_flags_horizontal = 3
+selected = 1
+item_count = 4
+popup/item_0/icon = ExtResource("2_xeckm")
+popup/item_1/icon = ExtResource("3_yxxp8")
+popup/item_1/id = 1
+popup/item_2/icon = ExtResource("4_tanc7")
+popup/item_2/id = 2
+popup/item_3/icon = ExtResource("5_7knxw")
+popup/item_3/id = 3
+
+[node name="ColorPickerButton" type="ColorPickerButton" parent="GameOptions/Local/VBoxContainer/PlayerSettings/Player1/Icon"]
+visible = false
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Color"
+color = Color(1.44392e-06, 0.519398, 0.785104, 1)
+edit_alpha = false
+
+[node name="Player2" type="VBoxContainer" parent="GameOptions/Local/VBoxContainer/PlayerSettings"]
+visible = false
+custom_minimum_size = Vector2(128, 0)
+layout_mode = 2
+
+[node name="Label" type="Label" parent="GameOptions/Local/VBoxContainer/PlayerSettings/Player2"]
+layout_mode = 2
+text = "Player 3"
+
+[node name="LineEdit" type="LineEdit" parent="GameOptions/Local/VBoxContainer/PlayerSettings/Player2"]
+layout_mode = 2
+text = "Yello"
+placeholder_text = "Name"
+clear_button_enabled = true
+
+[node name="Icon" type="HBoxContainer" parent="GameOptions/Local/VBoxContainer/PlayerSettings/Player2"]
+layout_mode = 2
+
+[node name="OptionButton" type="OptionButton" parent="GameOptions/Local/VBoxContainer/PlayerSettings/Player2/Icon"]
+layout_mode = 2
+size_flags_horizontal = 3
+selected = 2
+item_count = 4
+popup/item_0/icon = ExtResource("2_xeckm")
+popup/item_1/icon = ExtResource("3_yxxp8")
+popup/item_1/id = 1
+popup/item_2/icon = ExtResource("4_tanc7")
+popup/item_2/id = 2
+popup/item_3/icon = ExtResource("5_7knxw")
+popup/item_3/id = 3
+
+[node name="ColorPickerButton" type="ColorPickerButton" parent="GameOptions/Local/VBoxContainer/PlayerSettings/Player2/Icon"]
+visible = false
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Color"
+color = Color(0.792773, 0.498224, 0.240032, 1)
+edit_alpha = false
+
+[node name="Player3" type="VBoxContainer" parent="GameOptions/Local/VBoxContainer/PlayerSettings"]
+visible = false
+custom_minimum_size = Vector2(128, 0)
+layout_mode = 2
+
+[node name="Label" type="Label" parent="GameOptions/Local/VBoxContainer/PlayerSettings/Player3"]
+layout_mode = 2
+text = "Player 4"
+
+[node name="LineEdit" type="LineEdit" parent="GameOptions/Local/VBoxContainer/PlayerSettings/Player3"]
+layout_mode = 2
+text = "Greeny"
+placeholder_text = "Name"
+clear_button_enabled = true
+
+[node name="Icon" type="HBoxContainer" parent="GameOptions/Local/VBoxContainer/PlayerSettings/Player3"]
+layout_mode = 2
+
+[node name="OptionButton" type="OptionButton" parent="GameOptions/Local/VBoxContainer/PlayerSettings/Player3/Icon"]
+layout_mode = 2
+size_flags_horizontal = 3
+selected = 3
+item_count = 4
+popup/item_0/icon = ExtResource("2_xeckm")
+popup/item_1/icon = ExtResource("3_yxxp8")
+popup/item_1/id = 1
+popup/item_2/icon = ExtResource("4_tanc7")
+popup/item_2/id = 2
+popup/item_3/icon = ExtResource("5_7knxw")
+popup/item_3/id = 3
+
+[node name="ColorPickerButton" type="ColorPickerButton" parent="GameOptions/Local/VBoxContainer/PlayerSettings/Player3/Icon"]
+visible = false
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Color"
+color = Color(0, 0.571416, 0.535173, 1)
+edit_alpha = false
+
+[node name="Remote" type="MarginContainer" parent="GameOptions"]
+visible = false
+layout_mode = 2
+theme_override_constants/margin_left = 30
+theme_override_constants/margin_top = 30
+theme_override_constants/margin_right = 30
+theme_override_constants/margin_bottom = 30
+metadata/_tab_index = 1
+
+[node name="HBoxContainer" type="HBoxContainer" parent="GameOptions/Remote"]
+layout_mode = 2
+theme_override_constants/separation = 50
+
+[node name="Connect" type="GridContainer" parent="GameOptions/Remote/HBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 0
+theme_override_constants/h_separation = 10
+columns = 3
+
+[node name="NameLabel" type="Label" parent="GameOptions/Remote/HBoxContainer/Connect"]
+layout_mode = 2
+text = "Name"
+
+[node name="NameEdit" type="LineEdit" parent="GameOptions/Remote/HBoxContainer/Connect"]
+custom_minimum_size = Vector2(128, 0)
+layout_mode = 2
+text = "Player 1"
+clear_button_enabled = true
+
+[node name="HostButton" type="Button" parent="GameOptions/Remote/HBoxContainer/Connect"]
+layout_mode = 2
+text = "Host"
+
+[node name="IconLabel" type="Label" parent="GameOptions/Remote/HBoxContainer/Connect"]
+layout_mode = 2
+text = "Icon"
+
+[node name="OptionButton" type="OptionButton" parent="GameOptions/Remote/HBoxContainer/Connect"]
+layout_mode = 2
 selected = 0
 item_count = 4
 popup/item_0/icon = ExtResource("2_1pqxm")
@@ -132,122 +296,37 @@ popup/item_2/id = 2
 popup/item_3/icon = ExtResource("5_ok0q4")
 popup/item_3/id = 3
 
-[node name="ColorPickerButton" type="ColorPickerButton" parent="GameOptions/MarginContainer/VBoxContainer/PlayerSettings/Player0/Icon"]
-layout_mode = 2
-size_flags_horizontal = 3
-text = "Color"
-color = Color(1, 0, 0, 1)
-edit_alpha = false
-
-[node name="Player1" type="VBoxContainer" parent="GameOptions/MarginContainer/VBoxContainer/PlayerSettings"]
-custom_minimum_size = Vector2(128, 0)
+[node name="EmptyLabel" type="Label" parent="GameOptions/Remote/HBoxContainer/Connect"]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="GameOptions/MarginContainer/VBoxContainer/PlayerSettings/Player1"]
+[node name="IPLabel" type="Label" parent="GameOptions/Remote/HBoxContainer/Connect"]
 layout_mode = 2
-text = "Player 2"
+text = "IP"
 
-[node name="LineEdit" type="LineEdit" parent="GameOptions/MarginContainer/VBoxContainer/PlayerSettings/Player1"]
+[node name="IPEdit" type="LineEdit" parent="GameOptions/Remote/HBoxContainer/Connect"]
 layout_mode = 2
-text = "Player 2"
-placeholder_text = "Name"
+text = "127.0.0.1"
 clear_button_enabled = true
 
-[node name="Icon" type="HBoxContainer" parent="GameOptions/MarginContainer/VBoxContainer/PlayerSettings/Player1"]
+[node name="JoinButton" type="Button" parent="GameOptions/Remote/HBoxContainer/Connect"]
+layout_mode = 2
+text = "Join"
+
+[node name="Lobby" type="Panel" parent="GameOptions/Remote/HBoxContainer"]
 layout_mode = 2
 
-[node name="OptionButton" type="OptionButton" parent="GameOptions/MarginContainer/VBoxContainer/PlayerSettings/Player1/Icon"]
-layout_mode = 2
-size_flags_horizontal = 3
-selected = 1
-item_count = 4
-popup/item_0/icon = ExtResource("2_1pqxm")
-popup/item_1/icon = ExtResource("3_hi3w4")
-popup/item_1/id = 1
-popup/item_2/icon = ExtResource("4_ev16q")
-popup/item_2/id = 2
-popup/item_3/icon = ExtResource("5_ok0q4")
-popup/item_3/id = 3
+[node name="LobbyLabel" type="Label" parent="GameOptions/Remote/HBoxContainer/Lobby"]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 23.0
+text = "Lobby"
 
-[node name="ColorPickerButton" type="ColorPickerButton" parent="GameOptions/MarginContainer/VBoxContainer/PlayerSettings/Player1/Icon"]
-layout_mode = 2
-size_flags_horizontal = 3
-text = "Color"
-color = Color(1.44392e-06, 0.519398, 0.785104, 1)
-edit_alpha = false
+[node name="PlayerList" type="ItemList" parent="GameOptions/Remote/HBoxContainer/Lobby"]
+layout_mode = 0
+offset_top = 29.0
+offset_right = 314.0
+offset_bottom = 176.0
 
-[node name="Player2" type="VBoxContainer" parent="GameOptions/MarginContainer/VBoxContainer/PlayerSettings"]
-visible = false
-custom_minimum_size = Vector2(128, 0)
+[node name="ErrorLabel" type="Label" parent="GameOptions/Remote"]
 layout_mode = 2
-
-[node name="Label" type="Label" parent="GameOptions/MarginContainer/VBoxContainer/PlayerSettings/Player2"]
-layout_mode = 2
-text = "Player 3"
-
-[node name="LineEdit" type="LineEdit" parent="GameOptions/MarginContainer/VBoxContainer/PlayerSettings/Player2"]
-layout_mode = 2
-text = "Player 3"
-placeholder_text = "Name"
-clear_button_enabled = true
-
-[node name="Icon" type="HBoxContainer" parent="GameOptions/MarginContainer/VBoxContainer/PlayerSettings/Player2"]
-layout_mode = 2
-
-[node name="OptionButton" type="OptionButton" parent="GameOptions/MarginContainer/VBoxContainer/PlayerSettings/Player2/Icon"]
-layout_mode = 2
-size_flags_horizontal = 3
-selected = 2
-item_count = 4
-popup/item_0/icon = ExtResource("2_1pqxm")
-popup/item_1/icon = ExtResource("3_hi3w4")
-popup/item_1/id = 1
-popup/item_2/icon = ExtResource("4_ev16q")
-popup/item_2/id = 2
-popup/item_3/icon = ExtResource("5_ok0q4")
-popup/item_3/id = 3
-
-[node name="ColorPickerButton" type="ColorPickerButton" parent="GameOptions/MarginContainer/VBoxContainer/PlayerSettings/Player2/Icon"]
-layout_mode = 2
-size_flags_horizontal = 3
-text = "Color"
-color = Color(0.792773, 0.498224, 0.240032, 1)
-edit_alpha = false
-
-[node name="Player3" type="VBoxContainer" parent="GameOptions/MarginContainer/VBoxContainer/PlayerSettings"]
-visible = false
-custom_minimum_size = Vector2(128, 0)
-layout_mode = 2
-
-[node name="Label" type="Label" parent="GameOptions/MarginContainer/VBoxContainer/PlayerSettings/Player3"]
-layout_mode = 2
-text = "Player 4"
-
-[node name="LineEdit" type="LineEdit" parent="GameOptions/MarginContainer/VBoxContainer/PlayerSettings/Player3"]
-layout_mode = 2
-text = "Player 4"
-placeholder_text = "Name"
-clear_button_enabled = true
-
-[node name="Icon" type="HBoxContainer" parent="GameOptions/MarginContainer/VBoxContainer/PlayerSettings/Player3"]
-layout_mode = 2
-
-[node name="OptionButton" type="OptionButton" parent="GameOptions/MarginContainer/VBoxContainer/PlayerSettings/Player3/Icon"]
-layout_mode = 2
-size_flags_horizontal = 3
-selected = 3
-item_count = 4
-popup/item_0/icon = ExtResource("2_1pqxm")
-popup/item_1/icon = ExtResource("3_hi3w4")
-popup/item_1/id = 1
-popup/item_2/icon = ExtResource("4_ev16q")
-popup/item_2/id = 2
-popup/item_3/icon = ExtResource("5_ok0q4")
-popup/item_3/id = 3
-
-[node name="ColorPickerButton" type="ColorPickerButton" parent="GameOptions/MarginContainer/VBoxContainer/PlayerSettings/Player3/Icon"]
-layout_mode = 2
-size_flags_horizontal = 3
-text = "Color"
-color = Color(0, 0.571416, 0.535173, 1)
-edit_alpha = false
+size_flags_vertical = 8

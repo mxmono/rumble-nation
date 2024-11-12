@@ -1,11 +1,13 @@
-extends Node2D
+extends Node
 
 @export var current_player: int = 0
-var player_priority = []  # store which players are out first
-var card_in_effect = null # store which card is being played
+@export var player_priority = []  # store which players are out first
+@export var card_in_effect = null # store which card is being played
+var save_state = {}
 
 @onready var dice_buttons = $Control/GameButtons/Dice.get_children()
-@onready var card_buttons = $Control/GameButtons/Card.get_children()
+@onready var card_buttons = $Control/GameButtons/Card/CardTray.get_children()
+@onready var card_action_buttons = $Control/GameButtons/Card/ActionButtons.get_children()
 const DICE_MENU_PARENT = "Control/GameButtons/Dice/"
 const CARD_MENU_PARENT = "Control/GameButtons/Card/"
 @onready var pause_menu = $MenuCanvas/PauseMenu
@@ -21,37 +23,35 @@ enum TurnPhase {
 	END
 }
 
-var current_phase = TurnPhase.CHOICE
+@export var current_phase = TurnPhase.CHOICE
 
-# Start the game and the first player's turn
 func _ready():
-	
-	# connect signals
-	var control_scene = get_node("/root/GameController/Control")
-	control_scene.roll_phase_done.connect(_on_place_phase_done)
-	
-	for card_button in $Control/GameButtons/Card.get_children():
-		if card_button.name.begins_with("Card"):
-			card_button.card_selected.connect(_on_card_selected)
-	var board_scene = get_node("/root/GameController/Map")
-	board_scene.card_move_selected.connect(_on_card_move_selected)
-	board_scene.card_move_reverted.connect(_on_card_move_reverted)
-	$Control/GameButtons/Card/ConfirmCardButton.pressed.connect(_on_card_confirmed)
-	
 	# initialize players
 	for i in range(Settings.num_players):
-		Settings.players[i]["soldier"] = 16
+		Settings.players[i]["soldier"] = Settings.total_soldiers
 		Settings.players[i]["leader"] = 1
 		Settings.players[i]["active"] = true
 		Settings.players[i]["score"] = 0
 		Settings.players[i]["territories"] = []
 		Settings.players[i]["used_card"] = false
 	
+	var board_scene = get_node("/root/GameController/Map")
+	board_scene.card_move_selected.connect(_on_card_move_selected)
+	board_scene.card_move_reverted.connect(_on_card_move_reverted)
+	
+	# connect signals
+	var control_scene = get_node("/root/GameController/Control")
+	control_scene.roll_phase_done.connect(_on_place_phase_done)
+	$Control/GameButtons/Card/ActionButtons/ConfirmCardButton.pressed.connect(_on_card_confirmed)
+	
+	for card_button in card_buttons:
+		card_button.card_selected.connect(_on_card_selected)
+	
 	# start turn sequence
 	start_turn()
 
 func _process(delta):
-	self.card_buttons = $Control/GameButtons/Card.get_children()
+	self.card_buttons = $Control/GameButtons/Card/CardTray.get_children()
 
 func toggle_pause():
 	if get_tree().paused:
@@ -61,7 +61,6 @@ func toggle_pause():
 		get_tree().paused = true  # Pause the game
 		pause_menu.show()  # Show the pause menu centered
 
-# Starts a player's turn
 func start_turn():
 	if all_players_out():
 		print("All players are out of pieces! Transitioning to scoring phase.")
@@ -77,23 +76,33 @@ func start_turn():
 	
 	# UI: enable all relevant buttons and labels
 	for card_button in self.card_buttons:
-		if card_button.name.begins_with("Card"):
-			card_button.disabled = not card_button.is_condition_met(self.current_player)
-			card_button.update_valid_targets()
-	
+		card_button.disabled = not card_button.is_condition_met(self.current_player)
+		card_button.update_valid_targets()
+	for card_action_button in card_action_buttons:
+		card_action_button.disabled = true
+		# hide finish move, only show it when it's relevant for a card
+		if card_action_button.name == "FinishCardMoveButton":
+			card_action_button.visible = false
+
 	for dice_button in self.dice_buttons:
 		if dice_button is Button:
 			if dice_button.name == "RollDiceButton":
 				dice_button.disabled = false
 				dice_button.visible = true
 	get_node(DICE_MENU_PARENT + "ResultLabel").text = ""
-	
+
+	# UI: if any player is out, cannot use card any more
+	for player in range(Settings.num_players):
+		if not Settings.players[player]["active"]:
+			for card_button in self.card_buttons + self.card_action_buttons:
+				card_button.disabled = true
+			
 	# UI: use player color as menu background color
 	var current_color = Settings.players[self.current_player]["color"]
 	var style_box = StyleBoxFlat.new()
 	style_box.bg_color = current_color
 	style_box.bg_color.a = 0.2
-	$Control/GameButtons.add_theme_stylebox_override("panel", style_box)  # "panel" is the default style used for the background
+	$Control/GameButtons.add_theme_stylebox_override("panel", style_box)
 
 	current_phase = TurnPhase.CHOICE
 	process_turn_phase()
@@ -117,7 +126,6 @@ func all_players_out() -> bool:
 			return false  # At least one player still has pieces
 	return true  # All players are out of pieces
 
-# Process each phase of the turn
 func process_turn_phase():
 	var current_player_name = Settings.players[self.current_player]
 	match current_phase:
@@ -160,13 +168,13 @@ func card_phase():
 			dice_button.text = "Cannot use dice, a card has been selected"
 			
 	# UI: disable confirm or reset buttons
-	get_node(CARD_MENU_PARENT + "ConfirmCardButton").disabled = true
-	get_node(CARD_MENU_PARENT + "ResetCardButton").disabled = true
+	get_node(CARD_MENU_PARENT + "ActionButtons/ConfirmCardButton").disabled = true
+	get_node(CARD_MENU_PARENT + "ActionButtons/ResetCardButton").disabled = true
 
 func comfirm_or_reset_card_phase():
 	# UI: enable confirm or reset buttons
-	get_node(CARD_MENU_PARENT + "ConfirmCardButton").disabled = false
-	get_node(CARD_MENU_PARENT + "ResetCardButton").disabled = false
+	get_node(CARD_MENU_PARENT + "ActionButtons/ConfirmCardButton").disabled = false
+	get_node(CARD_MENU_PARENT + "ActionButtons/ResetCardButton").disabled = false
 
 func _on_card_selected(card):
 	# when clicked on a card, user has made a choice, ending the choice phase
@@ -178,12 +186,11 @@ func _on_card_selected(card):
 	card_in_effect = card
 	
 	# UI: highlight the selected card
-	card.modulate = Color(1, 0, 0)
+	card.modulate = Settings.players[self.current_player]["color"]
 	
 	# UI: disable all card buttons
 	for card_button in card_buttons:
-		if card_button.name.begins_with("Card"):
-			card_button.disabled = true
+		card_button.disabled = true
 
 func _on_card_move_selected(moves):
 	# moves is an array of [[player, territory_index, deploy_count, has_leader]]
@@ -192,7 +199,7 @@ func _on_card_move_selected(moves):
 	current_phase = TurnPhase.CONFIRM_OR_RESET_CARD
 	process_turn_phase()
 
-func _on_card_move_reverted(moves):	
+func _on_card_move_reverted(moves):
 	# go back to CARD phase where user needs to take actions to apply effect of card
 	current_phase = TurnPhase.CARD
 	process_turn_phase()
@@ -231,7 +238,7 @@ func _on_dice_rolled(dice_results, move_options):
 	process_turn_phase()
 	
 	# disable all card actions in card menu:
-	for card_button in self.card_buttons:
+	for card_button in self.card_buttons + self.card_action_buttons:
 		card_button.disabled = true
 
 func place_phase():
@@ -273,6 +280,7 @@ func update_player_piece_count(player, deploy_count, has_leader):
 # Ends the player's turn and switches to the next player
 func end_turn():
 	print(Settings.players[self.current_player]["name"], "'s turn is over.")
+	
 	# Update player pieces and check if they are out
 	if Settings.players[self.current_player]["leader"] + Settings.players[self.current_player]["soldier"] <= 0:
 		print(Settings.players[self.current_player]["name"], " is out of pieces!")
@@ -295,7 +303,7 @@ func scoring_phase():
 			dice_button.disabled = true
 		if dice_button is Label:
 			dice_button.text = ""
-	for card_button in self.card_buttons:
+	for card_button in self.card_buttons + self.card_action_buttons:
 		if card_button is Button:
 			card_button.disabled = true
 	
@@ -307,41 +315,81 @@ func scoring_phase():
 		var territory_tally = territory.get("territory_tally")
 		var scores = []
 		for player_tally in territory_tally:
-			scores.append(player_tally["soldier"] + player_tally["leader"] * 2)
-		var winning_player = get_winning_player(scores, player_priority)
-		print(territory.get("territory_points"), ":  player", str(winning_player), " wins")
-		if winning_player == -1:  # if no one wins, go to next territory
-			continue
+			scores.append(
+				player_tally["soldier"] + player_tally["reinforcement"] + player_tally["leader"] * 2
+			)
+		var win_order_players =  get_player_win_order(scores, player_priority)
+		var first_place_player = -1
+		var second_place_player = -1
+		if win_order_players.size() >= 1:
+			first_place_player = win_order_players[0]
+			if win_order_players.size() > 1:
+				second_place_player = win_order_players[1]
 
+		# TODO: set territory color to winning player color
+		var visual_polygon = territory.get_node("Polygon2D")
+		if first_place_player != -1:
+			var highlight_material = CanvasItemMaterial.new()
+			highlight_material.blend_mode = CanvasItemMaterial.BLEND_MODE_ADD
+			visual_polygon.material = highlight_material
+			visual_polygon.color = Settings.players[first_place_player]["color"]
+		
+		if first_place_player == -1:  # if no one wins, go to next territory
+			continue
+		
+		print(
+			territory.territory_points, ":  ", Settings.players[first_place_player]["name"], " wins",
+			"  credited ", territory.territory_points, "  to ", Settings.players[first_place_player]["name"]
+		)
+		if second_place_player != -1:
+			print(
+				Settings.players[second_place_player]["name"], " is second place",
+			)
+		
 		# reinforce to adjacent territories
-		territory.reinforce(Settings.num_players, winning_player)
+		territory.reinforce(Settings.num_players, first_place_player)
 		
 		# credit score to the player
-		Settings.players[winning_player]["score"] += territory.get("territory_points")
-	
+		Settings.players[first_place_player]["score"] += territory.territory_points
+		
+		# add half score (round down) to 2nd place if more than 2 players
+		if Settings.num_players > 2:
+			if second_place_player != -1:
+				Settings.players[second_place_player]["score"] += territory.territory_points / 2
+				print("credited ", territory.territory_points / 2, " to ", Settings.players[second_place_player]["name"])
+
 	# annouce the winner
 	var current_max = 0
-	var i = 0
-	var winners = [-1]
-	for player in Settings.players:
-		if player["score"] > current_max:
-			current_max = player["score"]
-			winners[0] = i
-			i += 1
-		elif player["score"] == current_max:
-			winners.append(i)
+	var winner = -1
+	var current_max_player_priority = -1
+	for player in range(Settings.num_players):
+		
+		if Settings.players[player]["score"] > current_max:
+			current_max = Settings.players[player]["score"]
+			winner = player
+			current_max_player_priority = self.player_priority.find(player)
+		
+		# if tie, the player goes out first wins
+		elif Settings.players[player]["score"] == current_max:
+			var player_priority = self.player_priority.find(player)
+			if player_priority < current_max_player_priority:
+				winner = player
 	
 	# UI: update winding label
-	$Info/PlayerLabel.text += "\nPlayer %s wins! Player 1: %s; Player 2: %s" % [
-		str(winners), str(Settings.players[0]["score"]), str(Settings.players[1]["score"])
-	]
+	$Info/PlayerLabel.text = "%s wins!" % Settings.players[winner]["name"]
+	var player_priority_name = []
+	for player in player_priority:
+		player_priority_name.append(Settings.players[player]["name"])
+	$Info/PlayerLabel.text += " Out sequence: %s" % str(player_priority_name)
+	for i in range(Settings.num_players):
+		$Info/PlayerLabel.text += "\n%s: %s" % [Settings.players[i]["name"], Settings.players[i]["score"]]
 
-func get_winning_player(scores, player_priority) -> int:
+func get_winning_player(scores: Array, player_priority) -> int:
 	"""Based on total score and out sequence (player priority), return winning player"""
 	var max_value = scores.max()  # Find the maximum value in the array
-	
+
 	# no one wins if no pieces
-	if max_value == 0:
+	if max_value <= 0:
 		return -1
 	var player_index = []  # Array to store the indices of the max value
 	
@@ -359,3 +407,20 @@ func get_winning_player(scores, player_priority) -> int:
 	
 	# otherwise if only 1 winner, return the winner
 	return player_index[0]
+
+func get_player_win_order(scores: Array, player_priority: Array) -> Array:
+	"""Return an array of win order, eg [2, 3, 0, 1], player 2 is first place."""
+	
+	var win_order_players = []  # if there are only 1 player on tile, should only have 1 element
+	var num_players_with_scores = 0
+	for score in scores:
+		if score > 0:
+			num_players_with_scores += 1
+	
+	for i in range(num_players_with_scores):
+		var winning_player = get_winning_player(scores, player_priority)
+		win_order_players.append(winning_player)
+		# set the score of the already identified player to -1
+		scores[winning_player] = -1
+
+	return win_order_players

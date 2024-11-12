@@ -6,6 +6,7 @@ signal card_selected(card)
 @export var card_name_jp: String = "卡片"
 @export var description: String = "Description of the card"
 @export var selection_required: int = 0
+@export var early_finish_enabled: bool = false
 var effect = []  # an array of dictionaries of moves
 var effect_index = 0  # which step is effect at, 0 = initial, 1 = after 1st step
 var staged_moves = []  # staged moves associated with usage of the card, [player, territory_index, deploy_count, has_leader]
@@ -19,8 +20,12 @@ var territory_func_mapping = {
 	"adjacent_selected": get_adjacent_territories_to_selected,
 	"_otori": get_otori_territories,
 	"_jouraku": get_jouraku_territories,
+	"_kyo": get_kyo,
 	"_suigun": get_suigun_territories,
 	"adjacent_selected_water": get_adjacent_selected_water,
+	"_yamagoe": get_yamagoe_territories,
+	"adjacent_selected_land": get_adjacent_selected_land,
+	"_buntai": get_buntai_territories,
 }
 var selected_opponent: int = -1 # to which opponent is the card targeting
 var last_selected_territory = -1
@@ -31,6 +36,13 @@ func _ready() -> void:
 	$Description.text = description
 	
 	self.pressed.connect(_on_card_selected)
+
+func _process(delta):
+	# gray out texts if disabled
+	if self.disabled:
+		$Mask.show()
+	else:
+		$Mask.hide()
 	
 func update_valid_targets():
 	# draw eligible opponents in TargetHBox if condition met
@@ -70,6 +82,9 @@ func is_condition_met(player) -> bool:
 
 func get_valid_targets(player) -> Array:
 	return []
+
+func update_effect(player):
+	pass
 
 func get_occupied_territories(player, territroy_index=null) -> Array:
 	"""Returns an array territory index."""
@@ -205,9 +220,11 @@ func get_jouraku_territories(player, territory_index):
 			
 	return valid_territories
 
-func get_suigun_territories(player, territory_index=null):
-	"""Get territories player has >=2 soldiers that has water connections."""
-	
+func get_kyo(player, territory_index):
+	return [4]
+
+func _get_territories_with_x_connections_with_at_least_y_soldiers(player: int, x: String, y: int):
+	"""x: water, land, all"""
 	var territory_connections = get_node("/root/GameController/Map").territory_connections
 	var board_state = get_node("/root/GameController/Map").board_state
 	var player_territories = Settings.players[player]["territories"]
@@ -215,15 +232,19 @@ func get_suigun_territories(player, territory_index=null):
 	var valid_territories = []
 	
 	for territory in range(territory_connections.size()):
-		if territory_connections[territory]["water"].size() > 0:
+		if territory_connections[territory][x].size() > 0:
 			valid_territory_pool.append(territory)
 
 	for player_territory in player_territories:
 		if valid_territory_pool.has(player_territory):
-			if board_state[player_territory][player]["soldier"] >= 2:
+			if board_state[player_territory][player]["soldier"] >= y:
 				valid_territories.append(player_territory)
 
 	return valid_territories
+
+func get_suigun_territories(player, territory_index=null):
+	"""Get territories where player has >=2 soldiers with water connections."""
+	return _get_territories_with_x_connections_with_at_least_y_soldiers(player, "water", 2)
 
 func get_adjacent_selected_water(player, territory_index=null):
 	"""Get territories adjacent to selected territory by water."""
@@ -233,3 +254,20 @@ func get_adjacent_selected_water(player, territory_index=null):
 	
 	# get select territory's adjacent territorries
 	return current_connections["water"]
+
+func get_yamagoe_territories(player, territory_index=null):
+	"""Get territories where player has >=2 soldiers with as land connections."""
+	return _get_territories_with_x_connections_with_at_least_y_soldiers(player, "land", 2)
+
+func get_adjacent_selected_land(player, territory_index=null):
+	"""Get territories adjacent to selected territory by land."""
+
+	var territory_connections = get_node("/root/GameController/Map").territory_connections
+	var current_connections = territory_connections[self.last_selected_territory]
+	
+	# get select territory's adjacent territorries
+	return current_connections["land"]
+
+func get_buntai_territories(player, territory_index=null):
+		"""Get territories where player has >=2 soldiers."""
+		return _get_territories_with_x_connections_with_at_least_y_soldiers(player, "all", 2)

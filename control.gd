@@ -19,8 +19,8 @@ const CARD_BUTTONS_PARENT = "GameButtons/Card/"
 var dice_move_options = []
 
 # cards
-#var cards = ["Kasei", "Monomi", "Hitojichi", "Tsuihou", "Muhon", "Otori", "Suigun"]
-var cards = ["Suigun"]
+#var cards = ["Kasei", "Monomi", "Hitojichi", "Tsuihou", "Muhon", "Otori", "Suigun", "Yamagoe", "Taikyaku", "Shinobi", "Buntai", "Jouraku"]
+var cards = ["Jouraku"]
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
@@ -51,8 +51,7 @@ func _ready():
 		new_card.set_script(card_script)
 		new_card.name = "Card" + str(i) + card_name
 		i += 1
-		get_node("GameButtons/Card").add_child(new_card)
-		get_node("GameButtons/Card").move_child(new_card, 0)  # move before confirm and reset buttons
+		get_node("GameButtons/Card/CardTray").add_child(new_card)
 
 # Handle the dice roll button press
 func _on_roll_dice_button_pressed():

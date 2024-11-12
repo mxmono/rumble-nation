@@ -2,7 +2,7 @@ extends "res://cards/card.gd"
 
 
 func _ready() -> void:
-	card_name = "Monomi"
+	card_name = "MonoMi / Sightseeing"
 	card_name_jp = "物見"
 	description = "Move exactly one soldier to any adjacent territory."
 	effect = [

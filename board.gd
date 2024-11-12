@@ -27,7 +27,18 @@ signal card_move_reverted(moves) # move is an array of [player, territory_index,
 ]
 var board_state = []  # an array of territory tallies
 
+const CARD_ACTION_PARENT = "/root/GameController/Control/GameButtons/Card/ActionButtons/"
+@onready var card_finish_move_button = get_node(CARD_ACTION_PARENT + "FinishCardMoveButton")
+@onready var reset_card_button = get_node(CARD_ACTION_PARENT + "ResetCardButton")
+
 func _ready() -> void:
+	
+	# assign random points to each territory
+	assign_points_to_territories()
+	
+	for i in range(territory_connections.size()):
+		territory_connections[i]["all"] = territory_connections[i]["land"] + territory_connections[i]["water"]
+	
 	# conect territory click signals
 	for territory in $Map.get_children():
 		territory.territory_clicked.connect(_on_territory_clicked)
@@ -38,18 +49,13 @@ func _ready() -> void:
 	get_node("/root/GameController/Control").dice_selected.connect(_on_dice_selected)
 	
 	# connect card selection signals (for map highlighting)
-	for card_button in get_node("/root/GameController/Control/GameButtons/Card").get_children():
-		if card_button.name.begins_with("Card"):
-			card_button.card_selected.connect(_on_card_selected)
+	for card_button in get_node("/root/GameController/Control/GameButtons/Card/CardTray").get_children():
+		card_button.card_selected.connect(_on_card_selected)
 	# connect reset card button
-	get_node("/root/GameController/Control/GameButtons/Card/ResetCardButton").pressed.connect(_on_card_reset)
-	
-	# assign random points to each territory
-	assign_points_to_territories()
-	
-	for i in range(territory_connections.size()):
-		territory_connections[i]["all"] = territory_connections[i]["land"] + territory_connections[i]["water"]
-	
+	reset_card_button.pressed.connect(_on_card_reset)
+	# connect finish move button
+	card_finish_move_button.pressed.connect(_on_card_finish_move_button_pressed)
+
 	for territory in $Map.get_children():
 		territory_points_to_index[territory.get("territory_points")] = territory.get("territory_index")
 		territory_index_to_points[territory.get("territory_index")] = territory.get("territory_points")
@@ -61,7 +67,6 @@ func _process(delta: float) -> void:
 	for territory in self.territories_default:
 		board_state.append(territory.territory_tally)
 
-# Randomly assign 2 to 12 to each territory
 func assign_points_to_territories():
 	# generate an array of randomized points
 	var points = Array(range(2, 13))  # 2 to 12
@@ -142,10 +147,16 @@ func _on_territory_clicked(territory_index, mouse_position):
 				if card.effect[card.effect_index]["player"] == "other":
 					player_to_deploy = card.selected_opponent
 				
+				# update effect (used for cards like buntai <deploy count>, jouraku)
+				card.update_effect(current_player)
+				
 				# queue up the effect to staged moves
 				card.staged_moves.append(
 					[player_to_deploy, territory_index, card.effect[card.effect_index]["deploy"], false]
 				)
+				
+				# for cards like jouraku, the user can confirm halfway (not realizing full potential)
+				enable_early_finish_button_if_valid(card)
 				
 				# once the action is queued (click is registered), unhighlight all territories
 				unhighlight_territories(self.territory_index_to_points.keys())
@@ -161,6 +172,8 @@ func _on_territory_clicked(territory_index, mouse_position):
 						if card.effect[card.effect_index]["player"] == "other":
 							player_to_deploy = card.selected_opponent
 						# TODO: territory_index will carry over from prev selected step by default
+						# update effect (used for cards like buntai <deploy count>, jouraku)
+						card.update_effect(current_player)
 						card.staged_moves.append(
 							[player_to_deploy, territory_index, card.effect[card.effect_index]["deploy"], false]
 						)
@@ -172,7 +185,7 @@ func _on_territory_clicked(territory_index, mouse_position):
 				# eg if we just took step 1, card_effect_index + 1 == 1, size = 2 (if two steps)
 				if card.effect_index < card.effect.size():
 					var next_step_territories = get_card_step_territories(card)
-					print("next steo territories: ", next_step_territories)
+					print("next step territories: ", next_step_territories)
 					# highlight the next eligible territories
 					var player_color = Settings.players[current_player]["color"]
 					highlight_territories(next_step_territories, player_color)
@@ -181,6 +194,7 @@ func _on_territory_clicked(territory_index, mouse_position):
 				elif card.effect_index == card.effect.size():
 					card_move_selected.emit(card.staged_moves)  # handles in game controller, territroy
 					# unhiglight all territories
+					card_finish_move_button.disabled = true
 					unhighlight_territories(self.territory_index_to_points.keys())
 
 func _input(event):
@@ -245,12 +259,24 @@ func _on_card_selected(card):
 	# highlight which territories are eligible when a card is selected
 	var current_player = get_node("/root/GameController").current_player
 	
+	# UI: enable finish move button if allowed
+	if card.early_finish_enabled:
+		card_finish_move_button.visible = true
+		card_finish_move_button.disabled = true
+	
 	# highlight the first move
 	var territories = card.territory_func_mapping[card.effect[0]["territory"]].call(
 		current_player, null
 	)
 	var player_color = Settings.players[current_player]["color"]
 	highlight_territories(territories, player_color)
+
+# when finishing move early, emit card moves and unhighlight territories
+func _on_card_finish_move_button_pressed():
+	var card = get_node("/root/GameController").card_in_effect
+	card_move_selected.emit(card.staged_moves)
+	card_finish_move_button.disabled = true
+	unhighlight_territories(self.territory_index_to_points.keys())
 
 func _on_card_reset():
 	# reverse deployment
@@ -297,3 +323,12 @@ func _on_dice_rolled(dice_results, move_options):
 # UI: unhighlight all territories when dice option is selected
 func _on_dice_selected(territory_index: int, deploy_count: int, is_leader: bool):
 	unhighlight_territories(self.territory_index_to_points.keys())
+
+func enable_early_finish_button_if_valid(card):
+	if card.early_finish_enabled:
+		if card.effect[card.effect_index]["finish_allowed"]:
+			card_finish_move_button.disabled = false
+			card_finish_move_button.visible = true
+		else:
+			card_finish_move_button.disabled = true
+			card_finish_move_button.visible = true

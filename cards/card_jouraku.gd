@@ -5,19 +5,13 @@ func _ready() -> void:
 	card_name = "JouRaku / Capital March"
 	card_name_jp = "上洛"
 	description = "Deploy any number of your own soldiers from any number of territories adjacent to Kyo to Kyo."
+	early_finish_enabled = true
 	
-	# special to this card: max number of times is total number of pieces in adjacent territories.
-	var current_player = get_node("/root/GameController").current_player
-	var max_deploy_times = get_max_deploy_times(current_player)
-	# TODO:
-	for i in range(max_deploy_times):
-		effect.append(
-			{"deploy": -1, "territory": "_jouraku", "player": "current", "territory_selection_required": true},
-		)
-		effect.append(
-			{"deploy": 1, "territory": "_kyo", "player": "current", "territory_selection_required": false},
-		)
-		
+	# effect needs to be updated, this is a placeholder for territory highlight on first click
+	effect = [
+		{"deploy": -1, "territory": "_jouraku", "player": "current", "territory_selection_required": true, "finish_allowed": false},
+	]
+	
 	super._ready()
 
 func is_condition_met(player):
@@ -33,6 +27,18 @@ func is_condition_met(player):
 			return true
 	
 	return false
+
+func update_effect(player):
+	# special to this card: max number of times is total number of pieces in adjacent territories.
+	var max_deploy_times = get_max_deploy_times(player)
+	self.effect = []
+	for i in range(max_deploy_times):
+		effect.append(
+			{"deploy": -1, "territory": "_jouraku", "player": "current", "territory_selection_required": true, "finish_allowed": false},
+		)
+		effect.append(
+			{"deploy": 1, "territory": "_kyo", "player": "current", "territory_selection_required": true, "finish_allowed": true},
+		)
 
 func get_max_deploy_times(player) -> int:
 	

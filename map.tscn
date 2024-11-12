@@ -1,20 +1,23 @@
-[gd_scene load_steps=6 format=3 uid="uid://btakum1qc8ovv"]
+[gd_scene load_steps=7 format=3 uid="uid://btakum1qc8ovv"]
 
 [ext_resource type="Texture2D" uid="uid://dtn405d2autni" path="res://icons/map.png" id="1_rg7fb"]
 [ext_resource type="Script" path="res://board.gd" id="1_upj78"]
 [ext_resource type="Script" path="res://territory.gd" id="2_1w8ia"]
 [ext_resource type="FontFile" uid="uid://bgwd66m3orfrw" path="res://fonts/VT323-Regular.ttf" id="2_g0uqw"]
+[ext_resource type="Texture2D" uid="uid://7p3l4uq1qut1" path="res://icons/map-border.png" id="5_2nac4"]
 
 [sub_resource type="LabelSettings" id="LabelSettings_8fms1"]
 line_spacing = 0.0
 font = ExtResource("2_g0uqw")
 font_size = 48
+outline_size = 8
+outline_color = Color(0.382726, 0.392696, 0.383009, 1)
 
 [node name="Map" type="Node2D"]
 script = ExtResource("1_upj78")
 
 [node name="Map" type="Sprite2D" parent="."]
-position = Vector2(463, 492)
+position = Vector2(568, 284)
 scale = Vector2(8.85938, 8.85938)
 texture = ExtResource("1_rg7fb")
 
@@ -27,7 +30,7 @@ script = ExtResource("2_1w8ia")
 
 [node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="Map/Territory0"]
 position = Vector2(-79.9998, -99.9998)
-polygon = PackedVector2Array(128, 112, 127, 127, 110, 127, 85, 166, 86, 239, 99, 258, 170, 259, 186, 240, 189, 151, 171, 137, 169, 111, 158, 100, 135, 100)
+polygon = PackedVector2Array(128, 112, 127, 127, 110, 127, 85, 166, 86, 239, 99, 258, 170, 259, 186, 240, 188, 155.999, 171, 137, 169, 111, 158, 100, 135, 100)
 
 [node name="PieceContainer" type="Node2D" parent="Map/Territory0"]
 position = Vector2(46.0001, 85.9995)
@@ -50,7 +53,7 @@ territory_index = 1
 
 [node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="Map/Territory1"]
 position = Vector2(-64.9998, -75.9998)
-polygon = PackedVector2Array(139, 149, 79.9998, 78.9998, 65.9998, 77.9998, 65.9998, 118, 71.9998, 133, 73.9998, 200.999, 90.9998, 218.999, 140, 218.999, 143, 229.999, 209.999, 230.999, 254.999, 202.999, 255.999, 164, 247.999, 140, 178, 140, 167, 149)
+polygon = PackedVector2Array(137.999, 149, 112.999, 125, 87.9995, 98.9997, 79.9998, 78.9998, 65.9998, 77.9998, 65.9998, 118, 83.9995, 140, 77.9995, 152, 73.9998, 200.999, 90.9998, 218.999, 140, 218.999, 143, 229.999, 208.999, 226.999, 249.999, 200.999, 252.999, 163, 245.999, 140, 178, 140, 167, 149)
 
 [node name="PieceContainer" type="Node2D" parent="Map/Territory1"]
 position = Vector2(55.9996, 89.9998)
@@ -73,7 +76,7 @@ territory_index = 2
 
 [node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="Map/Territory2"]
 position = Vector2(-73.9998, -97.9998)
-polygon = PackedVector2Array(111, 125, 99.9997, 95.9998, 81.9998, 97.9998, 81.9998, 114, 72.9998, 116, 71.9998, 177, 98.9997, 228.999, 126, 229.999, 132, 220.999, 165, 220.999, 220.999, 190, 251.999, 153, 251.999, 123, 230.999, 96.9997, 191.999, 96.9997)
+polygon = PackedVector2Array(101, 115, 101, 97.9999, 81.9998, 97.9998, 81.9998, 114, 72.9998, 116, 79.0002, 181, 98.9997, 228.999, 126, 229.999, 132, 220.999, 168, 216, 203, 199, 220.999, 190, 239, 172, 250, 151, 249, 125, 230.999, 96.9997, 191.999, 96.9997, 150, 117, 111, 123)
 
 [node name="PieceContainer" type="Node2D" parent="Map/Territory2"]
 position = Vector2(59.0003, 52)
@@ -96,7 +99,7 @@ territory_index = 3
 
 [node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="Map/Territory3"]
 position = Vector2(-81.9998, -95.9998)
-polygon = PackedVector2Array(143, 75.9998, 99.9997, 95.9998, 81.9998, 97.9998, 81.9998, 114, 77.9998, 117, 58.9999, 177, 83.9998, 219.999, 133, 234.999, 176, 241.999, 178, 268.999, 193, 269.999, 237.999, 218.999, 261.999, 172, 273.999, 103, 248.999, 88.9998, 167, 88.9998)
+polygon = PackedVector2Array(143, 75.9998, 99.9997, 95.9998, 90.9995, 103, 82.9996, 114, 74.9996, 136, 62.9996, 182, 83.9998, 219.999, 132.999, 238, 176, 241.999, 178, 268.999, 193, 269.999, 233.999, 231, 242.999, 212, 260.999, 177, 269.999, 142, 273.999, 103, 249.999, 91.9999, 167, 88.9998)
 
 [node name="PieceContainer" type="Node2D" parent="Map/Territory3"]
 position = Vector2(84.9995, 58.9999)
@@ -119,7 +122,7 @@ territory_index = 4
 
 [node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="Map/Territory4"]
 position = Vector2(-49.9998, 60.9999)
-polygon = PackedVector2Array(142, -46.9998, 131, 21, 86.9997, 95.9998, 74.9998, 108, 54.9998, 122, 71.9998, 178, 63.9998, 352.999, 74.9998, 385.999, 168, 401.999, 166, 256.999, 214.999, 203, 214.999, 152, 212.999, 22.0001, 243.999, -49.9998, 218.999, -69.9997, 181.999, -69.9997)
+polygon = PackedVector2Array(142, -46.9998, 131, 21, 86.9997, 95.9998, 74.9998, 108, 54.9998, 122, 58.0002, 140, 67.0002, 159, 71.0002, 176, 79.0001, 190, 80.0001, 304, 72.0002, 304, 69.0002, 322.999, 63.9998, 352.999, 74.9998, 385.999, 117, 393.999, 128, 401.999, 168, 401.999, 168, 366.999, 162, 363.999, 160, 305, 166, 306, 171, 267, 182, 238, 214.999, 203, 214.999, 152, 212.999, 22.0001, 217, 17.0002, 226, -9.99969, 243, -46.9996, 218.999, -69.9997, 183, -68.9995)
 
 [node name="PieceContainer" type="Node2D" parent="Map/Territory4"]
 position = Vector2(66.0002, 189)
@@ -143,7 +146,7 @@ position = Vector2(0, -3.05176e-05)
 
 [node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="Map/Territory5"]
 position = Vector2(-107, 55.9999)
-polygon = PackedVector2Array(137, -56.9998, 107, 10, 107, 142, 112, 190, 147, 190, 202.999, 258.999, 214.999, 264.999, 245.999, 234.999, 239.999, 172, 215, 119, 189, 52.9998, 184.999, -23.9999)
+polygon = PackedVector2Array(137, -56.9998, 132, -41.9999, 124, -33.9999, 116, 1.52588e-05, 107, 10, 107, 142, 112, 190, 147, 190, 202.999, 258.999, 214.999, 264.999, 237, 251.999, 252, 226.999, 245, 190, 236, 155, 210, 111, 201, 92.9998, 195, 63.9999, 189, 52.9998, 188, -22.9999, 188, -30.9999, 162, -49.9999)
 
 [node name="PieceContainer" type="Node2D" parent="Map/Territory5"]
 position = Vector2(38.0001, 162)
@@ -166,7 +169,7 @@ territory_index = 6
 
 [node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="Map/Territory6"]
 position = Vector2(-121, 58.9999)
-polygon = PackedVector2Array(137, -47.9999, 97.9996, -7.99994, 88.9997, 52.9999, 92.9997, 151, 149, 148, 184.999, 131, 238.999, 126, 299.999, 128, 364.999, 139, 365.999, 83.9998, 244.999, 28.9999, 171.999, -47.9999)
+polygon = PackedVector2Array(137, -47.9999, 105, -11, 93.0001, 12.9999, 88.9997, 52.9999, 82.0002, 53.9998, 82.0002, 114, 90.0001, 120, 92.0001, 151, 152, 150, 167, 139, 193, 126, 238.999, 126, 299.999, 128, 331, 136, 344, 139, 365.999, 145, 365.999, 83.9998, 342, 79.9998, 309, 63.9998, 267.511, 41.3107, 244.999, 28.9999, 229, 14.9999, 207, -7.00003, 202, -20, 185, -38, 173, -53.9999)
 
 [node name="PieceContainer" type="Node2D" parent="Map/Territory6"]
 position = Vector2(33, 118)
@@ -189,7 +192,7 @@ territory_index = 7
 
 [node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="Map/Territory7"]
 position = Vector2(-121, 58.9999)
-polygon = PackedVector2Array(125, -60.9998, 130, 49.9999, 185.999, 163, 180.999, 208.999, 153, 235.999, 276.999, 289.999, 305, 225.999, 314, 193.999, 302, 166.999, 279, 90.9995, 239, -0.000305176, 198, -54.0002)
+polygon = PackedVector2Array(125, -60.9998, 129, 25.9997, 134, 52.9996, 149, 81.9995, 173, 126.999, 185.999, 163, 180.999, 208.999, 173, 219.999, 153, 235.999, 192, 255.999, 227, 273.999, 276.999, 289.999, 305, 225.999, 311, 191.999, 302, 163.999, 280, 95.9995, 279, 90.9995, 249, 14.9997, 239, -0.000305176, 198, -54.0002, 175, -60.0001, 145, -50.0001)
 
 [node name="PieceContainer" type="Node2D" parent="Map/Territory7"]
 position = Vector2(85.9999, 149.999)
@@ -212,10 +215,10 @@ territory_index = 8
 
 [node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="Map/Territory8"]
 position = Vector2(-81.9998, -95.9998)
-polygon = PackedVector2Array(196, 93.9998, 162, 117, 112, 147, 160, 213.999, 200, 306.999, 235.999, 413.999, 324.999, 352.999, 322.999, 278.999, 237.999, 226.999, 236.999, 162, 228.999, 110, 213.999, 92.9998)
+polygon = PackedVector2Array(196, 93.9998, 162, 117, 136, 131, 111, 148, 160, 213.999, 173, 234.999, 197, 306.999, 235.999, 413.999, 269.999, 375.999, 303.999, 351.999, 323.999, 343.999, 322.999, 278.999, 315.999, 269.999, 260.999, 258.999, 250.999, 244.999, 237.999, 226.999, 237.999, 163, 230.999, 161, 228.999, 110, 213.999, 92.9998)
 
 [node name="PieceContainer" type="Node2D" parent="Map/Territory8"]
-position = Vector2(156, 191.999)
+position = Vector2(163, 193.999)
 
 [node name="PointsLabel" type="Label" parent="Map/Territory8"]
 offset_left = 99.9998
@@ -235,7 +238,7 @@ territory_index = 9
 
 [node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="Map/Territory9"]
 position = Vector2(-81.9998, -95.9998)
-polygon = PackedVector2Array(197, 83.9998, 162, 117, 122, 142, 96.9998, 194, 73.9998, 292.999, 101, 304.999, 182, 313.999, 241.999, 303.999, 308.999, 297.999, 334.999, 272.999, 296.999, 216.999, 217.999, 159)
+polygon = PackedVector2Array(197, 83.9998, 184.999, 84.9999, 147.999, 112, 122, 142, 107, 160, 90.9996, 190, 82.9996, 220.999, 71.9996, 236.999, 73.9998, 292.999, 91.9996, 297.999, 141.999, 300.999, 168.999, 300.999, 182, 313.999, 225.999, 313.999, 241.999, 303.999, 292.999, 299.999, 307.999, 295.999, 329.999, 280.999, 330.999, 232.999, 321.999, 223.999, 294.999, 215, 244.999, 194, 227.999, 174, 218.999, 156, 201.999, 130)
 
 [node name="PieceContainer" type="Node2D" parent="Map/Territory9"]
 position = Vector2(60.9997, 115)
@@ -258,7 +261,7 @@ territory_index = 10
 
 [node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="Map/Territory10"]
 position = Vector2(-81.9998, -95.9998)
-polygon = PackedVector2Array(253.999, 144, 191, 101, 88.9998, 99.9998, 86.9998, 169, 171, 254.999, 234.999, 256.999, 261.999, 239.999, 261.999, 212.999, 261.999, 172)
+polygon = PackedVector2Array(253.999, 144, 224.999, 121, 191, 101, 91.9996, 102, 88.9996, 108, 86.9998, 169, 108, 185, 126, 195, 144, 220.999, 153, 237.999, 169.999, 258.999, 234.999, 256.999, 261.999, 239.999, 261.999, 212.999, 258.999, 168)
 
 [node name="PieceContainer" type="Node2D" parent="Map/Territory10"]
 position = Vector2(84.9997, 73.9998)
@@ -270,3 +273,8 @@ offset_right = 42.0
 offset_bottom = 49.0
 label_settings = SubResource("LabelSettings_8fms1")
 horizontal_alignment = 1
+
+[node name="Border" type="Sprite2D" parent="."]
+position = Vector2(568, 284)
+scale = Vector2(8.859, 8.859)
+texture = ExtResource("5_2nac4")

@@ -6,13 +6,6 @@
 [ext_resource type="PackedScene" uid="uid://bhuosep1twjl0" path="res://control.tscn" id="3_5g63j"]
 
 [sub_resource type="GDScript" id="GDScript_t2318"]
-script/source = "extends Node
-
-@export var player_piece_icons = {
-	1: preload(\"res://icons/cat.webp\"),
-	2: preload(\"res://icons/bird.webp\"),
-}
-"
 
 [node name="GameController" type="Node2D"]
 script = ExtResource("1_8uaah")
@@ -28,7 +21,7 @@ offset_right = 358.0
 offset_bottom = 58.0
 
 [node name="Map" parent="." instance=ExtResource("3_2j6hj")]
-position = Vector2(102, -139)
+position = Vector2(17, 109)
 
 [node name="MenuCanvas" type="CanvasLayer" parent="."]
 script = SubResource("GDScript_t2318")
