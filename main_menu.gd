@@ -1,6 +1,7 @@
 extends Control
 
 @onready var start_game_button = $PanelContainer/VBoxContainer/StartGameButton
+@onready var quit_button = $PanelContainer/VBoxContainer/QuitButton
 
 const GAME_OPTIONS_PARENT = "GameOptions/Local/VBoxContainer/GameSettings/"
 const PLAYER_SETTINGS = "GameOptions/Local/VBoxContainer/PlayerSettings/"
@@ -23,7 +24,6 @@ func _ready() -> void:
 		)
 		player_settings[i]["name"].text_changed.connect(_on_player_name_changed.bind(i))
 		player_settings[i]["icon"].item_selected.connect(_on_player_icon_changed.bind(i))
-		#player_settings[i]["color"].color_changed.connect(_on_player_color_changed.bind(i))
 	
 	# get default selection
 	update_player_settings()
@@ -31,13 +31,14 @@ func _ready() -> void:
 	# connect buttons and updates
 	start_game_button.pressed.connect(_on_start_game_button_pressed)
 	num_players_option.item_selected.connect(_on_num_players_option_selected)
+	quit_button.pressed.connect(_on_quit_button_pressed)
 	
 	# remote
-	Gamestate.connection_failed.connect(_on_connection_failed)
-	Gamestate.connection_succeeded.connect(_on_connection_success)
-	Gamestate.player_list_changed.connect(refresh_lobby)
-	#Gamestate.game_ended.connect(_on_game_ended)
-	#Gamestate.game_error.connect(_on_game_error)
+	GameManager.connection_failed.connect(_on_connection_failed)
+	GameManager.connection_succeeded.connect(_on_connection_success)
+	GameManager.player_list_changed.connect(refresh_lobby)
+	#GameManager.game_ended.connect(_on_game_ended)
+	#GameManager.game_error.connect(_on_game_error)
 
 	get_node(CONNECT_PANEL + "HostButton").pressed.connect(_on_host_pressed)
 	get_node(CONNECT_PANEL + "JoinButton").pressed.connect(_on_join_pressed)
@@ -45,21 +46,26 @@ func _ready() -> void:
 func update_player_settings():
 	"""Update Settings on player selection."""
 	Settings.num_players = num_players_option.selected + 2  # option 0 is 2 players
-	Settings.players = []
+	Settings.initialize_players()
+	Settings.initialize_board_state()
+
 	for i in range(Settings.num_players):
 		var preset_index = player_settings[i]["icon"].selected
-		Settings.players.append(
-			{
+		var update_dict = {
 				"name": player_settings[i]["name"].text,
 				"icon": Settings.player_presets[preset_index]["icon"],
 				"icon_leader": Settings.player_presets[preset_index]["leader"],
 				"icon_reinforce": Settings.player_presets[preset_index]["reinforce"],
 				"color": Settings.player_presets[preset_index]["color"]
 			}
-		)
+
+		Settings.update_player_state(i, update_dict)
 
 func _on_start_game_button_pressed():
-	Gamestate.begin_game()
+	GameManager.begin_game()
+
+func _on_quit_button_pressed():
+	get_tree().quit()
 
 func _on_num_players_option_selected(selected_option):
 	# UI: update player settings section (if only 2 players, only show configuration for 2)
@@ -95,9 +101,6 @@ func _on_player_icon_changed(icon, i):
 	
 	update_player_settings()
 
-#func _on_player_color_changed(color, i):
-	#update_player_settings()
-
 #region remote
 func _on_host_pressed():
 	if get_node(CONNECT_PANEL + "NameEdit").text == "":
@@ -107,7 +110,7 @@ func _on_host_pressed():
 	$GameOptions/Remote/ErrorLabel.text = ""
 
 	var player_name = get_node(CONNECT_PANEL + "NameEdit").text
-	Gamestate.host_game(player_name)
+	GameManager.host_game(player_name)
 	refresh_lobby()
 
 func _on_join_pressed():
@@ -125,7 +128,7 @@ func _on_join_pressed():
 	get_node(CONNECT_PANEL + "JoinButton").disabled = true
 
 	var player_name = get_node(CONNECT_PANEL + "NameEdit").text
-	Gamestate.join_game(ip, player_name)
+	GameManager.join_game(ip, player_name)
 
 func _on_connection_success():
 	#$Connect.hide()
@@ -151,15 +154,15 @@ func _on_connection_failed():
 	#$Connect/Join.disabled = false
 
 func refresh_lobby():
-	var players = Gamestate.get_player_list()
+	var players = GameManager.get_player_list()
 	players.sort()
 	get_node(LOBBY_PANEL + "PlayerList").clear()
-	get_node(LOBBY_PANEL + "PlayerList").add_item(Gamestate.get_player_name() + " (You)")
+	get_node(LOBBY_PANEL + "PlayerList").add_item(GameManager.get_player_name() + " (You)")
 	for p in players:
 		get_node(LOBBY_PANEL + "PlayerList").add_item(p)
 
 	$PanelContainer/VBoxContainer/StartGameButton.disabled = not multiplayer.is_server()
 
 func _on_start_pressed():
-	Gamestate.begin_game()
+	GameManager.begin_game()
 #endregion

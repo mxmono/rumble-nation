@@ -68,20 +68,19 @@ func draw_piece_sprites():
 	Redrawing all is beneficial due to resets and reverts."""
 
 	var piece_container = $PieceContainer
-	var num_players = Settings.num_players
 	
 	# clear existing pieces if any:
 	for piece in piece_container.get_children():
 		piece.queue_free()
 	
 	# first draw soldiers
-	for player in range(territory_tally.size()):
-		if player > num_players:
-			continue
+	for player in range(Settings.num_players):
 		
 		var icon = Settings.players[player]["icon"]
 		var icon_leader = Settings.players[player]["icon_leader"]
 		var icon_reinforcement = Settings.players[player]["icon_reinforce"]
+		
+		var territory_tally = Settings.board_state["territory_tally"][self.territory_index]
 		
 		var color_adjustment = Settings.players[player]["color"]
 		for i in range(territory_tally[player]["soldier"]):
@@ -123,34 +122,8 @@ func _on_dice_selected(territory_index, deploy_count, has_leader):
 func _on_deployed(player, territory_index, deploy_count, has_leader):
 	"""This function alone should handle changes between deployment states."""
 	
-	# get current player
-	var game_controller = get_node("/root/GameController")
-
-	# update tally
-	if has_leader:
-		if deploy_count >= 0:  # normal game state, add pieces
-			territory_tally[player]["soldier"] += deploy_count - 1
-			territory_tally[player]["leader"] += 1
-		else:  # when reverting or removing pieces, deploy count is negative
-			# eg, when removing 2 pieces (deploy count = -2) with leader, remove 1 from soldier
-			territory_tally[player]["soldier"] += (deploy_count + 1)
-	else:
-		territory_tally[player]["soldier"] += deploy_count
+	Settings.update_game_state_on_deployed(player, territory_index, deploy_count, has_leader)
 	
-	# update territories tagged to the player
-	if deploy_count > 0:  # if normal game play, add territory to the list if not already there
-		if not self.territory_index in Settings.players[player]["territories"]:
-			Settings.players[player]["territories"].append(self.territory_index)
-		# update piece count of the player
-	
-	# if removing pieces and there are no pieces left on this territory, remove
-	elif deploy_count < 0:
-		if territory_tally[player]["soldier"] + territory_tally[player]["leader"] <= 0:
-			Settings.players[player]["territories"].erase(self.territory_index)
-	
-	# update player piece count
-	game_controller.update_player_piece_count(player, deploy_count, has_leader)
-			
 	# redraw sprites based on latest tally
 	draw_piece_sprites()
 
@@ -170,25 +143,28 @@ func _on_card_move_reverted(moves):
 func reinforce(num_players, player):
 	"""Reinforce to all adjacent territories."""
 	# get connected territories and how many pieces to reinforce
-	var territory_connections = get_node("/root/GameController/Map").territory_connections
+	var territory_connections = Settings.board_state["territory_connections"]
 	var current_connections = territory_connections[self.territory_index]
 	var pieces_to_reinforce = 1
 	if num_players > 2:
 		pieces_to_reinforce = 2
 	
 	# loop through territories to reinforce
+	print(self.territory_index)
 	var territories_default = get_node("/root/GameController/Map").territories_default
 	for territory_index in current_connections["all"]:
 		var territory_to_reinforce = territories_default[territory_index]
 		# only reinforce to bigger tiles with current player's pieces
-		if territory_to_reinforce.get("territory_points") > self.territory_points:
-			var tally = territory_to_reinforce.get("territory_tally")[player]
+		if territory_to_reinforce.territory_points > self.territory_points:
+			var tally = Settings.board_state["territory_tally"][territory_to_reinforce.territory_index][player]
 			if tally["soldier"] + tally["leader"] > 0:
 				territory_to_reinforce.receive_reinforcements(pieces_to_reinforce, player)
 
 func receive_reinforcements(pieces_to_reinforce, player):
 	"""Receive reinforcements at scoring phase."""
-	territory_tally[player]["reinforcement"] += pieces_to_reinforce
+	Settings.update_board_tally_by_delta(
+		self.territory_index, player, {"reinforcement": pieces_to_reinforce}
+	)
 	draw_piece_sprites()
 	print("territory %s with points %s received player %s's %s reinforcements" % 
 		[str(self.territory_index), str(self.territory_points), str(player), str(pieces_to_reinforce)]

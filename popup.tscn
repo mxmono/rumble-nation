@@ -1,0 +1,23 @@
+[gd_scene format=3 uid="uid://bb5b84uv2gjob"]
+
+[node name="PopUp" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="PopupPanel" type="PopupPanel" parent="."]
+title = "Select Target"
+size = Vector2i(108, 101)
+
+[node name="VBoxContainer" type="VBoxContainer" parent="PopupPanel"]
+offset_left = 4.0
+offset_top = 4.0
+offset_right = 104.0
+offset_bottom = 97.0
+
+[node name="Label" type="Label" parent="PopupPanel/VBoxContainer"]
+layout_mode = 2
+text = "Select Target"

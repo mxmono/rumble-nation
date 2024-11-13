@@ -4,7 +4,7 @@ extends "res://cards/card.gd"
 func _ready() -> void:
 	card_name = "KaSei / Reinforcement"
 	card_name_jp = "加勢"
-	description = "Deploy one soldier from your hand to any territory you occupy."
+	description = "Deploy 1 soldier from your hand to any territory you occupy."
 	effect = [
 		{"deploy": 1, "territory": "occupied", "player": "current", "territory_selection_required": true},
 	]

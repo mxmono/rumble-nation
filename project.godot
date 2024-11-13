@@ -18,7 +18,7 @@ config/icon="res://icon.svg"
 [autoload]
 
 Settings="*res://settings.gd"
-Gamestate="*res://gamestate.gd"
+GameManager="*res://game_manager.gd"
 
 [display]
 

@@ -2,6 +2,7 @@ extends Button
 
 signal card_selected(card)
 
+@export var card_type: String = "normal"
 @export var card_name: String = "Base Card"
 @export var card_name_jp: String = "卡片"
 @export var description: String = "Description of the card"
@@ -43,7 +44,13 @@ func _process(delta):
 		$Mask.show()
 	else:
 		$Mask.hide()
-	
+
+func reset_card():
+	self.staged_moves = []
+	self.effect_index = 0
+	self.selected_opponent = -1
+	self.last_selected_territory = -1
+
 func update_valid_targets():
 	# draw eligible opponents in TargetHBox if condition met
 	var current_player = get_node("/root/GameController").current_player
@@ -75,6 +82,8 @@ func _on_card_selected():
 	if Settings.num_players == 2:
 		self.selected_opponent = 1 - get_node("/root/GameController").current_player
 	
+	update_card_on_selection()
+	
 	card_selected.emit(self)
 
 func is_condition_met(player) -> bool:
@@ -83,7 +92,21 @@ func is_condition_met(player) -> bool:
 func get_valid_targets(player) -> Array:
 	return []
 
+func get_valid_targets_on_territory(player, territory_index) -> Array:
+	"""Overlap of valid targets on clicked territory."""
+	
+	var target_pool = get_valid_targets(player)
+	var valid_targets = []
+	for target in target_pool:
+		if Settings.players[target]["territories"].has(territory_index):
+			valid_targets.append(target)
+	
+	return valid_targets
+
 func update_effect(player):
+	pass
+
+func update_card_on_selection():
 	pass
 
 func get_occupied_territories(player, territroy_index=null) -> Array:
@@ -141,7 +164,7 @@ func get_adjacent_territories(player, territory_index) -> Array:
 	if territory_index == null:
 		return []
 
-	var territory_connections = get_node("/root/GameController/Map").territory_connections
+	var territory_connections = Settings.board_state["territory_connections"]
 	var current_connections = territory_connections[territory_index]
 	
 	# get select territory's adjacent territorries
@@ -161,7 +184,7 @@ func get_other_player_adjacent_territories(player, territory_index) -> Array:
 func _get_other_player_adjacent_territories(player, territory_index, other_player) -> Array:
 	"""Find territories `other_player` occupies that are adjacent to `player` `territory`."""
 	# get variables
-	var territory_connections = get_node("/root/GameController/Map").territory_connections
+	var territory_connections = Settings.board_state["territory_connections"]
 	var player_territories = Settings.players[player]["territories"]
 	var other_player_territories = []
 	if other_player != -1:  # ie opponent has been selected
@@ -194,7 +217,7 @@ func get_otori_territories(player, territory_index):
 	"""Territoies with one of self and at least two of others."""
 	
 	var player_territories = Settings.players[player]["territories"]
-	var board_state = get_node("/root/GameController/Map").board_state
+	var board_state =Settings.board_state["territory_tally"]
 	var valid_territories = []
 	
 	for territory in player_territories:
@@ -210,7 +233,7 @@ func get_otori_territories(player, territory_index):
 func get_jouraku_territories(player, territory_index):
 	"""Territories around kyo (4) the player occupies."""
 	
-	var territory_connections = get_node("/root/GameController/Map").territory_connections
+	var territory_connections = Settings.board_state["territory_connections"]
 	var valid_territory_pool = territory_connections[4]["all"]
 	var valid_territories = []
 	
@@ -225,8 +248,8 @@ func get_kyo(player, territory_index):
 
 func _get_territories_with_x_connections_with_at_least_y_soldiers(player: int, x: String, y: int):
 	"""x: water, land, all"""
-	var territory_connections = get_node("/root/GameController/Map").territory_connections
-	var board_state = get_node("/root/GameController/Map").board_state
+	var territory_connections = Settings.board_state["territory_connections"]
+	var board_state =Settings.board_state["territory_tally"]
 	var player_territories = Settings.players[player]["territories"]
 	var valid_territory_pool = []
 	var valid_territories = []
@@ -249,8 +272,10 @@ func get_suigun_territories(player, territory_index=null):
 func get_adjacent_selected_water(player, territory_index=null):
 	"""Get territories adjacent to selected territory by water."""
 
-	var territory_connections = get_node("/root/GameController/Map").territory_connections
-	var current_connections = territory_connections[self.last_selected_territory]
+	var territory_connections = Settings.board_state["territory_connections"]
+	if territory_index == null:
+		territory_index = self.last_selected_territory
+	var current_connections = territory_connections[territory_index]
 	
 	# get select territory's adjacent territorries
 	return current_connections["water"]
@@ -262,7 +287,7 @@ func get_yamagoe_territories(player, territory_index=null):
 func get_adjacent_selected_land(player, territory_index=null):
 	"""Get territories adjacent to selected territory by land."""
 
-	var territory_connections = get_node("/root/GameController/Map").territory_connections
+	var territory_connections = Settings.board_state["territory_connections"]
 	var current_connections = territory_connections[self.last_selected_territory]
 	
 	# get select territory's adjacent territorries

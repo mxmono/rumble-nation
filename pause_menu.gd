@@ -21,6 +21,7 @@ func _on_resume_button_pressed():
 
 func _on_restart_button_pressed():
 	get_tree().paused = false
+	Settings.reset_all_states()
 	get_tree().reload_current_scene()
 	
 func _on_exit_to_start_button_pressed():

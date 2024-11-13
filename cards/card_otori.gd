@@ -4,7 +4,7 @@ extends "res://cards/card.gd"
 func _ready() -> void:
 	card_name = "Otori / Decoy"
 	card_name_jp = "囮"
-	description = "Move one of your soldiers and two of an opponent's soldiers to any adjancent territory."
+	description = "Move 1 of your soldiers and two of an opponent's soldiers to any adjancent territory."
 	effect = [
 		{"deploy": -2, "territory": "_otori", "player": "other", "territory_selection_required": true},  # the first one needs to be "other" player
 		{"deploy": -1, "territory": "previous_selected", "player": "current", "territory_selection_required": false},
@@ -27,7 +27,7 @@ func is_condition_met(player):
 func get_valid_targets(player):
 	
 	var player_territories = Settings.players[player]["territories"]
-	var board_state = get_node("/root/GameController/Map").board_state
+	var board_state =Settings.board_state["territory_tally"]
 	var valid_targets = []
 	
 	for territory in player_territories:

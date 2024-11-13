@@ -19,7 +19,7 @@ func is_condition_met(player):
 		1. player must have territories adjacent to kyo (index = 4)
 	"""
 	
-	var territory_connections = get_node("/root/GameController/Map").territory_connections
+	var territory_connections =  Settings.board_state["territory_connections"]
 	var valid_territories = territory_connections[4]["all"]
 	
 	for player_territory in Settings.players[player]["territories"]:
@@ -44,7 +44,7 @@ func update_effect(player):
 func get_max_deploy_times(player) -> int:
 	
 	var valid_territories = super.get_jouraku_territories(player, null)
-	var board_state = get_node("/root/GameController/Map").board_state
+	var board_state =Settings.board_state["territory_tally"]
 	var max_deploy_times = 0
 	
 	for territory in valid_territories:

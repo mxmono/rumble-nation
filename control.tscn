@@ -79,7 +79,7 @@ offset_left = 1032.0
 offset_top = 48.0
 offset_right = 1264.0
 offset_bottom = 656.0
-current_tab = 1
+current_tab = 2
 
 [node name="Dice" type="Control" parent="GameButtons"]
 visible = false
@@ -169,6 +169,7 @@ shortcut = SubResource("Shortcut_e71ni")
 text = "L"
 
 [node name="Card" type="VBoxContainer" parent="GameButtons"]
+visible = false
 layout_mode = 2
 theme_override_constants/separation = 10
 metadata/_tab_index = 1
@@ -178,12 +179,6 @@ layout_mode = 2
 
 [node name="ActionButtons" type="VBoxContainer" parent="GameButtons/Card"]
 layout_mode = 2
-
-[node name="FinishCardMoveButton" type="Button" parent="GameButtons/Card/ActionButtons"]
-visible = false
-layout_mode = 2
-disabled = true
-text = "Finish Move"
 
 [node name="ConfirmCardButton" type="Button" parent="GameButtons/Card/ActionButtons"]
 layout_mode = 2
@@ -196,9 +191,24 @@ disabled = true
 text = "Reset"
 
 [node name="Leader" type="VBoxContainer" parent="GameButtons"]
-visible = false
 layout_mode = 2
 metadata/_tab_index = 2
+
+[node name="CardTray" type="VBoxContainer" parent="GameButtons/Leader"]
+layout_mode = 2
+
+[node name="ActionButtons" type="VBoxContainer" parent="GameButtons/Leader"]
+layout_mode = 2
+
+[node name="ConfirmCardButton" type="Button" parent="GameButtons/Leader/ActionButtons"]
+layout_mode = 2
+disabled = true
+text = "Confirm"
+
+[node name="ResetCardButton" type="Button" parent="GameButtons/Leader/ActionButtons"]
+layout_mode = 2
+disabled = true
+text = "Reset"
 
 [connection signal="dice_rolled" from="." to="." method="_on_dice_rolled"]
 [connection signal="dice_selected" from="." to="." method="_on_dice_selected"]

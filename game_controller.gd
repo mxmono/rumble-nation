@@ -6,10 +6,11 @@ extends Node
 var save_state = {}
 
 @onready var dice_buttons = $Control/GameButtons/Dice.get_children()
-@onready var card_buttons = $Control/GameButtons/Card/CardTray.get_children()
-@onready var card_action_buttons = $Control/GameButtons/Card/ActionButtons.get_children()
+@onready var card_buttons = $Control/GameButtons/Card/CardTray.get_children() + $Control/GameButtons/Leader/CardTray.get_children()
+@onready var card_action_buttons = $Control/GameButtons/Card/ActionButtons.get_children() + $Control/GameButtons/Leader/ActionButtons.get_children()
 const DICE_MENU_PARENT = "Control/GameButtons/Dice/"
 const CARD_MENU_PARENT = "Control/GameButtons/Card/"
+const LEADER_MENU_PARENT = "Control/GameButtons/Leader/"
 @onready var pause_menu = $MenuCanvas/PauseMenu
 
 # Enum for different phases in a player's turn
@@ -26,15 +27,6 @@ enum TurnPhase {
 @export var current_phase = TurnPhase.CHOICE
 
 func _ready():
-	# initialize players
-	for i in range(Settings.num_players):
-		Settings.players[i]["soldier"] = Settings.total_soldiers
-		Settings.players[i]["leader"] = 1
-		Settings.players[i]["active"] = true
-		Settings.players[i]["score"] = 0
-		Settings.players[i]["territories"] = []
-		Settings.players[i]["used_card"] = false
-	
 	var board_scene = get_node("/root/GameController/Map")
 	board_scene.card_move_selected.connect(_on_card_move_selected)
 	board_scene.card_move_reverted.connect(_on_card_move_reverted)
@@ -43,6 +35,7 @@ func _ready():
 	var control_scene = get_node("/root/GameController/Control")
 	control_scene.roll_phase_done.connect(_on_place_phase_done)
 	$Control/GameButtons/Card/ActionButtons/ConfirmCardButton.pressed.connect(_on_card_confirmed)
+	$Control/GameButtons/Leader/ActionButtons/ConfirmCardButton.pressed.connect(_on_card_confirmed)
 	
 	for card_button in card_buttons:
 		card_button.card_selected.connect(_on_card_selected)
@@ -52,6 +45,7 @@ func _ready():
 
 func _process(delta):
 	self.card_buttons = $Control/GameButtons/Card/CardTray.get_children()
+	self.card_buttons += $Control/GameButtons/Leader/CardTray.get_children()
 
 func toggle_pause():
 	if get_tree().paused:
@@ -127,7 +121,7 @@ func all_players_out() -> bool:
 	return true  # All players are out of pieces
 
 func process_turn_phase():
-	var current_player_name = Settings.players[self.current_player]
+	var current_player_name = Settings.players[self.current_player]["name"]
 	match current_phase:
 
 		TurnPhase.CHOICE:
@@ -170,11 +164,15 @@ func card_phase():
 	# UI: disable confirm or reset buttons
 	get_node(CARD_MENU_PARENT + "ActionButtons/ConfirmCardButton").disabled = true
 	get_node(CARD_MENU_PARENT + "ActionButtons/ResetCardButton").disabled = true
+	get_node(LEADER_MENU_PARENT + "ActionButtons/ConfirmCardButton").disabled = true
+	get_node(LEADER_MENU_PARENT + "ActionButtons/ResetCardButton").disabled = true
 
 func comfirm_or_reset_card_phase():
 	# UI: enable confirm or reset buttons
 	get_node(CARD_MENU_PARENT + "ActionButtons/ConfirmCardButton").disabled = false
 	get_node(CARD_MENU_PARENT + "ActionButtons/ResetCardButton").disabled = false
+	get_node(LEADER_MENU_PARENT + "ActionButtons/ConfirmCardButton").disabled = false
+	get_node(LEADER_MENU_PARENT + "ActionButtons/ResetCardButton").disabled = false
 
 func _on_card_selected(card):
 	# when clicked on a card, user has made a choice, ending the choice phase
@@ -261,24 +259,6 @@ func _on_place_phase_done():
 	process_turn_phase()
 #endregion 
 
-func update_player_piece_count(player, deploy_count, has_leader):
-	# update player piece count on deployment
-	# if adding pieces (normal game play)
-	if deploy_count > 0:
-		if has_leader:
-			Settings.players[player]["leader"] -= 1
-			Settings.players[player]["soldier"] -= deploy_count - 1
-		else:
-			Settings.players[player]["soldier"] -= deploy_count
-	
-	# if reverting (deploy_count will be negative)
-	elif deploy_count < 0:  # eg, if -2
-		if has_leader:  # eg if has leader, then go up 1 leader, 1 solder
-			Settings.players[player]["leader"] += 1
-			Settings.players[player]["soldier"] += (-deploy_count) - 1
-		else:  # eg, go up 2 soldiers
-			Settings.players[player]["soldier"] += (-deploy_count)
-
 # Ends the player's turn and switches to the next player
 func end_turn():
 	print(Settings.players[self.current_player]["name"], "'s turn is over.")
@@ -316,7 +296,7 @@ func scoring_phase():
 
 	for territory in territories:
 		# check who wins
-		var territory_tally = territory.get("territory_tally")
+		var territory_tally = Settings.board_state["territory_tally"][territory.territory_index]
 		var scores = []
 		for player_tally in territory_tally:
 			scores.append(

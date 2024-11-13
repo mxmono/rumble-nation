@@ -11,33 +11,18 @@ signal card_move_reverted(moves) # move is an array of [player, territory_index,
 @export var territory_points_to_index = {}
 # dictionary mapping of {index: points}
 @export var territory_index_to_points = {}
-# default connections
-@export var territory_connections = [
-	{"land": [], "water": [1, 2, 3]},		# 0
-	{"land": [], "water": [0, 3, 4]},		# 1
-	{"land": [], "water": [0]},				# 2
-	{"land": [4], "water": [0, 1]},			# 3
-	{"land": [3, 5, 6], "water": [1]},		# 4
-	{"land": [4, 6, 7], "water": []},		# 5
-	{"land": [4, 5, 7, 9], "water": []},	# 6
-	{"land": [5, 6, 8, 9], "water": []},	# 7
-	{"land": [7, 9], "water": [10]},		# 8
-	{"land": [6, 7, 8], "water": []},		# 9
-	{"land": [], "water": [8]},				# 10
-]
-var board_state = []  # an array of territory tallies
 
 const CARD_ACTION_PARENT = "/root/GameController/Control/GameButtons/Card/ActionButtons/"
+const LEADER_ACTION_PARENT = "/root/GameController/Control/GameButtons/Leader/ActionButtons/"
 @onready var confirm_card_button = get_node(CARD_ACTION_PARENT + "ConfirmCardButton")
 @onready var reset_card_button = get_node(CARD_ACTION_PARENT + "ResetCardButton")
+@onready var confirm_leader_button = get_node(LEADER_ACTION_PARENT + "ConfirmCardButton")
+@onready var reset_leader_button = get_node(LEADER_ACTION_PARENT + "ResetCardButton")
 
 func _ready() -> void:
 	
 	# assign random points to each territory
 	assign_points_to_territories()
-	
-	for i in range(territory_connections.size()):
-		territory_connections[i]["all"] = territory_connections[i]["land"] + territory_connections[i]["water"]
 	
 	# conect territory click signals
 	for territory in $Map.get_children():
@@ -51,28 +36,22 @@ func _ready() -> void:
 	# connect card selection signals (for map highlighting)
 	for card_button in get_node("/root/GameController/Control/GameButtons/Card/CardTray").get_children():
 		card_button.card_selected.connect(_on_card_selected)
+	# TODO
+	for card_button in get_node("/root/GameController/Control/GameButtons/Leader/CardTray").get_children():
+		card_button.card_selected.connect(_on_card_selected)
 	# connect reset card button
 	reset_card_button.pressed.connect(_on_card_reset)
+	reset_leader_button.pressed.connect(_on_card_reset)
 
 	for territory in $Map.get_children():
 		territory_points_to_index[territory.get("territory_points")] = territory.get("territory_index")
 		territory_index_to_points[territory.get("territory_index")] = territory.get("territory_points")
-		board_state.append(territory.territory_tally)
-
-func _process(delta: float) -> void:
-	# update board state
-	board_state = []
-	for territory in self.territories_default:
-		board_state.append(territory.territory_tally)
 
 func assign_points_to_territories():
-	# generate an array of randomized points
-	var points = Array(range(2, 13))  # 2 to 12
-	points.shuffle()
 	var i = 0
 	for territory in $Map.get_children():
-		territory.set("territory_points", points[i])
-		territory.get_node("PointsLabel").text = str(points[i])
+		territory.set("territory_points", Settings.board_state["territory_points"][i])
+		territory.get_node("PointsLabel").text = str(Settings.board_state["territory_points"][i])
 		i += 1
 	
 	# assemble the territory array ordered by points value
@@ -109,16 +88,19 @@ func _on_territory_clicked(territory_index, mouse_position):
 	
 	# if we are in card phase
 	if game_controller.current_phase == game_controller.TurnPhase.CARD and card != null:
+		# only proceed with card effect if clicking on a territory in current valid territories
+		# find which territories are eligible for current step
+		var current_step_territories = get_card_step_territories(card)
+		if not territory_index in current_step_territories:
+			return
+		
 		# eg if we have two moves (size = 2) and index is 0 (initial), or 1 (after 1 move)
 		if card.effect_index < card.effect.size():
 			# select opponent if an opponent is required and hasn't been selected
 			if card.selected_opponent == -1 and card.effect[card.effect_index]["player"] == "other":
 				# find overlap of valid target and targets available on the clicked territory
-				var target_pool = card.get_valid_targets(current_player)
-				var valid_targets = []
-				for target in target_pool:
-					if Settings.players[target]["territories"].has(territory_index):
-						valid_targets.append(target)
+				var valid_targets = card.get_valid_targets_on_territory(current_player, territory_index)
+				print(valid_targets)
 				
 				# if only 1 valid target, no need for selection, set target directly
 				if valid_targets.size() == 1:
@@ -133,9 +115,15 @@ func _on_territory_clicked(territory_index, mouse_position):
 					# exit the function
 					return
 			
-			# only proceed with card effect if clicking on a territory in current valid territories
-			# find which territories are eligible for current step
-			var current_step_territories = get_card_step_territories(card)
+			# if it's leader card and requires leader selection
+			if card.card_type == "leader" and card.get("is_leader_optional_or_undecided") and card.effect_index == 0:
+				card.last_selected_territory = territory_index
+				# only show leader selection window if there are options (ie if only leader is on territory...)
+				if Settings.board_state["territory_tally"][territory_index][current_player]["soldier"] > 0:
+					show_leader_selection_window(mouse_position)
+				else:
+					_on_apply_to_leader_selected(true)
+				return
 			
 			# if clicked territory is one of the valid territories for this card step, take actions
 			if territory_index in current_step_territories:
@@ -150,7 +138,7 @@ func _on_territory_clicked(territory_index, mouse_position):
 				
 				# queue up the effect to staged moves
 				card.staged_moves.append(
-					[player_to_deploy, territory_index, card.effect[card.effect_index]["deploy"], false]
+					[player_to_deploy, territory_index, card.effect[card.effect_index]["deploy"], card.effect[card.effect_index].get("has_leader")]
 				)
 				
 				# emit staged moves if allows emit (for multi-step cards)
@@ -179,11 +167,22 @@ func _on_territory_clicked(territory_index, mouse_position):
 						# update effect (used for cards like buntai <deploy count>, jouraku)
 						card.update_effect(current_player)
 						card.staged_moves.append(
-							[player_to_deploy, territory_index, card.effect[card.effect_index]["deploy"], false]
+							[player_to_deploy, territory_index, card.effect[card.effect_index]["deploy"], card.effect[card.effect_index].get("has_leader")]
 						)
+						
+						# emit staged moves if allows emit (for multi-step cards)
+						if card.effect[card.effect_index].get("emit"):
+							var moves_to_emit = get_unemitted_moves(card)
+							card_move_selected.emit(moves_to_emit)
+							print("emited early card move: ", str(moves_to_emit))
+							enable_early_action_button_if_valid(card)
+							
 						card.effect_index += 1
 					else:
 						break
+				
+				print(card.staged_moves)
+				print("current effect index: ", card.effect_index)
 				
 				# if there is still a next step, highlight next eligible territories
 				# eg if we just took step 1, card_effect_index + 1 == 1, size = 2 (if two steps)
@@ -196,24 +195,29 @@ func _on_territory_clicked(territory_index, mouse_position):
 	
 				# if after clicking the territory, we have all sequence of moves, can emit the signals
 				elif card.effect_index == card.effect.size():
-					
-					var moves_to_emit = get_unemitted_moves(card)
-					card_move_selected.emit(moves_to_emit)  # handles in game controller, territroy
+					# if the last move has already emitted, don't emit
+					if not card.effect[-1].get("emit"):
+						var moves_to_emit = get_unemitted_moves(card)
+						if moves_to_emit:
+							card_move_selected.emit(moves_to_emit)  # handles in game controller, territroy
 					
 					# unhiglight all territories
 					unhighlight_territories(self.territory_index_to_points.keys())
 
-func _input(event):
-	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
-		print("click position: ", event.position)
+#func _input(event):
+	#if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
+		#print("click position: ", event.position)
 		
 # show target selection menu when clicked on a valid territory
 func show_target_selection_menu(mouse_position, valid_opponents):
-	print("passed mouse position:", mouse_position)
-	# instantiate the target selection pop up
-	var target_selection_popup = preload("res://target_popup.tscn").instantiate()
+	# clean up if needed
+	if has_node("PopUp"):
+		$PopUp.queue_free()
 	
-	# generate a button for each valid target
+	# inistantiate the popup
+	var target_selection_popup = preload("res://popup.tscn").instantiate()
+	
+	# generate options per valid opponents
 	for valid_opponent in valid_opponents:
 		var opponent_name = Settings.players[valid_opponent]["name"]
 		var target_button = Button.new()
@@ -225,29 +229,61 @@ func show_target_selection_menu(mouse_position, valid_opponents):
 		target_button.pressed.connect(_on_target_selected.bind(valid_opponent))
 		
 		# add the buttons to pop up menu
-		target_selection_popup.get_node(
-			"PopUpPanel/MarginContainer/VBoxContainer/TargetButtons"
-		).add_child(target_button)
-
-	# set pop up menu position
-	target_selection_popup.global_position = mouse_position
-
-	# add the pop up menu
-	add_child(target_selection_popup)
+		target_selection_popup.get_node("PopupPanel/VBoxContainer").add_child(target_button)
 	
-	# pop up the target selection window
-	target_selection_popup.show()
+	# add pop up to scene tree
+	add_child(target_selection_popup)
+	target_selection_popup.get_node("PopupPanel").popup()
+	target_selection_popup.get_node("PopupPanel").position = mouse_position
+
+func show_leader_selection_window(mouse_position):
+	# clean up if needed
+	if has_node("PopUp"):
+		$PopUp.queue_free()
+	
+	# inistantiate the popup
+	var current_player = get_node("/root/GameController").current_player
+	var target_selection_popup = preload("res://popup.tscn").instantiate()
+	
+	for i in range(2):
+		var button = Button.new()
+		button.text = ["Apply to Soldiers Only", "Apply to Leader"][i]
+		button.icon = Settings.players[current_player][["icon", "icon_leader"][i]]
+	
+		# connect button to pressed signal, 0=false=do not apply to leader
+		button.pressed.connect(_on_apply_to_leader_selected.bind(bool(i)))
+	
+		# add the buttons to pop up menu
+		target_selection_popup.get_node("PopupPanel/VBoxContainer").add_child(button)
+
+	# add pop up to scene tree
+	add_child(target_selection_popup)
+	target_selection_popup.get_node("PopupPanel").popup()
+	target_selection_popup.get_node("PopupPanel").position = mouse_position
 
 # when button on target selection pop up is selected
 func _on_target_selected(valid_opponent):
 	var card = get_node("/root/GameController").card_in_effect
 	if card != null:
 		card.selected_opponent = valid_opponent
-		$TargetPopUpWindow.queue_free()
+		if has_node("PopUp"):
+			$PopUp.queue_free()
 		_on_territory_clicked(card.last_selected_territory, Vector2(0, 0))  # mock mouse position
+
+func _on_apply_to_leader_selected(apply_to_leader: bool):
+	var card = get_node("/root/GameController").card_in_effect
+	if card != null:
+		card.apply_to_leader = apply_to_leader
+		card.is_leader_optional_or_undecided = false
+		if has_node("PopUp"):
+			$PopUp.queue_free()
+		_on_territory_clicked(card.last_selected_territory, Vector2(0, 0))
 
 func get_card_step_territories(card):
 	"""Get eligible territories (to highligh and enable click) for a step."""
+	if card.effect_index >= card.effect.size():
+		return []
+	
 	# if territory in "occupied", pass null to territory, since function is independent of it
 	# if territroy is "adjacent" pass previous move's selected territory
 	var current_player = get_node("/root/GameController").current_player
@@ -285,6 +321,7 @@ func _on_card_selected(card):
 	var territories = card.territory_func_mapping[card.effect[0]["territory"]].call(
 		current_player, null
 	)
+	
 	var player_color = Settings.players[current_player]["color"]
 	highlight_territories(territories, player_color)
 
@@ -300,10 +337,8 @@ func _on_card_reset():
 		revert_moves.append([move[0], move[1], -move[2], move[3]])
 	
 	# clear moves associated with the card itself and reset move count
-	card.staged_moves = []
-	card.effect_index = 0
-	card.selected_opponent = -1
-	card.last_selected_territory = -1
+	card.reset_card()
+
 	if get_parent().has_node("TargetPopUpWindow"):
 		$TargetPopUpWindow.queue_free()
 	
@@ -338,3 +373,5 @@ func enable_early_action_button_if_valid(card):
 	if card.effect[card.effect_index].get("finish_allowed"):
 		confirm_card_button.disabled = false
 		reset_card_button.disabled = false
+		confirm_leader_button.disabled = false
+		reset_leader_button.disabled = false

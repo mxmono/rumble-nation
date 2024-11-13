@@ -4,7 +4,7 @@ extends "res://cards/card.gd"
 func _ready() -> void:
 	card_name = "HitoJichi / Hostage"
 	card_name_jp = "人質"
-	description = "Move one opponent's soldier to a connected territory you occupy."
+	description = "Move 1 opponent's soldier to an adjacent territory you occupy."
 	effect = [
 		{"deploy": -1, "territory": "occupied_other_adjacent_to_self", "player": "other", "territory_selection_required": true},
 		{"deploy": 1, "territory": "adjacent_occupied", "player": "other", "territory_selection_required": true},
@@ -34,7 +34,7 @@ func is_condition_met(player):
 
 func get_valid_targets(player) -> Array:
 	var current_player_territories = Settings.players[player]["territories"]
-	var territory_connections = get_node("/root/GameController/Map").territory_connections
+	var territory_connections = Settings.board_state["territory_connections"]
 	
 	# find which players have territories adjacent to current player 
 	var valid_opponents = []

@@ -20,7 +20,9 @@ var dice_move_options = []
 
 # cards
 var cards = ["Kasei", "Monomi", "Hitojichi", "Tsuihou", "Muhon", "Otori", "Suigun", "Yamagoe", "Taikyaku", "Shinobi", "Buntai", "Jouraku"]
-#var cards = ["Jouraku", "Taikyaku"]
+#var leaders = ["Ootomo"]
+var leaders = ["Mouri", "Chosokabe", "Uesugi", "Oda", "Takeda"]
+#var cards = ["HitoJichi"]
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
@@ -52,6 +54,29 @@ func _ready():
 		new_card.name = "Card" + str(i) + card_name
 		i += 1
 		get_node("GameButtons/Card/CardTray").add_child(new_card)
+	
+	# deal leaders based on number of players
+	var n_leaders = Settings.num_players + 1
+	var drawn_leaders = []
+	leaders.shuffle()
+	if leaders.size() >= n_leaders:
+		drawn_leaders = leaders.slice(0, n_leaders)
+	else:
+		# Allow replacements: draw numbers with potential duplicates
+		for l in range(n_leaders):
+			var random_index = randi() % leaders.size()
+			drawn_leaders.append(leaders[random_index])
+	# initiate these cards
+	i = 0
+	var leader_template: PackedScene = load("res://card_template.tscn")
+	for leader_name in drawn_leaders:
+		var leader_script = load("res://cards/leader_%s.gd" % leader_name.to_lower())
+		# instantiate the drawn card scene and add to parent
+		var new_leader = leader_template.instantiate()
+		new_leader.set_script(leader_script)
+		new_leader.name = "Leader" + str(i) + leader_name
+		i += 1
+		get_node("GameButtons/Leader/CardTray").add_child(new_leader)
 
 # Handle the dice roll button press
 func _on_roll_dice_button_pressed():
@@ -102,8 +127,6 @@ func _on_dice_rolled(dice_results, move_options):
 			button.disabled = true
 		else:
 			button.disabled = false
-	
-	print("dice option 3 button visibile: ", dice_option3.visible, " disabled:", dice_option3.disabled)
 
 func roll_dice() -> int:
 		randomize()
