@@ -264,7 +264,7 @@ position = Vector2(-81.9998, -95.9998)
 polygon = PackedVector2Array(253.999, 144, 224.999, 121, 191, 101, 91.9996, 102, 88.9996, 108, 86.9998, 169, 108, 185, 126, 195, 144, 220.999, 153, 237.999, 169.999, 258.999, 234.999, 256.999, 261.999, 239.999, 261.999, 212.999, 258.999, 168)
 
 [node name="PieceContainer" type="Node2D" parent="Map/Territory10"]
-position = Vector2(84.9997, 73.9998)
+position = Vector2(106, 61.9998)
 
 [node name="PointsLabel" type="Label" parent="Map/Territory10"]
 offset_left = 14.0

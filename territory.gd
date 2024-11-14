@@ -21,7 +21,7 @@ var highlight_material  # Material used for highlighting with blend mode
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
 	
-	for i in range(Settings.num_players):
+	for i in range(GameState.num_players):
 		territory_tally.append({"soldier": 0, "leader": 0, "reinforcement": 0})
 	
 	# Set the points of the visual Polygon2D to match the CollisionPolygon2D
@@ -74,15 +74,15 @@ func draw_piece_sprites():
 		piece.queue_free()
 	
 	# first draw soldiers
-	for player in range(Settings.num_players):
+	for player in range(GameState.num_players):
 		
-		var icon = Settings.players[player]["icon"]
-		var icon_leader = Settings.players[player]["icon_leader"]
-		var icon_reinforcement = Settings.players[player]["icon_reinforce"]
+		var icon = GameState.players[player]["icon"]
+		var icon_leader = GameState.players[player]["icon_leader"]
+		var icon_reinforcement = GameState.players[player]["icon_reinforce"]
 		
-		var territory_tally = Settings.board_state["territory_tally"][self.territory_index]
+		var territory_tally = GameState.board_state["territory_tally"][self.territory_index]
 		
-		var color_adjustment = Settings.players[player]["color"]
+		var color_adjustment = GameState.players[player]["color"]
 		for i in range(territory_tally[player]["soldier"]):
 			var piece_sprite = Sprite2D.new()
 			piece_sprite.scale = player_piece_scale
@@ -115,14 +115,14 @@ func _on_territory_click(viewport, event, shape_idx):
 
 func _on_dice_selected(territory_index, deploy_count, has_leader):
 	# only take action if this is the territory that got deployed
-	var current_player = get_node("/root/GameController").current_player
+	var current_player = GameState.current_player
 	if self.territory_index == territory_index:
 		_on_deployed(current_player, territory_index, deploy_count, has_leader)
 
 func _on_deployed(player, territory_index, deploy_count, has_leader):
 	"""This function alone should handle changes between deployment states."""
 	
-	Settings.update_game_state_on_deployed(player, territory_index, deploy_count, has_leader)
+	GameState.update_game_state_on_deployed(player, territory_index, deploy_count, has_leader)
 	
 	# redraw sprites based on latest tally
 	draw_piece_sprites()
@@ -143,7 +143,7 @@ func _on_card_move_reverted(moves):
 func reinforce(num_players, player):
 	"""Reinforce to all adjacent territories."""
 	# get connected territories and how many pieces to reinforce
-	var territory_connections = Settings.board_state["territory_connections"]
+	var territory_connections = GameState.board_state["territory_connections"]
 	var current_connections = territory_connections[self.territory_index]
 	var pieces_to_reinforce = 1
 	if num_players > 2:
@@ -156,13 +156,13 @@ func reinforce(num_players, player):
 		var territory_to_reinforce = territories_default[territory_index]
 		# only reinforce to bigger tiles with current player's pieces
 		if territory_to_reinforce.territory_points > self.territory_points:
-			var tally = Settings.board_state["territory_tally"][territory_to_reinforce.territory_index][player]
+			var tally = GameState.board_state["territory_tally"][territory_to_reinforce.territory_index][player]
 			if tally["soldier"] + tally["leader"] > 0:
 				territory_to_reinforce.receive_reinforcements(pieces_to_reinforce, player)
 
 func receive_reinforcements(pieces_to_reinforce, player):
 	"""Receive reinforcements at scoring phase."""
-	Settings.update_board_tally_by_delta(
+	GameState.update_board_tally_by_delta(
 		self.territory_index, player, {"reinforcement": pieces_to_reinforce}
 	)
 	draw_piece_sprites()

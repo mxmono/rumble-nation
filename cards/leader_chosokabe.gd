@@ -21,11 +21,11 @@ func is_condition_met(player):
 		2. player leader territory has water connection
 	"""
 	
-	if Settings.players[player]["leader"] >= 1:
+	if GameState.players[player]["leader"] >= 1:
 		return false
 	
 	var leader_territory = get_leader_territory(player)[0]
-	if Settings.board_state["territory_connections"][leader_territory]["water"].size() == 0:
+	if GameState.board_state["territory_connections"][leader_territory]["water"].size() == 0:
 		return false
 
 	return true
@@ -37,7 +37,7 @@ func reset_card():
 func update_effect(player):
 	# can only move up to number of total pieces on leader territory
 	# below updates each early emit
-	var times_allowed = Settings.board_state["territory_tally"][self.leader_territory][player]["soldier"]
+	var times_allowed = GameState.board_state["territory_tally"][self.leader_territory][player]["soldier"]
 	if self.apply_to_leader:
 		if effect_index <= 1:
 			times_allowed += 1  # only plus 1 if leader hasn't been played (ie effect step 0 and 1)

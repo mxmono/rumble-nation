@@ -17,8 +17,9 @@ config/icon="res://icon.svg"
 
 [autoload]
 
-Settings="*res://settings.gd"
+GameState="*res://gamestate.gd"
 GameManager="*res://game_manager.gd"
+TerritoryHelper="*res://territory_helper.gd"
 
 [display]
 

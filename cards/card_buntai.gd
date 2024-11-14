@@ -26,7 +26,7 @@ func is_condition_met(player):
 func update_effect(player):
 
 	# half of the player's soldiers on selected territory
-	var board_state =Settings.board_state["territory_tally"]
+	var board_state =GameState.board_state["territory_tally"]
 	var deploy_count = 0
 	if self.staged_moves.size() > 0:  # ie step 2, the first move is alredy staged
 		deploy_count = board_state[self.staged_moves[0][1]][player]["soldier"] / 2

@@ -26,7 +26,7 @@ func is_condition_met(player):
 		1. player has played the leader
 	"""
 	
-	if Settings.players[player]["leader"] >= 1:
+	if GameState.players[player]["leader"] >= 1:
 		return false
 	
 	return true
@@ -36,9 +36,9 @@ func update_card_on_selection():
 	
 	super.update_card_on_selection()
 		
-	var current_player = get_node("/root/GameController").current_player
+	var current_player = GameState.current_player
 	var leader_territory = get_leader_territory(current_player, null)[0]
-	var soldiers_on_leader_territory = Settings.board_state["territory_tally"][leader_territory][current_player]["soldier"]
+	var soldiers_on_leader_territory = GameState.board_state["territory_tally"][leader_territory][current_player]["soldier"]
 
 	# if no soldier on leader territory, remove the optional step
 	if soldiers_on_leader_territory <= 0:

@@ -20,7 +20,7 @@ func is_condition_met(player):
 		2. on leader territory, there are at least 1 other player's soldiers
 	"""
 	
-	if Settings.players[player]["leader"] >= 1:
+	if GameState.players[player]["leader"] >= 1:
 		return false
 	
 	if get_valid_targets(player).size() == 0:
@@ -32,7 +32,7 @@ func get_valid_targets(player):
 	"""Players who have soldiers on current player leader territory."""
 	
 	var leader_territory = get_leader_territory(player, null)[0]
-	var territory_tally = Settings.board_state["territory_tally"][leader_territory]
+	var territory_tally = GameState.board_state["territory_tally"][leader_territory]
 	
 	var valid_targets = []
 	for opponent in range(territory_tally.size()):
@@ -49,7 +49,7 @@ func update_effect(player):
 		return
 	
 	# get how many soldiers are on player leader territory, below updates on early emit
-	var num_opponent_soldiers = Settings.board_state["territory_tally"][self.leader_territory][self.selected_opponent]["soldier"]
+	var num_opponent_soldiers = GameState.board_state["territory_tally"][self.leader_territory][self.selected_opponent]["soldier"]
 	var soldiers_already_moved = self.staged_moves.size() / 2
 	var effect_times = min(3, num_opponent_soldiers + soldiers_already_moved)
 	

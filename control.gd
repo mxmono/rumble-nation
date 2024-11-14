@@ -19,10 +19,10 @@ const CARD_BUTTONS_PARENT = "GameButtons/Card/"
 var dice_move_options = []
 
 # cards
-var cards = ["Kasei", "Monomi", "Hitojichi", "Tsuihou", "Muhon", "Otori", "Suigun", "Yamagoe", "Taikyaku", "Shinobi", "Buntai", "Jouraku"]
+#var cards = ["Kasei", "Monomi", "Hitojichi", "Tsuihou", "Muhon", "Otori", "Suigun", "Yamagoe", "Taikyaku", "Shinobi", "Buntai", "Jouraku"]
 #var leaders = ["Ootomo"]
 var leaders = ["Mouri", "Chosokabe", "Uesugi", "Oda", "Takeda"]
-#var cards = ["HitoJichi"]
+var cards = ["Otori", "Taikyaku"]
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
@@ -33,7 +33,7 @@ func _ready():
 		dice_option_buttons_leader[i].pressed.connect(_on_dice_option_selected.bind(i, true))
 	
 	# deal cards based on number of players
-	var n_cards = Settings.num_players + 1
+	var n_cards = GameState.num_players + 1
 	var drawn_cards = []
 	cards.shuffle()
 	if cards.size() >= n_cards:
@@ -51,12 +51,13 @@ func _ready():
 		# instantiate the drawn card scene and add to parent
 		var new_card = card_template.instantiate()
 		new_card.set_script(card_script)
+		new_card.get_node("Mask").custom_minimum_size = new_card.custom_minimum_size
 		new_card.name = "Card" + str(i) + card_name
 		i += 1
 		get_node("GameButtons/Card/CardTray").add_child(new_card)
 	
 	# deal leaders based on number of players
-	var n_leaders = Settings.num_players + 1
+	var n_leaders = GameState.num_players
 	var drawn_leaders = []
 	leaders.shuffle()
 	if leaders.size() >= n_leaders:
@@ -75,6 +76,8 @@ func _ready():
 		var new_leader = leader_template.instantiate()
 		new_leader.set_script(leader_script)
 		new_leader.name = "Leader" + str(i) + leader_name
+		new_leader.custom_minimum_size.y = 128
+		new_leader.get_node("Mask").custom_minimum_size = new_leader.custom_minimum_size
 		i += 1
 		get_node("GameButtons/Leader/CardTray").add_child(new_leader)
 
@@ -90,7 +93,7 @@ func _on_roll_dice_button_pressed():
 	dice_rolled.emit(dice_results, move_options)
 
 func _on_dice_rolled(dice_results, move_options):
-	var current_player = get_node("/root/GameController").current_player
+	var current_player = GameState.current_player
 	self.dice_move_options = move_options
 	
 	# UI: display dice results
@@ -116,14 +119,14 @@ func _on_dice_rolled(dice_results, move_options):
 		]
 		
 		# if leader already played, disable the leader button
-		if Settings.players[current_player]["leader"] <= 0:
+		if GameState.players[current_player]["leader"] <= 0:
 			button_leader.disabled = true
 		else:
 			button_leader.disabled = false
 		
 		# only enable the regular button if the deploy is all soldier
 		# (eg can happen last round, deploy = 2 but with 1 leader, 1 solider left)
-		if move_options[i]["deploy_count"] > Settings.players[current_player]["soldier"]:
+		if move_options[i]["deploy_count"] > GameState.players[current_player]["soldier"]:
 			button.disabled = true
 		else:
 			button.disabled = false
@@ -133,7 +136,7 @@ func roll_dice() -> int:
 		return randi() % 6 + 1
 
 func combine_dice(dice_results: Array) -> Array:
-	var current_player = get_node("/root/GameController").current_player
+	var current_player = GameState.current_player
 	var territory_points_to_index = get_node("/root/GameController/Map").territory_points_to_index
 	
 	# calculate all move options
@@ -143,7 +146,7 @@ func combine_dice(dice_results: Array) -> Array:
 		var deploy_count = (dice_results[i % 3] + 1) / 2
 		deploy_count = min(
 			deploy_count,
-			Settings.players[current_player]["soldier"] + Settings.players[current_player]["leader"]
+			GameState.players[current_player]["soldier"] + GameState.players[current_player]["leader"]
 		)
 		var territory_score = dice_results[(i + 1) % 3] + dice_results[(i + 2) % 3]
 		var territory_index = territory_points_to_index[territory_score]
@@ -159,7 +162,7 @@ func combine_dice(dice_results: Array) -> Array:
 	return move_options
 
 func _on_dice_option_selected(i, has_leader):
-	var current_player = get_node("/root/GameController").current_player
+	var current_player = GameState.current_player
 	dice_selected.emit(
 		self.dice_move_options[i]["territory_index"],
 		self.dice_move_options[i]["deploy_count"],

@@ -3,7 +3,18 @@ extends Node
 var num_players: int = 2
 var total_soldiers: int = 16
 var num_territories: int = 11
-
+var current_player: int = 0
+var current_card = null
+enum TurnPhase {
+	CHOICE,
+	CARD,
+	CONFIRM_OR_RESET_CARD,
+	ROLL,
+	REROLL,
+	PLACE,
+	END
+}
+var current_phase = TurnPhase.CHOICE
 var player_presets = [
 	{
 		"name": "Reddo",
@@ -72,7 +83,9 @@ func _ready() -> void:
 	# initialize board state
 	initialize_board_state()
 
+
 func reset_all_states():
+	# reset player states
 	for i in range(self.num_players):
 		update_player_state(
 			i, 
@@ -86,8 +99,17 @@ func reset_all_states():
 			}
 		)
 	print(self.players)
+	current_player = 0
 	
+	# reset board states
 	initialize_board_state()
+	
+	# reset card states
+	current_card = null
+	
+	# reset turn state
+	current_phase = TurnPhase.CHOICE
+
 
 func initialize_players():
 	self.players = []  # this is needed as initialize can be called from main menu
@@ -106,6 +128,7 @@ func initialize_players():
 				"used_card": false
 			}
 		)
+
 
 func initialize_board_state():
 	"""Randomly assign points and initialize board state."""
@@ -133,16 +156,20 @@ func initialize_board_state():
 			self.board_state["territory_connections"][i]["water"]
 		)
 
+
 func update_player_state(player_index: int, state_dict: Dictionary):
 	self.players[player_index].merge(state_dict, true)
 
+
 func update_board_tally(territory_index: int, player_index: int, state_dict: Dictionary):
 	self.board_state["territory_tally"][territory_index][player_index].merge(state_dict, true)
+
 
 func update_board_tally_by_delta(territory_index: int, player_index: int, delta_dict: Dictionary):
 	# example delta_dict = {"soldier": 1, "leader": 0}, ie adding 1 soldier
 	for key in delta_dict.keys():
 		self.board_state["territory_tally"][territory_index][player_index][key] += delta_dict[key]
+
 
 func update_game_state_on_deployed(player_index, territory_index, deploy_count, has_leader):
 	"""This function alone should handle changes between deployment states."""

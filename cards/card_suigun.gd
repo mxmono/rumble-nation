@@ -4,7 +4,7 @@ extends "res://cards/card.gd"
 func _ready() -> void:
 	card_name = "SuiGun / Navy"
 	card_name_jp = "水軍"
-	description = "Move two of your soldiers from one territory to an adjacent territory by water."
+	description = "Move 2 of your soldiers from one territory to an adjacent territory by water."
 	effect = [
 		{"deploy": -2, "territory": "_suigun", "player": "current", "territory_selection_required": true},
 		{"deploy": 2, "territory": "adjacent_selected_water", "player": "current", "territory_selection_required": true},

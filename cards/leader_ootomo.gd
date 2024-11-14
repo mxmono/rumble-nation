@@ -27,7 +27,7 @@ func is_condition_met(player):
 			leader but have no soldier left (player is out)
 	"""
 	
-	if Settings.players[player]["leader"] >= 1:
+	if GameState.players[player]["leader"] >= 1:
 		return false
 	
 	if get_valid_targets(player).size() == 0:
@@ -42,7 +42,7 @@ func get_valid_targets(player):
 
 	var valid_targets = []
 	for territory in leader_adjacent_territories:
-		var territory_tally = Settings.board_state["territory_tally"][territory]
+		var territory_tally = GameState.board_state["territory_tally"][territory]
 		for opponent in range(territory_tally.size()):
 			if opponent == player:
 				continue
@@ -59,7 +59,7 @@ func get_valid_targets_on_territory(player, territory_index) -> Array:
 	print("target pool: ", target_pool)
 	var valid_targets = []
 	for target in target_pool:
-		if Settings.board_state["territory_tally"][territory_index][target]["soldier"] > 0:
+		if GameState.board_state["territory_tally"][territory_index][target]["soldier"] > 0:
 			valid_targets.append(target)
 	
 	return valid_targets
@@ -69,14 +69,14 @@ func update_card_on_selection():
 	
 	super.update_card_on_selection()
 	
-	var current_player = get_node("/root/GameController").current_player
+	var current_player = GameState.current_player
 	var valid_targets = get_valid_targets(current_player)
 	var leader_adjacent_territories = get_leader_adjacent_territories(current_player, null)
 	
 	# if valid targets only have 1 soldier in total, remove 2nd step
 	var valid_soldiers = 0
 	for territory in leader_adjacent_territories:
-		var territory_tally = Settings.board_state["territory_tally"][territory]
+		var territory_tally = GameState.board_state["territory_tally"][territory]
 		for opponent in range(territory_tally.size()):
 			if opponent == current_player:
 				continue
@@ -86,7 +86,7 @@ func update_card_on_selection():
 		self.effect = self.effect.slice(0, 2)
 	
 	# if only 1 piece left in hand, also can only take 1 step
-	if Settings.players[current_player]["soldier"] == 1:
+	if GameState.players[current_player]["soldier"] == 1:
 		self.effect = self.effect.slice(0, 2)
 
 func update_effect(player):

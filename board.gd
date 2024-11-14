@@ -50,8 +50,8 @@ func _ready() -> void:
 func assign_points_to_territories():
 	var i = 0
 	for territory in $Map.get_children():
-		territory.set("territory_points", Settings.board_state["territory_points"][i])
-		territory.get_node("PointsLabel").text = str(Settings.board_state["territory_points"][i])
+		territory.set("territory_points", GameState.board_state["territory_points"][i])
+		territory.get_node("PointsLabel").text = str(GameState.board_state["territory_points"][i])
 		i += 1
 	
 	# assemble the territory array ordered by points value
@@ -83,11 +83,11 @@ func _on_territory_clicked(territory_index, mouse_position):
 
 	# if it's in territory selection phase from playing a card, emit the selected territory
 	var game_controller = get_node("/root/GameController")
-	var card = game_controller.card_in_effect
-	var current_player = game_controller.current_player
+	var card = GameState.current_card
+	var current_player = GameState.current_player
 	
 	# if we are in card phase
-	if game_controller.current_phase == game_controller.TurnPhase.CARD and card != null:
+	if GameState.current_phase == GameState.TurnPhase.CARD and card != null:
 		# only proceed with card effect if clicking on a territory in current valid territories
 		# find which territories are eligible for current step
 		var current_step_territories = get_card_step_territories(card)
@@ -119,7 +119,7 @@ func _on_territory_clicked(territory_index, mouse_position):
 			if card.card_type == "leader" and card.get("is_leader_optional_or_undecided") and card.effect_index == 0:
 				card.last_selected_territory = territory_index
 				# only show leader selection window if there are options (ie if only leader is on territory...)
-				if Settings.board_state["territory_tally"][territory_index][current_player]["soldier"] > 0:
+				if GameState.board_state["territory_tally"][territory_index][current_player]["soldier"] > 0:
 					show_leader_selection_window(mouse_position)
 				else:
 					_on_apply_to_leader_selected(true)
@@ -190,7 +190,7 @@ func _on_territory_clicked(territory_index, mouse_position):
 					var next_step_territories = get_card_step_territories(card)
 					print("next step territories: ", next_step_territories)
 					# highlight the next eligible territories
-					var player_color = Settings.players[current_player]["color"]
+					var player_color = GameState.players[current_player]["color"]
 					highlight_territories(next_step_territories, player_color)
 	
 				# if after clicking the territory, we have all sequence of moves, can emit the signals
@@ -219,10 +219,10 @@ func show_target_selection_menu(mouse_position, valid_opponents):
 	
 	# generate options per valid opponents
 	for valid_opponent in valid_opponents:
-		var opponent_name = Settings.players[valid_opponent]["name"]
+		var opponent_name = GameState.players[valid_opponent]["name"]
 		var target_button = Button.new()
 		target_button.text = opponent_name
-		target_button.icon = Settings.players[valid_opponent]["icon"]
+		target_button.icon = GameState.players[valid_opponent]["icon"]
 		target_button.name = "Player" +  str(valid_opponent)
 		
 		# connect button to pressed signal
@@ -242,13 +242,13 @@ func show_leader_selection_window(mouse_position):
 		$PopUp.queue_free()
 	
 	# inistantiate the popup
-	var current_player = get_node("/root/GameController").current_player
+	var current_player = GameState.current_player
 	var target_selection_popup = preload("res://popup.tscn").instantiate()
 	
 	for i in range(2):
 		var button = Button.new()
 		button.text = ["Apply to Soldiers Only", "Apply to Leader"][i]
-		button.icon = Settings.players[current_player][["icon", "icon_leader"][i]]
+		button.icon = GameState.players[current_player][["icon", "icon_leader"][i]]
 	
 		# connect button to pressed signal, 0=false=do not apply to leader
 		button.pressed.connect(_on_apply_to_leader_selected.bind(bool(i)))
@@ -263,7 +263,7 @@ func show_leader_selection_window(mouse_position):
 
 # when button on target selection pop up is selected
 func _on_target_selected(valid_opponent):
-	var card = get_node("/root/GameController").card_in_effect
+	var card = GameState.current_card
 	if card != null:
 		card.selected_opponent = valid_opponent
 		if has_node("PopUp"):
@@ -271,7 +271,7 @@ func _on_target_selected(valid_opponent):
 		_on_territory_clicked(card.last_selected_territory, Vector2(0, 0))  # mock mouse position
 
 func _on_apply_to_leader_selected(apply_to_leader: bool):
-	var card = get_node("/root/GameController").card_in_effect
+	var card = GameState.current_card
 	if card != null:
 		card.apply_to_leader = apply_to_leader
 		card.is_leader_optional_or_undecided = false
@@ -286,7 +286,7 @@ func get_card_step_territories(card):
 	
 	# if territory in "occupied", pass null to territory, since function is independent of it
 	# if territroy is "adjacent" pass previous move's selected territory
-	var current_player = get_node("/root/GameController").current_player
+	var current_player = GameState.current_player
 	var territory_arg = null
 	if card.effect[card.effect_index]["territory"].begins_with("adjacent"):
 		territory_arg = card.last_selected_territory
@@ -315,21 +315,19 @@ func get_unemitted_moves(card) -> Array:
 # highlight relevant territories on card selection
 func _on_card_selected(card):
 	# highlight which territories are eligible when a card is selected
-	var current_player = get_node("/root/GameController").current_player
+	var current_player = GameState.current_player
 	
 	# highlight the first move
 	var territories = card.territory_func_mapping[card.effect[0]["territory"]].call(
 		current_player, null
 	)
 	
-	var player_color = Settings.players[current_player]["color"]
+	var player_color = GameState.players[current_player]["color"]
 	highlight_territories(territories, player_color)
 
 func _on_card_reset():
 	# reverse deployment
-	var game_controller = get_node("/root/GameController")
-	var card = game_controller.card_in_effect
-	#if game_controller.current_phase == game_controller.TurnPhase.CONFIRM_OR_RESET_CARD:
+	var card = GameState.current_card
 	var revert_moves = []
 	# card_moves_stage is [[player, territory_index, deploy_count, has_leader], ...]
 	for i in range(card.staged_moves.size()):
@@ -360,8 +358,8 @@ func _on_dice_rolled(dice_results, move_options):
 		territories.append(move_option["territory_index"])
 	
 	# get player color
-	var current_player = get_node("/root/GameController").current_player
-	var player_color = Settings.players[current_player]["color"]
+	var current_player = GameState.current_player
+	var player_color = GameState.players[current_player]["color"]
 	player_color.a = 0.3
 	highlight_territories(territories, player_color)
 

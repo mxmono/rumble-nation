@@ -16,13 +16,13 @@ func _ready() -> void:
 
 func is_condition_met(player):
 	"""Conditions:
-		1. player must have territories adjacent to kyo (index = 4)
+		1. player must have territories adjacent to kyo (index = 4) with soldiers
 	"""
 	
-	var territory_connections =  Settings.board_state["territory_connections"]
+	var territory_connections =  GameState.board_state["territory_connections"]
 	var valid_territories = territory_connections[4]["all"]
 	
-	for player_territory in Settings.players[player]["territories"]:
+	for player_territory in TerritoryHelper.get_player_territories_soldiers_only(player):
 		if valid_territories.has(player_territory):
 			return true
 	
@@ -44,7 +44,7 @@ func update_effect(player):
 func get_max_deploy_times(player) -> int:
 	
 	var valid_territories = super.get_jouraku_territories(player, null)
-	var board_state =Settings.board_state["territory_tally"]
+	var board_state =GameState.board_state["territory_tally"]
 	var max_deploy_times = 0
 	
 	for territory in valid_territories:

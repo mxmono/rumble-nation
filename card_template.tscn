@@ -19,11 +19,6 @@ offset_bottom = 104.0
 theme_override_colors/font_disabled_color = Color(0.299547, 0.299547, 0.299547, 1)
 script = ExtResource("1_xhfe4")
 
-[node name="Background" type="TextureRect" parent="."]
-layout_mode = 0
-offset_right = 232.0
-offset_bottom = 105.0
-
 [node name="ENTitle" type="Label" parent="."]
 layout_mode = 0
 offset_left = 56.0
@@ -53,24 +48,7 @@ text = "sample card description sample card description sample card description"
 label_settings = SubResource("LabelSettings_4rg4u")
 autowrap_mode = 3
 
-[node name="TargetHBox" type="HBoxContainer" parent="."]
-visible = false
-clip_contents = true
-layout_mode = 0
-offset_left = 8.0
-offset_top = 120.0
-offset_right = 224.0
-offset_bottom = 160.0
-alignment = 1
-
-[node name="Button" type="Button" parent="TargetHBox"]
-custom_minimum_size = Vector2(100, 0)
-layout_mode = 2
-text = "jkjijixxxxxxxxzzzzzzzzzzzzzzzzzzzzzzzzzz"
-text_overrun_behavior = 1
-
 [node name="Mask" type="ColorRect" parent="."]
-visible = false
 layout_mode = 0
 offset_right = 232.0
 offset_bottom = 104.0

@@ -1,9 +1,6 @@
 extends Node
 
-@export var current_player: int = 0
 @export var player_priority = []  # store which players are out first
-@export var card_in_effect = null # store which card is being played
-var save_state = {}
 
 @onready var dice_buttons = $Control/GameButtons/Dice.get_children()
 @onready var card_buttons = $Control/GameButtons/Card/CardTray.get_children() + $Control/GameButtons/Leader/CardTray.get_children()
@@ -13,18 +10,6 @@ const CARD_MENU_PARENT = "Control/GameButtons/Card/"
 const LEADER_MENU_PARENT = "Control/GameButtons/Leader/"
 @onready var pause_menu = $MenuCanvas/PauseMenu
 
-# Enum for different phases in a player's turn
-enum TurnPhase {
-	CHOICE,
-	CARD,
-	CONFIRM_OR_RESET_CARD,
-	ROLL,
-	REROLL,
-	PLACE,
-	END
-}
-
-@export var current_phase = TurnPhase.CHOICE
 
 func _ready():
 	var board_scene = get_node("/root/GameController/Map")
@@ -62,16 +47,15 @@ func start_turn():
 		return
 	
 	# Find the next active player with pieces
-	while not Settings.players[self.current_player]["active"]:
-		self.current_player = (self.current_player + 1) % Settings.num_players
+	while not GameState.players[GameState.current_player]["active"]:
+		GameState.current_player = (GameState.current_player + 1) % GameState.num_players
 
-	print(Settings.players[self.current_player]["name"], "'s turn.")
+	print(GameState.players[GameState.current_player]["name"], "'s turn.")
 	update_stats_label()
 	
 	# UI: enable all relevant buttons and labels
 	for card_button in self.card_buttons:
-		card_button.disabled = not card_button.is_condition_met(self.current_player)
-		card_button.update_valid_targets()
+		card_button.disabled = not card_button.is_condition_met(GameState.current_player)
 	for card_action_button in card_action_buttons:
 		card_action_button.disabled = true
 		# hide finish move, only show it when it's relevant for a card
@@ -86,68 +70,68 @@ func start_turn():
 	get_node(DICE_MENU_PARENT + "ResultLabel").text = ""
 
 	# UI: if any player is out, cannot use card any more
-	for player in range(Settings.num_players):
-		if not Settings.players[player]["active"]:
+	for player in range(GameState.num_players):
+		if not GameState.players[player]["active"]:
 			for card_button in self.card_buttons + self.card_action_buttons:
 				card_button.disabled = true
 			
 	# UI: use player color as menu background color
-	var current_color = Settings.players[self.current_player]["color"]
+	var current_color = GameState.players[GameState.current_player]["color"]
 	var style_box = StyleBoxFlat.new()
 	style_box.bg_color = current_color
 	style_box.bg_color.a = 0.2
 	$Control/GameButtons.add_theme_stylebox_override("panel", style_box)
 
-	current_phase = TurnPhase.CHOICE
+	GameState.current_phase = GameState.TurnPhase.CHOICE
 	process_turn_phase()
 
 func update_stats_label():
 	if all_players_out():
 		$Info/PlayerLabel.text = "All players out"
 	else:
-		$Info/PlayerLabel.text = "%s's Turn" % Settings.players[self.current_player]["name"]
-	for i in range(Settings.num_players):
+		$Info/PlayerLabel.text = "%s's Turn" % GameState.players[GameState.current_player]["name"]
+	for i in range(GameState.num_players):
 		$Info/PlayerLabel.text += "\n%s: %s soldier(s) left; %s leader left" % [
-			Settings.players[i]["name"],
-			str(Settings.players[i]["soldier"]),
-			str(Settings.players[i]["leader"])
+			GameState.players[i]["name"],
+			str(GameState.players[i]["soldier"]),
+			str(GameState.players[i]["leader"])
 		]
 
 # Check if all players are out of pieces
 func all_players_out() -> bool:
-	for player in Settings.players:
+	for player in GameState.players:
 		if player["active"]:
 			return false  # At least one player still has pieces
 	return true  # All players are out of pieces
 
 func process_turn_phase():
-	var current_player_name = Settings.players[self.current_player]["name"]
-	match current_phase:
+	var current_player_name = GameState.players[GameState.current_player]["name"]
+	match GameState.current_phase:
 
-		TurnPhase.CHOICE:
+		GameState.TurnPhase.CHOICE:
 			print(current_player_name, " is in the CHOICE phase.")
 
-		TurnPhase.CARD:
+		GameState.TurnPhase.CARD:
 			print(current_player_name, " is in the CARD phase.")
 			card_phase()
 
-		TurnPhase.CONFIRM_OR_RESET_CARD:
+		GameState.TurnPhase.CONFIRM_OR_RESET_CARD:
 			print(current_player_name, " to confirm or reset CARD actions.")
 			comfirm_or_reset_card_phase()
 		
-		TurnPhase.ROLL:
+		GameState.TurnPhase.ROLL:
 			print(current_player_name, " is in the ROLL phase.")
 			roll_phase()
 		
-		TurnPhase.REROLL:
+		GameState.TurnPhase.REROLL:
 			print(current_player_name, " is in the REROLL phase.")
 			reroll_phase()
 		
-		TurnPhase.PLACE:
+		GameState.TurnPhase.PLACE:
 			print(current_player_name, " is in the PLACE phase.")
 			place_phase()
 
-		TurnPhase.END:
+		GameState.TurnPhase.END:
 			print(current_player_name, "'s turn is ending.")
 			end_turn()
 
@@ -176,15 +160,15 @@ func comfirm_or_reset_card_phase():
 
 func _on_card_selected(card):
 	# when clicked on a card, user has made a choice, ending the choice phase
-	current_phase = TurnPhase.CARD
+	GameState.current_phase = GameState.TurnPhase.CARD
 	process_turn_phase()
 	
 	# when player clicks on a playable card in the card tray
 	# make sure globally we know which card is being player
-	card_in_effect = card
+	GameState.current_card = card
 	
 	# UI: highlight the selected card
-	card.modulate = Settings.players[self.current_player]["color"]
+	card.modulate = GameState.players[GameState.current_player]["color"]
 	
 	# UI: disable all card buttons
 	for card_button in card_buttons:
@@ -195,46 +179,46 @@ func _on_card_move_selected(moves):
 	# when player clicked on territories to apply effect of the card
 	# proceed to confirm or reset card
 	# only do so if the card effect has fully finished, as signal can be emitted for multi-step midway
-	if card_in_effect.effect_index == card_in_effect.effect.size():
-		current_phase = TurnPhase.CONFIRM_OR_RESET_CARD
+	if GameState.current_card.effect_index == GameState.current_card.effect.size():
+		GameState.current_phase = GameState.TurnPhase.CONFIRM_OR_RESET_CARD
 		process_turn_phase()
 
 func _on_card_move_reverted(moves):
 	# go back to CARD phase where user needs to take actions to apply effect of card
-	current_phase = TurnPhase.CARD
+	GameState.current_phase = GameState.TurnPhase.CARD
 	process_turn_phase()
 	
 func _on_card_confirmed():
 	# the used card disappears
-	card_in_effect.queue_free()
+	GameState.current_card.queue_free()
 	
 	# mark player
-	Settings.players[self.current_player]["used_card"] = true
+	GameState.players[GameState.current_player]["used_card"] = true
 	
 	# once the player confirmed the card action, transition to next turn
-	current_phase = TurnPhase.END
+	GameState.current_phase = GameState.TurnPhase.END
 	process_turn_phase()
 
 	# reset for next card play
-	card_in_effect = null
+	GameState.current_card = null
 #endregion
 
 #region handles dice rolling and piece placement actions
 func roll_phase():
-	print(Settings.players[self.current_player]["name"], " rolls.")
+	print(GameState.players[GameState.current_player]["name"], " rolls.")
 
 func reroll_phase():
 	get_node(DICE_MENU_PARENT + "RollDiceButton").text = "Reroll"
 	
 func _on_dice_rolled(dice_results, move_options):
 	# allow reroll if current player has used a card, otherwise the turn ends
-	if Settings.players[self.current_player]["used_card"]:
-		if current_phase != TurnPhase.REROLL:
-			current_phase = TurnPhase.REROLL
+	if GameState.players[GameState.current_player]["used_card"]:
+		if GameState.current_phase != GameState.TurnPhase.REROLL:
+			GameState.current_phase = GameState.TurnPhase.REROLL
 		else:  # already rerolled
-			current_phase = TurnPhase.PLACE
+			GameState.current_phase = GameState.TurnPhase.PLACE
 	else:
-		current_phase = TurnPhase.PLACE
+		GameState.current_phase = GameState.TurnPhase.PLACE
 	process_turn_phase()
 	
 	# disable all card actions in card menu:
@@ -255,25 +239,25 @@ func _on_place_phase_done():
 			button.text = "Roll Dice"
 			
 
-	current_phase = TurnPhase.END
+	GameState.current_phase = GameState.TurnPhase.END
 	process_turn_phase()
 #endregion 
 
 # Ends the player's turn and switches to the next player
 func end_turn():
-	print(Settings.players[self.current_player]["name"], "'s turn is over.")
+	print(GameState.players[GameState.current_player]["name"], "'s turn is over.")
 	# unhighlight territories
 	$Map.unhighlight_territories($Map.territory_index_to_points.keys())
 	
 	# Update player pieces and check if they are out
-	if Settings.players[self.current_player]["leader"] + Settings.players[self.current_player]["soldier"] <= 0:
-		print(Settings.players[self.current_player]["name"], " is out of pieces!")
-		Settings.players[self.current_player]["active"] = false
+	if GameState.players[GameState.current_player]["leader"] + GameState.players[GameState.current_player]["soldier"] <= 0:
+		print(GameState.players[GameState.current_player]["name"], " is out of pieces!")
+		GameState.players[GameState.current_player]["active"] = false
 		# store player out sequence for tie-breaker
-		player_priority.append(self.current_player)
+		player_priority.append(GameState.current_player)
 
 	# Switch to the next player
-	self.current_player = (self.current_player + 1) % Settings.num_players
+	GameState.current_player = (GameState.current_player + 1) % GameState.num_players
 	update_stats_label()
 
 	# Start the next player's turn
@@ -296,7 +280,7 @@ func scoring_phase():
 
 	for territory in territories:
 		# check who wins
-		var territory_tally = Settings.board_state["territory_tally"][territory.territory_index]
+		var territory_tally = GameState.board_state["territory_tally"][territory.territory_index]
 		var scores = []
 		for player_tally in territory_tally:
 			scores.append(
@@ -316,57 +300,57 @@ func scoring_phase():
 			var highlight_material = CanvasItemMaterial.new()
 			highlight_material.blend_mode = CanvasItemMaterial.BLEND_MODE_ADD
 			visual_polygon.material = highlight_material
-			visual_polygon.color = Settings.players[first_place_player]["color"]
+			visual_polygon.color = GameState.players[first_place_player]["color"]
 		
 		if first_place_player == -1:  # if no one wins, go to next territory
 			continue
 		
 		print(
-			territory.territory_points, ":  ", Settings.players[first_place_player]["name"], " wins",
-			"  credited ", territory.territory_points, "  to ", Settings.players[first_place_player]["name"]
+			territory.territory_points, ":  ", GameState.players[first_place_player]["name"], " wins",
+			"  credited ", territory.territory_points, "  to ", GameState.players[first_place_player]["name"]
 		)
 		if second_place_player != -1:
 			print(
-				Settings.players[second_place_player]["name"], " is second place",
+				GameState.players[second_place_player]["name"], " is second place",
 			)
 		
 		# reinforce to adjacent territories
-		territory.reinforce(Settings.num_players, first_place_player)
+		territory.reinforce(GameState.num_players, first_place_player)
 		
 		# credit score to the player
-		Settings.players[first_place_player]["score"] += territory.territory_points
+		GameState.players[first_place_player]["score"] += territory.territory_points
 		
 		# add half score (round down) to 2nd place if more than 2 players
-		if Settings.num_players > 2:
+		if GameState.num_players > 2:
 			if second_place_player != -1:
-				Settings.players[second_place_player]["score"] += territory.territory_points / 2
-				print("credited ", territory.territory_points / 2, " to ", Settings.players[second_place_player]["name"])
+				GameState.players[second_place_player]["score"] += territory.territory_points / 2
+				print("credited ", territory.territory_points / 2, " to ", GameState.players[second_place_player]["name"])
 
 	# annouce the winner
 	var current_max = 0
 	var winner = -1
 	var current_max_player_priority = -1
-	for player in range(Settings.num_players):
+	for player in range(GameState.num_players):
 		
-		if Settings.players[player]["score"] > current_max:
-			current_max = Settings.players[player]["score"]
+		if GameState.players[player]["score"] > current_max:
+			current_max = GameState.players[player]["score"]
 			winner = player
 			current_max_player_priority = self.player_priority.find(player)
 		
 		# if tie, the player goes out first wins
-		elif Settings.players[player]["score"] == current_max:
+		elif GameState.players[player]["score"] == current_max:
 			var player_priority = self.player_priority.find(player)
 			if player_priority < current_max_player_priority:
 				winner = player
 	
 	# UI: update winding label
-	$Info/PlayerLabel.text = "%s wins!" % Settings.players[winner]["name"]
+	$Info/PlayerLabel.text = "%s wins!" % GameState.players[winner]["name"]
 	var player_priority_name = []
 	for player in player_priority:
-		player_priority_name.append(Settings.players[player]["name"])
+		player_priority_name.append(GameState.players[player]["name"])
 	$Info/PlayerLabel.text += " Out sequence: %s" % str(player_priority_name)
-	for i in range(Settings.num_players):
-		$Info/PlayerLabel.text += "\n%s: %s" % [Settings.players[i]["name"], Settings.players[i]["score"]]
+	for i in range(GameState.num_players):
+		$Info/PlayerLabel.text += "\n%s: %s" % [GameState.players[i]["name"], GameState.players[i]["score"]]
 
 func get_winning_player(scores: Array, player_priority) -> int:
 	"""Based on total score and out sequence (player priority), return winning player"""

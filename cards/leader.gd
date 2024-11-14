@@ -26,7 +26,7 @@ func reset_card():
 	super.reset_card()
 
 func update_card_on_selection():
-	var current_player = get_node("/root/GameController").current_player
+	var current_player = GameState.current_player
 	
 	# specific to leader, get initial leader territory and store it
 	self.leader_territory = get_leader_territory(current_player, null)[0]
@@ -36,8 +36,8 @@ func get_leader_territory(player, territory_index=null):
 	Returns -1 if no leader.
 	"""
 	# assume 1 leader only
-	var board_state =Settings.board_state["territory_tally"]
-	var territory_connections = Settings.board_state["territory_connections"]
+	var board_state =GameState.board_state["territory_tally"]
+	var territory_connections = GameState.board_state["territory_connections"]
 	
 	var leader_territory_index = -1
 	for territory in range(board_state.size()):
@@ -97,7 +97,7 @@ func get_leader_adjacent_territories_occupied_by_any_opponent(player, territory_
 	
 	var valid_territories = []
 	for territory in leader_adjacent_territories:
-		var territory_tally = Settings.board_state["territory_tally"][territory]
+		var territory_tally = GameState.board_state["territory_tally"][territory]
 		for opponent in range(territory_tally.size()):
 			if opponent == player:
 				continue
