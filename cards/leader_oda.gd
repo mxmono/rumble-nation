@@ -1,4 +1,4 @@
-extends "res://cards/leader.gd"
+extends Leader
 
 
 func _ready() -> void:
@@ -8,18 +8,15 @@ func _ready() -> void:
 	
 	effect = [
 		# leader move
-		{"deploy": -1, "territory": "leader_initial_occupied", "player": "current", "territory_selection_required": true, "has_leader": true},
-		{"deploy": 1, "territory": "leader_adjacent", "player": "current", "territory_selection_required": true, "has_leader": true, "finish_allowed": true, "emit": true},
+		{"deploy": -1, "player": "current", "territory_selection_required": true, "has_leader": true},
+		{"deploy": 1, "player": "current", "territory_selection_required": true, "has_leader": true, "finish_allowed": true, "emit": true},
 		# optional soldier move
-		{"deploy": -1, "territory": "leader_initial_occupied", "player": "current", "territory_selection_required": true},
-		{"deploy": 1, "territory": "_oda_soldier", "player": "current", "territory_selection_required": true, "finish_allowed": true, "emit": true},
+		{"deploy": -1, "player": "current", "territory_selection_required": true},
+		{"deploy": 1, "player": "current", "territory_selection_required": true, "finish_allowed": true, "emit": true},
 	]
 	
-	territory_func_mapping.merge(
-		{"_oda_soldier": get_oda_soldier_territories}
-	)
-	
 	super._ready()
+
 
 func is_condition_met(player):
 	"""Conditions:
@@ -31,21 +28,37 @@ func is_condition_met(player):
 	
 	return true
 
+
 func update_card_on_selection():
 	"""If no soldier on leader territory, remove the optional step."""
 	
 	super.update_card_on_selection()
 		
 	var current_player = GameState.current_player
-	var leader_territory = get_leader_territory(current_player, null)[0]
-	var soldiers_on_leader_territory = GameState.board_state["territory_tally"][leader_territory][current_player]["soldier"]
-
+	var soldiers_on_leader_territory = TerritoryHelper.get_player_territory_tally(
+		GameState.current_player, self.leader_territory
+	)["soldier"]
+	
 	# if no soldier on leader territory, remove the optional step
 	if soldiers_on_leader_territory <= 0:
 		self.effect = self.effect.slice(0, 2)
 
-func get_oda_soldier_territories(player, territory_index=null):
-	"""Return the territory selected in step 2 (the one leader moved to)."""
+
+func get_card_step_territories(step: int) -> Array:
+	# step 1: leader initial occupied
+	if step == 0:
+		return [self.leader_territory]
 	
-	# first index: move 2; second index: territory_index in move array
-	return [self.staged_moves[1][1]]
+	# step 2: adjacent to leader
+	if step == 1:
+		return TerritoryHelper.get_adjacent_by_connection_type(self.leader_territory, "all")
+	
+	# step 3: optional. but should be the same as step 1
+	if step == 2:
+		return [self.leader_territory]
+	
+	# step 4: optional, but should be same as step 2
+	if step == 3:
+		return [self.staged_moves[1][1]]
+	
+	return []

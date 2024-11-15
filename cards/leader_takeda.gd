@@ -1,4 +1,4 @@
-extends "res://cards/leader.gd"
+extends Leader
 
 
 func _ready() -> void:
@@ -8,11 +8,12 @@ func _ready() -> void:
 	
 	# effect needs to be updated, based on which opponent the current player selectes
 	effect = [
-		{"deploy": -1, "territory": "leader_initial_occupied", "player": "other", "territory_selection_required": true},
-		{"deploy": 1, "territory": "leader_adjacent", "player": "other", "territory_selection_required": true, "finish_allowed": true, "emit": true},
+		{"deploy": -1, "player": "other", "territory_selection_required": true},
+		{"deploy": 1, "player": "other", "territory_selection_required": true, "finish_allowed": true, "emit": true},
 	]
 	
 	super._ready()
+
 
 func is_condition_met(player):
 	"""Conditions:
@@ -28,20 +29,20 @@ func is_condition_met(player):
 	
 	return true
 
+
 func get_valid_targets(player):
 	"""Players who have soldiers on current player leader territory."""
 	
-	var leader_territory = get_leader_territory(player, null)[0]
-	var territory_tally = GameState.board_state["territory_tally"][leader_territory]
+	var leader_territory = TerritoryHelper.get_player_leader_occupied(player)
 	
+
 	var valid_targets = []
-	for opponent in range(territory_tally.size()):
-		if opponent == player:
-			continue
-		if territory_tally[opponent]["soldier"] > 0:
+	for opponent in TerritoryHelper.get_opponents(player):
+		if TerritoryHelper.get_player_territory_tally(opponent, leader_territory)["soldier"] > 0:
 			valid_targets.append(opponent)
 	
 	return valid_targets
+
 
 func update_effect(player):
 	"""Depending on which opponent is selected, update number of applicable effects."""
@@ -49,7 +50,9 @@ func update_effect(player):
 		return
 	
 	# get how many soldiers are on player leader territory, below updates on early emit
-	var num_opponent_soldiers = GameState.board_state["territory_tally"][self.leader_territory][self.selected_opponent]["soldier"]
+	var num_opponent_soldiers = TerritoryHelper.get_player_territory_tally(
+		self.selected_opponent, self.leader_territory
+	)["soldier"]
 	var soldiers_already_moved = self.staged_moves.size() / 2
 	var effect_times = min(3, num_opponent_soldiers + soldiers_already_moved)
 	
@@ -57,6 +60,18 @@ func update_effect(player):
 	self.effect = []
 	for i in range(effect_times):
 		self.effect += [
-			{"deploy": -1, "territory": "leader_initial_occupied", "player": "other", "territory_selection_required": true},
-			{"deploy": 1, "territory": "leader_adjacent", "player": "other", "territory_selection_required": true, "finish_allowed": true, "emit": true},
+			{"deploy": -1, "player": "other", "territory_selection_required": true},
+			{"deploy": 1, "player": "other", "territory_selection_required": true, "finish_allowed": true, "emit": true},
 		]
+
+
+func get_card_step_territories(step: int) -> Array:
+	# step 1s: leader initial territory
+	if step % 2 == 0:
+		return [self.leader_territory]
+	
+	# step 2s: leader adjacent
+	if step % 2 == 1:
+		return TerritoryHelper.get_adjacent_by_connection_type(self.leader_territory, "all")
+	
+	return []

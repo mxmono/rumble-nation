@@ -20,6 +20,7 @@ config/icon="res://icon.svg"
 GameState="*res://gamestate.gd"
 GameManager="*res://game_manager.gd"
 TerritoryHelper="*res://territory_helper.gd"
+Helper="*res://helper.gd"
 
 [display]
 

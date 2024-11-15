@@ -1,4 +1,4 @@
-extends "res://cards/card.gd"
+extends Card
 
 
 func _ready() -> void:
@@ -6,11 +6,12 @@ func _ready() -> void:
 	card_name_jp = "追放"
 	description = "Move 1 opponent's soldier from a territory you occupy to an adjacent territory."
 	effect = [
-		{"deploy": -1, "territory": "occupied_both_soldiers", "player": "other", "territory_selection_required": true},
-		{"deploy": 1, "territory": "adjacent_selected", "player": "other", "territory_selection_required": true},
+		{"deploy": -1, "player": "other", "territory_selection_required": true},
+		{"deploy": 1, "player": "other", "territory_selection_required": true},
 	]
 	
 	super._ready()
+
 
 func is_condition_met(player):
 	"""Conditions:
@@ -26,22 +27,40 @@ func is_condition_met(player):
 	
 	return true
 
+
 func get_valid_targets(player):
 	"""Opponent must occupy the same territory."""
 	
-	var player_territories = GameState.players[player]["territories"]
-	var territory_tallies = GameState.board_state["territory_tally"]
+	var player_territories = TerritoryHelper.get_player_soldier_occupied(player)
 	var valid_targets = []
 	
-	for opponent in range(GameState.players.size()):
-		if opponent == player:
-			continue
-		
-		var opponent_territories = GameState.players[opponent]["territories"]
-		for opponent_territory in opponent_territories:
-			if player_territories.has(opponent_territory):
-				if territory_tallies[opponent_territory][opponent]["soldier"] > 0:
-					valid_targets.append(opponent)
-					break
+	for opponent in TerritoryHelper.get_opponents(player):
+		var opponent_territories = TerritoryHelper.get_player_soldier_occupied(opponent)
+		if Helper.get_array_overlap(player_territories, opponent_territories).size() > 0:
+			valid_targets.append(opponent)
 	
 	return valid_targets
+
+
+func get_card_step_territories(step: int) -> Array:
+	# step 1: self soldier occupied, opponent soldier occupied
+	if step == 0:
+		var player_soldier_occupied = TerritoryHelper.get_player_soldier_occupied(GameState.current_player)
+		var opponent_soldier_occupied = []
+		
+		# if opponent selected
+		if self.selected_opponent != -1:
+			opponent_soldier_occupied = TerritoryHelper.get_player_soldier_occupied(self.selected_opponent)
+		# if not selected, get all
+		else:
+			opponent_soldier_occupied = TerritoryHelper.get_players_soldier_occupied(
+				TerritoryHelper.get_opponents(GameState.current_player)
+			)
+		
+		return Helper.get_array_overlap(player_soldier_occupied, opponent_soldier_occupied)
+	
+	# step 2: adjacent to previously selected
+	if step == 1:
+		return TerritoryHelper.get_adjacent_by_connection_type(self.staged_moves[0][1], "all")
+	
+	return []

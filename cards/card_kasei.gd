@@ -1,4 +1,4 @@
-extends "res://cards/card.gd"
+extends Card
 
 
 func _ready() -> void:
@@ -6,10 +6,11 @@ func _ready() -> void:
 	card_name_jp = "加勢"
 	description = "Deploy 1 soldier from your hand to any territory your soldiers occupy."
 	effect = [
-		{"deploy": 1, "territory": "occupied_soldier", "player": "current", "territory_selection_required": true},
+		{"deploy": 1, "player": "current", "territory_selection_required": true},
 	]
 	
 	super._ready()
+
 
 func is_condition_met(player):
 	"""Conditions:
@@ -20,7 +21,15 @@ func is_condition_met(player):
 	if GameState.players[player]["soldier"] <= 0:
 		return false
 	
-	if TerritoryHelper.get_player_territories_soldiers_only(player).size() == 0:
+	if TerritoryHelper.get_player_soldier_occupied(player).size() == 0:
 		return false
 	
 	return true
+
+
+func get_card_step_territories(step: int) -> Array:
+	# step 1: soldier occupied
+	if step == 0:
+		return TerritoryHelper.get_player_soldier_occupied(GameState.current_player)
+	
+	return []

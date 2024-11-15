@@ -284,17 +284,7 @@ func get_card_step_territories(card):
 	if card.effect_index >= card.effect.size():
 		return []
 	
-	# if territory in "occupied", pass null to territory, since function is independent of it
-	# if territroy is "adjacent" pass previous move's selected territory
-	var current_player = GameState.current_player
-	var territory_arg = null
-	if card.effect[card.effect_index]["territory"].begins_with("adjacent"):
-		territory_arg = card.last_selected_territory
-	var valid_territories = card.territory_func_mapping[card.effect[card.effect_index]["territory"]].call(
-		current_player, territory_arg
-	)
-	
-	return valid_territories
+	return card.get_card_step_territories(card.effect_index)
 
 # get which moves to emit, start from last unemitted move
 func get_unemitted_moves(card) -> Array:
@@ -314,15 +304,9 @@ func get_unemitted_moves(card) -> Array:
 
 # highlight relevant territories on card selection
 func _on_card_selected(card):
-	# highlight which territories are eligible when a card is selected
-	var current_player = GameState.current_player
-	
-	# highlight the first move
-	var territories = card.territory_func_mapping[card.effect[0]["territory"]].call(
-		current_player, null
-	)
-	
-	var player_color = GameState.players[current_player]["color"]
+	# highlight which territories are eligible when a card is selected (1st move)
+	var territories = card.get_card_step_territories(card.effect_index)
+	var player_color = GameState.players[GameState.current_player]["color"]
 	highlight_territories(territories, player_color)
 
 func _on_card_reset():

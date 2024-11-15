@@ -1,4 +1,4 @@
-extends "res://cards/card.gd"
+extends Card
 
 
 func _ready() -> void:
@@ -6,11 +6,12 @@ func _ready() -> void:
 	card_name_jp = "退却"
 	description = "Return 2 of your soldiers to hand from any number of territories."
 	effect = [
-		{"deploy": -1, "territory": "occupied_soldier", "player": "current", "territory_selection_required": true, "emit": true},
-		{"deploy": -1, "territory": "occupied_soldier", "player": "current", "territory_selection_required": true},
+		{"deploy": -1, "player": "current", "territory_selection_required": true, "emit": true},
+		{"deploy": -1, "player": "current", "territory_selection_required": true},
 	]
 	
 	super._ready()
+
 
 func is_condition_met(player):
 	"""Conditions:
@@ -21,3 +22,11 @@ func is_condition_met(player):
 		return false
 	
 	return true
+
+
+func get_card_step_territories(step: int) -> Array:
+	# step 1 and 2: soldier occupied
+	if step == 0 or step == 1:
+		return TerritoryHelper.get_player_soldier_occupied(GameState.current_player)
+	
+	return []

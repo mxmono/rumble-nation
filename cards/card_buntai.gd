@@ -1,4 +1,4 @@
-extends "res://cards/card.gd"
+extends Card
 
 
 func _ready() -> void:
@@ -7,23 +7,25 @@ func _ready() -> void:
 	description = "Move half (round down) of your soldiers from one territory to any one adjacent territory."
 	
 	effect = [
-		{"deploy": -1, "territory": "_buntai", "player": "current", "territory_selection_required": true},
-		{"deploy": 1, "territory": "adjacent_selected", "player": "current", "territory_selection_required": true},
+		{"deploy": -1, "player": "current", "territory_selection_required": true},
+		{"deploy": 1, "player": "current", "territory_selection_required": true},
 	]
 	
 	super._ready()
 
-func is_condition_met(player):
+
+func is_condition_met(player) -> bool:
 	"""Conditions:
 		1. player must have >=2 soldiers on any territory.
 	"""
 	
-	if super.get_buntai_territories(player, null).size() > 0:
+	if get_card_step_territories(0).size() > 0:
 		return true
 	
 	return false
 
-func update_effect(player):
+
+func update_effect(player) -> void:
 
 	# half of the player's soldiers on selected territory
 	var board_state =GameState.board_state["territory_tally"]
@@ -36,3 +38,16 @@ func update_effect(player):
 	# update the effect
 	self.effect[0]["deploy"] = -deploy_count
 	self.effect[1]["deploy"] = deploy_count
+
+
+func get_card_step_territories(step) -> Array:
+	# step 1: territories with at least 2 soldiers with connections
+	if step == 0:
+		var territory_pool = TerritoryHelper.get_all_with_connection_type("all")
+		var territory_at_least_two_soldiers = TerritoryHelper.get_player_occupied_with_min_tally(
+			GameState.current_player, 2, 0
+		)
+		return Helper.get_array_overlap(territory_pool, territory_at_least_two_soldiers)
+	
+	# step 2: any adjacent to previous selected
+	return TerritoryHelper.get_adjacent_by_connection_type(self.staged_moves[0][1], "all")

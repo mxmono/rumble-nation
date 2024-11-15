@@ -1,4 +1,4 @@
-extends "res://cards/leader.gd"
+extends Leader
 
 
 func _ready() -> void:
@@ -10,6 +10,7 @@ func _ready() -> void:
 	
 	super._ready()
 
+
 func is_condition_met(player):
 	"""Conditions:
 		1. player has played the leader
@@ -20,7 +21,7 @@ func is_condition_met(player):
 	if GameState.players[player]["leader"] >= 1:
 		return false
 	
-	var leader_territory = get_leader_territory(player, null)[0]
+	var leader_territory = TerritoryHelper.get_player_leader_occupied(player)
 	
 	if GameState.board_state["territory_connections"][leader_territory]["land"].size() == 0:
 		return false
@@ -30,6 +31,7 @@ func is_condition_met(player):
 
 	return true
 
+
 func update_card_on_selection():
 	
 	super.update_card_on_selection()
@@ -37,12 +39,24 @@ func update_card_on_selection():
 	var current_player = GameState.current_player
 	
 	# update effects based on state when card is selected
-	var soldiers_on_leader_territory = GameState.board_state["territory_tally"][self.leader_territory][current_player]["soldier"]
 	self.effect = []
+	var soldiers_on_leader_territory = TerritoryHelper.get_player_territory_tally(
+		GameState.current_player, self.leader_territory
+	)["soldier"]
 	for i in range(soldiers_on_leader_territory):
-		self.effect.append(
-			{"deploy": -1, "territory": "leader_initial_occupied", "player": "current", "territory_selection_required": true}
-		)
-		self.effect.append(
-			{"deploy": 1, "territory": "leader_adjacent_land", "player": "current", "territory_selection_required": true, "finish_allowed": true, "emit": true},
-		)
+		self.effect += [
+			{"deploy": -1, "player": "current", "territory_selection_required": true},
+			{"deploy": 1, "player": "current", "territory_selection_required": true, "finish_allowed": true, "emit": true},
+		]
+
+
+func get_card_step_territories(step: int) -> Array:
+	# step 1s: leader initial
+	if step % 2 == 0:
+		return [self.leader_territory]
+	
+	# step 2s: adjacent to leader
+	if step % 2 == 1:
+		return TerritoryHelper.get_adjacent_by_connection_type(self.leader_territory, "all")
+	
+	return []

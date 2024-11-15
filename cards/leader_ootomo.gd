@@ -1,4 +1,4 @@
-extends "res://cards/leader.gd"
+extends Leader
 
 
 func _ready() -> void:
@@ -9,15 +9,14 @@ func _ready() -> void:
 	# effect needs to be updated, based on how many opponent pieces are available on the board,
 	# and on how many soldiers the player still has left
 	effect = [
-		{"deploy": -1, "territory": "leader_adjacent_opponent_occupied", "player": "other", "territory_selection_required": true},
-		{"deploy": 1, "territory": "previous_selected", "player": "current", "territory_selection_required": false, "finish_allowed": true, "emit": true},
-		{"deploy": -1, "territory": "_ootomo_step_2", "player": "other", "territory_selection_required": true},
-		{"deploy": 1, "territory": "previous_selected", "player": "current", "territory_selection_required": false, "finish_allowed": true, "emit": true},
+		{"deploy": -1, "player": "other", "territory_selection_required": true},
+		{"deploy": 1, "player": "current", "territory_selection_required": false, "finish_allowed": true, "emit": true},
+		{"deploy": -1, "player": "other", "territory_selection_required": true},
+		{"deploy": 1, "player": "current", "territory_selection_required": false, "finish_allowed": true, "emit": true},
 	]
 	
-	territory_func_mapping.merge({"_ootomo_step_2": get_ootomo_step_2_territories})
-	
 	super._ready()
+
 
 func is_condition_met(player):
 	"""Conditions:
@@ -35,34 +34,35 @@ func is_condition_met(player):
 	
 	return true
 
-func get_valid_targets(player):
+
+func get_valid_targets(player: int) -> Array:
 	"""Players who have soldiers on current player leader adjacent territory."""
 	
-	var leader_adjacent_territories = get_leader_adjacent_territories(player, null)
-
+	# this is only called on first click, so okay to get leader occupied dynamically
+	var leader_adjacent_territories = TerritoryHelper.get_adjacent_by_connection_type(
+		TerritoryHelper.get_player_leader_occupied(player), "all"
+	)
 	var valid_targets = []
-	for territory in leader_adjacent_territories:
-		var territory_tally = GameState.board_state["territory_tally"][territory]
-		for opponent in range(territory_tally.size()):
-			if opponent == player:
-				continue
-			if territory_tally[opponent]["soldier"] > 0:
-				if not valid_targets.has(opponent):
-					valid_targets.append(opponent)
+	for opponent in TerritoryHelper.get_opponents(player):
+		var opponent_territories = TerritoryHelper.get_player_soldier_occupied(opponent)
+		if Helper.get_array_overlap(leader_adjacent_territories, opponent_territories).size() > 0:
+			valid_targets.append(opponent)
 	
 	return valid_targets
 
-func get_valid_targets_on_territory(player, territory_index) -> Array:
+
+func get_valid_targets_on_territory(player: int, territory_index: int) -> Array:
 	# override parent function, as the territory must have soldiers (not any piece)
 	
 	var target_pool = get_valid_targets(player)
-	print("target pool: ", target_pool)
+
 	var valid_targets = []
 	for target in target_pool:
 		if GameState.board_state["territory_tally"][territory_index][target]["soldier"] > 0:
 			valid_targets.append(target)
 	
 	return valid_targets
+
 
 func update_card_on_selection():
 	"""Update how many steps are allowed based on opponent piece and hand piece."""
@@ -71,15 +71,15 @@ func update_card_on_selection():
 	
 	var current_player = GameState.current_player
 	var valid_targets = get_valid_targets(current_player)
-	var leader_adjacent_territories = get_leader_adjacent_territories(current_player, null)
+	var leader_adjacent_territories = TerritoryHelper.get_adjacent_by_connection_type(
+		self.leader_territory, "all"
+	)
 	
-	# if valid targets only have 1 soldier in total, remove 2nd step
+	# if all of valid targets only have 1 soldier in total, remove 2nd bounce
 	var valid_soldiers = 0
 	for territory in leader_adjacent_territories:
 		var territory_tally = GameState.board_state["territory_tally"][territory]
-		for opponent in range(territory_tally.size()):
-			if opponent == current_player:
-				continue
+		for opponent in TerritoryHelper.get_opponents(current_player):
 			valid_soldiers += territory_tally[opponent]["soldier"]
 	
 	if valid_soldiers == 1:
@@ -89,17 +89,45 @@ func update_card_on_selection():
 	if GameState.players[current_player]["soldier"] == 1:
 		self.effect = self.effect.slice(0, 2)
 
+
 func update_effect(player):
 	"""Given player can choose different opponents, reset opponent after 1 step."""
 	if self.effect_index == 1:  # called before the increment before staged moves
 		self.selected_opponent = -1
 
-func get_ootomo_step_2_territories(player, territory_index):
-	"""Can't be the same as previous step."""
+
+func get_card_step_territories(step: int) -> Array:
+	# step 1: adjacent to player leader + opponent soldier occupied
+	if step == 0:
+		var leader_adjacents = TerritoryHelper.get_adjacent_by_connection_type(self.leader_territory, "all")
+		var opponent_soldier_occupied = []
+		
+		# if opponent is known
+		if self.selected_opponent != -1:
+			opponent_soldier_occupied = TerritoryHelper.get_player_soldier_occupied(self.selected_opponent)
+			
+		# otherwise get all opponents' soldier occupied
+		else:
+			opponent_soldier_occupied = TerritoryHelper.get_players_soldier_occupied(
+				TerritoryHelper.get_opponents(GameState.current_player)
+			)
+		
+		return Helper.get_array_overlap(leader_adjacents, opponent_soldier_occupied)
 	
-	var valid_territories = get_leader_adjacent_territories_occupied_by_any_opponent(player, null)
-	var selected_territory = self.staged_moves[0][1]
+	# step 2: same as step 1 (replce move)
+	if step == 1:
+		return self.staged_moves[0][1]
 	
-	valid_territories.erase(selected_territory)
+	# step 3: same criteria as step 1, but step 1 territory is no longer valid
+	if step == 2:
+		var leader_adjacents = TerritoryHelper.get_adjacent_by_connection_type(self.leader_territory, "all")
+		var opponent_soldier_occupied = TerritoryHelper.get_player_soldier_occupied(self.selected_opponent)
+		var territories = Helper.get_array_overlap(leader_adjacents, opponent_soldier_occupied)
+		territories.erase(self.staged_moves[0][1])
+		return territories
 	
-	return valid_territories
+	# step 4: same as step 3:
+	if step == 3:
+		return self.staged_moves[2][1]
+	
+	return []

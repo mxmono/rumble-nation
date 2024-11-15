@@ -19,10 +19,10 @@ const CARD_BUTTONS_PARENT = "GameButtons/Card/"
 var dice_move_options = []
 
 # cards
-#var cards = ["Kasei", "Monomi", "Hitojichi", "Tsuihou", "Muhon", "Otori", "Suigun", "Yamagoe", "Taikyaku", "Shinobi", "Buntai", "Jouraku"]
-#var leaders = ["Ootomo"]
+var cards = ["Kasei", "Monomi", "Hitojichi", "Tsuihou", "Muhon", "Otori", "Suigun", "Yamagoe", "Taikyaku", "Shinobi", "Buntai", "Jouraku"]
 var leaders = ["Mouri", "Chosokabe", "Uesugi", "Oda", "Takeda"]
-var cards = ["Otori", "Taikyaku"]
+#var cards = ["Yamagoe"]
+#var leaders = ["Ootomo"]
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
