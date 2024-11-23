@@ -2,7 +2,7 @@ extends Leader
 
 
 func _ready() -> void:
-	card_name = "Chosokabe Motochika"
+	card_name = "Chosokabe M"
 	card_name_jp = "長宗我部元親"
 	description = "Move up to 3 pieces (leader or soldier) from your leader territory to any number of adjacent territories by water."
 	effect = []
@@ -56,8 +56,10 @@ func update_effect(player):
 			if i == 0:
 				has_leader = true
 		
-		self.effect.append({"deploy": -1, "player": "current", "territory_selection_required": true, "has_leader": has_leader})
-		self.effect.append({"deploy": 1, "player": "current", "territory_selection_required": true, "has_leader": has_leader, "finish_allowed": true, "emit": true})
+		self.effect += [
+			{"deploy": -1, "player": "current", "territory_selection_required": true, "has_leader": has_leader},
+			{"deploy": 1, "player": "current", "territory_selection_required": true, "has_leader": has_leader, "finish_allowed": true, "emit": true},
+		]
 
 
 func get_card_step_territories(step: int) -> Array:

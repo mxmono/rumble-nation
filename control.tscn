@@ -1,6 +1,9 @@
-[gd_scene load_steps=17 format=3 uid="uid://bhuosep1twjl0"]
+[gd_scene load_steps=19 format=3 uid="uid://bhuosep1twjl0"]
 
 [ext_resource type="Script" path="res://control.gd" id="1_x8hjk"]
+[ext_resource type="Script" path="res://ui_control.gd" id="2_ugd3a"]
+
+[sub_resource type="Theme" id="Theme_luytd"]
 
 [sub_resource type="InputEventKey" id="InputEventKey_8umb0"]
 device = -1
@@ -71,6 +74,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+theme = SubResource("Theme_luytd")
 script = ExtResource("1_x8hjk")
 
 [node name="GameButtons" type="TabContainer" parent="."]
@@ -79,9 +83,10 @@ offset_left = 1032.0
 offset_top = 48.0
 offset_right = 1264.0
 offset_bottom = 656.0
-current_tab = 0
+current_tab = 2
 
 [node name="Dice" type="Control" parent="GameButtons"]
+visible = false
 layout_mode = 2
 metadata/_tab_index = 0
 
@@ -104,7 +109,12 @@ label_settings = SubResource("LabelSettings_qtri6")
 horizontal_alignment = 1
 autowrap_mode = 3
 
-[node name="DiceOption1" type="Button" parent="GameButtons/Dice"]
+[node name="DiceOptions" type="Control" parent="GameButtons/Dice"]
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="DiceOption1" type="Button" parent="GameButtons/Dice/DiceOptions"]
 visible = false
 layout_mode = 2
 offset_left = 24.0
@@ -114,7 +124,7 @@ offset_bottom = 169.0
 disabled = true
 shortcut = SubResource("Shortcut_u38ye")
 
-[node name="DiceOption1L" type="Button" parent="GameButtons/Dice"]
+[node name="DiceOption1L" type="Button" parent="GameButtons/Dice/DiceOptions"]
 visible = false
 layout_mode = 2
 offset_left = 168.0
@@ -125,7 +135,7 @@ disabled = true
 shortcut = SubResource("Shortcut_etmgr")
 text = "L"
 
-[node name="DiceOption2" type="Button" parent="GameButtons/Dice"]
+[node name="DiceOption2" type="Button" parent="GameButtons/Dice/DiceOptions"]
 visible = false
 layout_mode = 0
 offset_left = 24.0
@@ -135,7 +145,7 @@ offset_bottom = 217.0
 disabled = true
 shortcut = SubResource("Shortcut_48qcy")
 
-[node name="DiceOption2L" type="Button" parent="GameButtons/Dice"]
+[node name="DiceOption2L" type="Button" parent="GameButtons/Dice/DiceOptions"]
 visible = false
 layout_mode = 0
 offset_left = 168.0
@@ -146,7 +156,7 @@ disabled = true
 shortcut = SubResource("Shortcut_g60yr")
 text = "L"
 
-[node name="DiceOption3" type="Button" parent="GameButtons/Dice"]
+[node name="DiceOption3" type="Button" parent="GameButtons/Dice/DiceOptions"]
 visible = false
 layout_mode = 0
 offset_left = 24.0
@@ -156,7 +166,7 @@ offset_bottom = 265.0
 disabled = true
 shortcut = SubResource("Shortcut_wmw3x")
 
-[node name="DiceOption3L" type="Button" parent="GameButtons/Dice"]
+[node name="DiceOption3L" type="Button" parent="GameButtons/Dice/DiceOptions"]
 visible = false
 layout_mode = 0
 offset_left = 168.0
@@ -170,7 +180,7 @@ text = "L"
 [node name="Card" type="VBoxContainer" parent="GameButtons"]
 visible = false
 layout_mode = 2
-theme_override_constants/separation = 10
+theme_override_constants/separation = 5
 metadata/_tab_index = 1
 
 [node name="CardTray" type="VBoxContainer" parent="GameButtons/Card"]
@@ -190,7 +200,6 @@ disabled = true
 text = "Reset"
 
 [node name="Leader" type="VBoxContainer" parent="GameButtons"]
-visible = false
 layout_mode = 2
 metadata/_tab_index = 2
 
@@ -209,6 +218,12 @@ text = "Confirm"
 layout_mode = 2
 disabled = true
 text = "Reset"
+
+[node name="UI" type="Control" parent="."]
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+script = ExtResource("2_ugd3a")
 
 [connection signal="dice_rolled" from="." to="." method="_on_dice_rolled"]
 [connection signal="dice_selected" from="." to="." method="_on_dice_selected"]

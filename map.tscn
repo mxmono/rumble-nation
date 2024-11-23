@@ -1,10 +1,12 @@
-[gd_scene load_steps=7 format=3 uid="uid://btakum1qc8ovv"]
+[gd_scene load_steps=9 format=3 uid="uid://btakum1qc8ovv"]
 
 [ext_resource type="Texture2D" uid="uid://dtn405d2autni" path="res://icons/map.png" id="1_rg7fb"]
-[ext_resource type="Script" path="res://board.gd" id="1_upj78"]
+[ext_resource type="Script" path="res://board_old.gd" id="1_upj78"]
 [ext_resource type="Script" path="res://territory.gd" id="2_1w8ia"]
 [ext_resource type="FontFile" uid="uid://bgwd66m3orfrw" path="res://fonts/VT323-Regular.ttf" id="2_g0uqw"]
 [ext_resource type="Texture2D" uid="uid://7p3l4uq1qut1" path="res://icons/map-border.png" id="5_2nac4"]
+[ext_resource type="Texture2D" uid="uid://dn8rpumuk8jli" path="res://icons/lead1.png" id="6_1c4uv"]
+[ext_resource type="Texture2D" uid="uid://cvhkdf5tbnm6d" path="res://icons/char1.png" id="7_apwsk"]
 
 [sub_resource type="LabelSettings" id="LabelSettings_8fms1"]
 line_spacing = 0.0
@@ -47,7 +49,6 @@ horizontal_alignment = 1
 position = Vector2(-56.5502, -6.65961)
 scale = Vector2(0.112875, 0.112875)
 script = ExtResource("2_1w8ia")
-territory_index = 1
 
 [node name="Polygon2D" type="Polygon2D" parent="Map/Territory1"]
 
@@ -70,7 +71,6 @@ horizontal_alignment = 1
 position = Vector2(-59.5979, 14.6737)
 scale = Vector2(0.112875, 0.112875)
 script = ExtResource("2_1w8ia")
-territory_index = 2
 
 [node name="Polygon2D" type="Polygon2D" parent="Map/Territory2"]
 
@@ -93,7 +93,6 @@ horizontal_alignment = 1
 position = Vector2(-39.1675, -24.1552)
 scale = Vector2(0.112875, 0.112875)
 script = ExtResource("2_1w8ia")
-territory_index = 3
 
 [node name="Polygon2D" type="Polygon2D" parent="Map/Territory3"]
 
@@ -116,7 +115,6 @@ horizontal_alignment = 1
 position = Vector2(-27.8801, -24.7196)
 scale = Vector2(0.112875, 0.112875)
 script = ExtResource("2_1w8ia")
-territory_index = 4
 
 [node name="Polygon2D" type="Polygon2D" parent="Map/Territory4"]
 
@@ -139,7 +137,6 @@ horizontal_alignment = 1
 position = Vector2(-9.59437, -22.8007)
 scale = Vector2(0.112875, 0.112875)
 script = ExtResource("2_1w8ia")
-territory_index = 5
 
 [node name="Polygon2D" type="Polygon2D" parent="Map/Territory5"]
 position = Vector2(0, -3.05176e-05)
@@ -163,7 +160,6 @@ horizontal_alignment = 1
 position = Vector2(-11.1746, 3.61199)
 scale = Vector2(0.112875, 0.112875)
 script = ExtResource("2_1w8ia")
-territory_index = 6
 
 [node name="Polygon2D" type="Polygon2D" parent="Map/Territory6"]
 
@@ -186,7 +182,6 @@ horizontal_alignment = 1
 position = Vector2(-0.903004, -19.5273)
 scale = Vector2(0.112875, 0.112875)
 script = ExtResource("2_1w8ia")
-territory_index = 7
 
 [node name="Polygon2D" type="Polygon2D" parent="Map/Territory7"]
 
@@ -209,7 +204,6 @@ horizontal_alignment = 1
 position = Vector2(3.95061, -25.8483)
 scale = Vector2(0.112875, 0.112875)
 script = ExtResource("2_1w8ia")
-territory_index = 8
 
 [node name="Polygon2D" type="Polygon2D" parent="Map/Territory8"]
 
@@ -232,7 +226,6 @@ horizontal_alignment = 1
 position = Vector2(17.4956, 4.17636)
 scale = Vector2(0.112875, 0.112875)
 script = ExtResource("2_1w8ia")
-territory_index = 9
 
 [node name="Polygon2D" type="Polygon2D" parent="Map/Territory9"]
 
@@ -255,7 +248,6 @@ horizontal_alignment = 1
 position = Vector2(25.0582, -28.1058)
 scale = Vector2(0.112875, 0.112875)
 script = ExtResource("2_1w8ia")
-territory_index = 10
 
 [node name="Polygon2D" type="Polygon2D" parent="Map/Territory10"]
 
@@ -275,6 +267,106 @@ label_settings = SubResource("LabelSettings_8fms1")
 horizontal_alignment = 1
 
 [node name="Border" type="Sprite2D" parent="."]
+visible = false
 position = Vector2(568, 284)
 scale = Vector2(8.859, 8.859)
 texture = ExtResource("5_2nac4")
+
+[node name="T1" type="Node2D" parent="."]
+visible = false
+position = Vector2(94, 268)
+
+[node name="Node2D" type="Node2D" parent="T1"]
+
+[node name="Lead2" type="Sprite2D" parent="T1/Node2D"]
+position = Vector2(24, 24)
+scale = Vector2(1.5, 1.5)
+texture = ExtResource("6_1c4uv")
+
+[node name="Char1" type="Sprite2D" parent="T1/Node2D"]
+position = Vector2(48, 24)
+texture = ExtResource("7_apwsk")
+
+[node name="Char2" type="Sprite2D" parent="T1/Node2D"]
+position = Vector2(64, 24)
+texture = ExtResource("7_apwsk")
+
+[node name="Char5" type="Sprite2D" parent="T1/Node2D"]
+position = Vector2(80, 24)
+texture = ExtResource("7_apwsk")
+
+[node name="Char3" type="Sprite2D" parent="T1/Node2D"]
+position = Vector2(96, 24)
+texture = ExtResource("7_apwsk")
+
+[node name="Node2D2" type="Node2D" parent="T1"]
+position = Vector2(0, 24)
+
+[node name="Lead2" type="Sprite2D" parent="T1/Node2D2"]
+position = Vector2(24, 24)
+scale = Vector2(1.5, 1.5)
+texture = ExtResource("6_1c4uv")
+
+[node name="Char1" type="Sprite2D" parent="T1/Node2D2"]
+position = Vector2(48, 24)
+texture = ExtResource("7_apwsk")
+
+[node name="Char2" type="Sprite2D" parent="T1/Node2D2"]
+position = Vector2(64, 24)
+texture = ExtResource("7_apwsk")
+
+[node name="Char5" type="Sprite2D" parent="T1/Node2D2"]
+position = Vector2(80, 24)
+texture = ExtResource("7_apwsk")
+
+[node name="Char3" type="Sprite2D" parent="T1/Node2D2"]
+position = Vector2(96, 24)
+texture = ExtResource("7_apwsk")
+
+[node name="Node2D3" type="Node2D" parent="T1"]
+position = Vector2(0, 48)
+
+[node name="Lead2" type="Sprite2D" parent="T1/Node2D3"]
+position = Vector2(24, 24)
+scale = Vector2(1.5, 1.5)
+texture = ExtResource("6_1c4uv")
+
+[node name="Char1" type="Sprite2D" parent="T1/Node2D3"]
+position = Vector2(48, 24)
+texture = ExtResource("7_apwsk")
+
+[node name="Char2" type="Sprite2D" parent="T1/Node2D3"]
+position = Vector2(64, 24)
+texture = ExtResource("7_apwsk")
+
+[node name="Char5" type="Sprite2D" parent="T1/Node2D3"]
+position = Vector2(80, 24)
+texture = ExtResource("7_apwsk")
+
+[node name="Char3" type="Sprite2D" parent="T1/Node2D3"]
+position = Vector2(96, 24)
+texture = ExtResource("7_apwsk")
+
+[node name="Node2D4" type="Node2D" parent="T1"]
+position = Vector2(0, 72)
+
+[node name="Lead2" type="Sprite2D" parent="T1/Node2D4"]
+position = Vector2(24, 24)
+scale = Vector2(1.5, 1.5)
+texture = ExtResource("6_1c4uv")
+
+[node name="Char1" type="Sprite2D" parent="T1/Node2D4"]
+position = Vector2(48, 24)
+texture = ExtResource("7_apwsk")
+
+[node name="Char2" type="Sprite2D" parent="T1/Node2D4"]
+position = Vector2(64, 24)
+texture = ExtResource("7_apwsk")
+
+[node name="Char5" type="Sprite2D" parent="T1/Node2D4"]
+position = Vector2(80, 24)
+texture = ExtResource("7_apwsk")
+
+[node name="Char3" type="Sprite2D" parent="T1/Node2D4"]
+position = Vector2(96, 24)
+texture = ExtResource("7_apwsk")

@@ -23,6 +23,17 @@ func get_players_occupied(players: Array) -> Array:
 	return territories
 
 
+func get_players_on_territory(territory: int) -> Array:
+	"""Return array of players with pieces on territory."""
+	var players = []
+	
+	for player in range(GameState.num_players):
+		if GameState.players[player]["territories"].has(territory):
+			players.append(player)
+	
+	return players
+
+
 func get_player_territory_tally(player:int, territory: int) -> Dictionary:
 	return GameState.board_state["territory_tally"][territory][player]
 

@@ -56,7 +56,6 @@ func get_card_step_territories(step: int) -> Array:
 			opponent_soldier_occupied = TerritoryHelper.get_players_soldier_occupied(
 				TerritoryHelper.get_opponents(GameState.current_player)
 			)
-		
 		return Helper.get_array_overlap(player_soldier_occupied, opponent_soldier_occupied)
 	
 	# step 2: adjacent to previously selected

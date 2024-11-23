@@ -1,0 +1,173 @@
+[gd_scene load_steps=15 format=3 uid="uid://toymkd56ew5r"]
+
+[ext_resource type="Texture2D" uid="uid://chi31hw4ridbg" path="res://icons/close.png" id="1_36tvv"]
+[ext_resource type="Texture2D" uid="uid://n0jxpacuob4o" path="res://icons/medal1.png" id="1_gq0xd"]
+[ext_resource type="Texture2D" uid="uid://cvhkdf5tbnm6d" path="res://icons/char1.png" id="1_l2bs8"]
+[ext_resource type="Script" path="res://gameover_menu.gd" id="1_sx0tq"]
+[ext_resource type="Texture2D" uid="uid://dn8rpumuk8jli" path="res://icons/lead1.png" id="2_6irkp"]
+[ext_resource type="FontFile" uid="uid://bgwd66m3orfrw" path="res://fonts/VT323-Regular.ttf" id="3_mlsbc"]
+[ext_resource type="Texture2D" uid="uid://diftevdlg7cmx" path="res://icons/char2.png" id="4_xdysc"]
+[ext_resource type="Texture2D" uid="uid://dph4hlajss8we" path="res://icons/lead2.png" id="5_jica0"]
+[ext_resource type="Texture2D" uid="uid://dptoqt6vyo4of" path="res://icons/char3.png" id="6_1dido"]
+[ext_resource type="Texture2D" uid="uid://scx3hess5oys" path="res://icons/lead3.png" id="7_7b0a3"]
+[ext_resource type="Texture2D" uid="uid://cnn6iguti0pju" path="res://icons/char4.png" id="8_dqlsh"]
+[ext_resource type="Texture2D" uid="uid://bwypb3vt5vfuw" path="res://icons/lead4.png" id="9_oq5rd"]
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_cs6sf"]
+animations = [{
+"frames": [{
+"duration": 2.0,
+"texture": ExtResource("1_l2bs8")
+}, {
+"duration": 1.0,
+"texture": ExtResource("2_6irkp")
+}],
+"loop": true,
+"name": &"1",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 2.0,
+"texture": ExtResource("4_xdysc")
+}, {
+"duration": 1.0,
+"texture": ExtResource("5_jica0")
+}],
+"loop": true,
+"name": &"2",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 2.0,
+"texture": ExtResource("6_1dido")
+}, {
+"duration": 1.0,
+"texture": ExtResource("7_7b0a3")
+}],
+"loop": true,
+"name": &"3",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 2.0,
+"texture": ExtResource("8_dqlsh")
+}, {
+"duration": 1.0,
+"texture": ExtResource("9_oq5rd")
+}],
+"loop": true,
+"name": &"4",
+"speed": 5.0
+}]
+
+[sub_resource type="Theme" id="Theme_pavbl"]
+default_font = ExtResource("3_mlsbc")
+default_font_size = 16
+
+[node name="GameOverMenu" type="Node2D"]
+script = ExtResource("1_sx0tq")
+
+[node name="Main" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="Panel" type="Panel" parent="Main"]
+offset_right = 832.0
+offset_bottom = 399.0
+
+[node name="ColorRect" type="ColorRect" parent="Main/Panel"]
+layout_mode = 0
+offset_right = 832.0
+offset_bottom = 400.0
+color = Color(0, 0, 0, 0.5)
+
+[node name="CloseButton" type="Button" parent="Main"]
+offset_left = 800.0
+offset_right = 832.0
+offset_bottom = 32.0
+icon = ExtResource("1_36tvv")
+
+[node name="Medal1" type="Sprite2D" parent="Main"]
+position = Vector2(360, 128)
+scale = Vector2(2, 2)
+texture = ExtResource("1_gq0xd")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="Main"]
+position = Vector2(416, 128)
+scale = Vector2(2, 2)
+sprite_frames = SubResource("SpriteFrames_cs6sf")
+animation = &"4"
+
+[node name="Place1Label" type="RichTextLabel" parent="Main"]
+custom_minimum_size = Vector2(300, 40)
+offset_left = 16.0
+offset_top = 152.0
+offset_right = 816.0
+offset_bottom = 208.0
+theme = SubResource("Theme_pavbl")
+bbcode_enabled = true
+text = "[center][font size=48]Reddo 27 [/font][img width=32]res://icons/sword2.png[/img] [img width=32]res://icons/card-both.png[/img]"
+
+[node name="Scores" type="HBoxContainer" parent="Main"]
+offset_left = 16.0
+offset_top = 232.0
+offset_right = 816.0
+offset_bottom = 360.0
+theme_override_constants/separation = 20
+alignment = 1
+
+[node name="Place2Label" type="RichTextLabel" parent="Main/Scores"]
+custom_minimum_size = Vector2(256, 40)
+layout_mode = 2
+theme = SubResource("Theme_pavbl")
+bbcode_enabled = true
+text = "[img width=32]res://icons/medal2.png[/img][img width=32]res://icons/char2.png[/img][font size=24] Redoooo 27 [/font][img width=24]res://icons/sword2.png[/img] [img width=24]res://icons/card-both.png[/img]"
+
+[node name="Place3Label" type="RichTextLabel" parent="Main/Scores"]
+visible = false
+custom_minimum_size = Vector2(256, 40)
+layout_mode = 2
+theme = SubResource("Theme_pavbl")
+bbcode_enabled = true
+text = "[img width=32]res://icons/medal2.png[/img][img width=32]res://icons/char2.png[/img][font size=24] Redoooo 27 [/font][img width=24]res://icons/sword2.png[/img] [img width=24]res://icons/card-both.png[/img]"
+
+[node name="Place4Label" type="RichTextLabel" parent="Main/Scores"]
+visible = false
+custom_minimum_size = Vector2(256, 40)
+layout_mode = 2
+theme = SubResource("Theme_pavbl")
+bbcode_enabled = true
+text = "[img width=32]res://icons/medal2.png[/img][img width=32]res://icons/char2.png[/img][font size=24] Redoooo 27 [/font][img width=24]res://icons/sword2.png[/img] [img width=24]res://icons/card-both.png[/img]"
+
+[node name="HBoxContainer" type="HBoxContainer" parent="Main"]
+offset_left = 192.0
+offset_top = 304.0
+offset_right = 640.0
+offset_bottom = 344.0
+theme_override_constants/separation = 20
+alignment = 1
+
+[node name="RematchButton" type="Button" parent="Main/HBoxContainer"]
+custom_minimum_size = Vector2(120, 0)
+layout_mode = 2
+text = "REMATCH"
+
+[node name="MainMenuButton" type="Button" parent="Main/HBoxContainer"]
+custom_minimum_size = Vector2(120, 0)
+layout_mode = 2
+text = "MAIN MENU"
+
+[node name="QuitButton" type="Button" parent="Main/HBoxContainer"]
+custom_minimum_size = Vector2(120, 0)
+layout_mode = 2
+text = "QUIT"
+
+[node name="ShowButton" type="Button" parent="."]
+visible = false
+offset_left = 344.0
+offset_top = 488.0
+offset_right = 488.0
+offset_bottom = 528.0
+text = "SHOW RESULT"

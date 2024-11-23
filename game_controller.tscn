@@ -1,27 +1,113 @@
-[gd_scene load_steps=6 format=3 uid="uid://g5nmapmpmw6v"]
+[gd_scene load_steps=26 format=3 uid="uid://g5nmapmpmw6v"]
 
-[ext_resource type="Script" path="res://game_controller.gd" id="1_8uaah"]
+[ext_resource type="Script" path="res://turn_logic.gd" id="1_8uaah"]
 [ext_resource type="PackedScene" uid="uid://drhj1usffqkax" path="res://pause_menu.tscn" id="2_du5q5"]
-[ext_resource type="PackedScene" uid="uid://btakum1qc8ovv" path="res://map.tscn" id="3_2j6hj"]
 [ext_resource type="PackedScene" uid="uid://bhuosep1twjl0" path="res://control.tscn" id="3_5g63j"]
+[ext_resource type="Script" path="res://info.gd" id="3_qt77f"]
+[ext_resource type="FontFile" uid="uid://bgwd66m3orfrw" path="res://fonts/VT323-Regular.ttf" id="4_jbmg8"]
+[ext_resource type="PackedScene" uid="uid://bytjjtpjcxxe2" path="res://board.tscn" id="6_yhtb1"]
+[ext_resource type="PackedScene" uid="uid://clmaiveja705w" path="res://card_template.tscn" id="7_h0jj3"]
+[ext_resource type="PackedScene" uid="uid://toymkd56ew5r" path="res://gameover_menu.tscn" id="8_bbj7e"]
+
+[sub_resource type="Theme" id="Theme_xckhs"]
+default_font = ExtResource("4_jbmg8")
+default_font_size = 25
 
 [sub_resource type="GDScript" id="GDScript_t2318"]
 
-[node name="GameController" type="Node2D"]
+[sub_resource type="InputEventKey" id="InputEventKey_8umb0"]
+device = -1
+keycode = 82
+unicode = 114
+
+[sub_resource type="Shortcut" id="Shortcut_brrw2"]
+events = [SubResource("InputEventKey_8umb0")]
+
+[sub_resource type="LabelSettings" id="LabelSettings_5oqaq"]
+font_size = 27
+
+[sub_resource type="InputEventKey" id="InputEventKey_28gtv"]
+device = -1
+keycode = 49
+unicode = 49
+
+[sub_resource type="Shortcut" id="Shortcut_wmm83"]
+events = [SubResource("InputEventKey_28gtv")]
+
+[sub_resource type="InputEventKey" id="InputEventKey_rilot"]
+device = -1
+ctrl_pressed = true
+keycode = 49
+unicode = 49
+
+[sub_resource type="Shortcut" id="Shortcut_bekj0"]
+events = [SubResource("InputEventKey_rilot")]
+
+[sub_resource type="InputEventKey" id="InputEventKey_g3thb"]
+device = -1
+keycode = 50
+unicode = 50
+
+[sub_resource type="Shortcut" id="Shortcut_5vwm6"]
+events = [SubResource("InputEventKey_g3thb")]
+
+[sub_resource type="InputEventKey" id="InputEventKey_kk50h"]
+device = -1
+ctrl_pressed = true
+keycode = 50
+unicode = 50
+
+[sub_resource type="Shortcut" id="Shortcut_dqu11"]
+events = [SubResource("InputEventKey_kk50h")]
+
+[sub_resource type="InputEventKey" id="InputEventKey_fv78p"]
+device = -1
+keycode = 51
+unicode = 51
+
+[sub_resource type="Shortcut" id="Shortcut_3t2gv"]
+events = [SubResource("InputEventKey_fv78p")]
+
+[sub_resource type="InputEventKey" id="InputEventKey_y2jlo"]
+device = -1
+ctrl_pressed = true
+keycode = 51
+unicode = 51
+
+[sub_resource type="Shortcut" id="Shortcut_dun44"]
+events = [SubResource("InputEventKey_y2jlo")]
+
+[node name="Game" type="Node2D"]
 script = ExtResource("1_8uaah")
 
 [node name="Control" parent="." instance=ExtResource("3_5g63j")]
+offset_top = 48.0
+offset_bottom = 48.0
 
 [node name="Info" type="Node2D" parent="."]
+script = ExtResource("3_qt77f")
+
+[node name="ColorRect" type="ColorRect" parent="Info"]
+offset_right = 1280.0
+offset_bottom = 88.0
+color = Color(0, 0, 0, 0.422)
 
 [node name="PlayerLabel" type="Label" parent="Info"]
+visible = false
 offset_left = 217.0
 offset_top = 14.0
 offset_right = 358.0
 offset_bottom = 58.0
 
-[node name="Map" parent="." instance=ExtResource("3_2j6hj")]
-position = Vector2(17, 109)
+[node name="PiecesLeftLabel" type="RichTextLabel" parent="Info"]
+offset_left = 48.0
+offset_top = 32.0
+offset_right = 1232.0
+offset_bottom = 96.0
+theme = SubResource("Theme_xckhs")
+bbcode_enabled = true
+text = "[center][color=ff00ff]Reddo: [img width=32]res://icons/lead1.png[/img]x1 [img]res://icons/char1.png[/img]x16    [img width=32]res://icons/lead2.png[/img]x1 [img]res://icons/char2.png[/img]x16[/color]"
+fit_content = true
 
 [node name="MenuCanvas" type="CanvasLayer" parent="."]
 script = SubResource("GDScript_t2318")
@@ -37,5 +123,159 @@ grow_horizontal = 2
 grow_vertical = 2
 size_flags_horizontal = 4
 size_flags_vertical = 4
+
+[node name="Board" parent="." instance=ExtResource("6_yhtb1")]
+position = Vector2(-32, 88)
+
+[node name="Control2" type="Control" parent="."]
+visible = false
+layout_mode = 3
+anchors_preset = 0
+offset_left = 63.0
+offset_top = 532.0
+offset_right = 103.0
+offset_bottom = 572.0
+
+[node name="Dice" type="Control" parent="Control2"]
+layout_mode = 3
+anchors_preset = 0
+offset_left = 20.0
+offset_top = 22.0
+offset_right = 20.0
+offset_bottom = 22.0
+metadata/_tab_index = 0
+
+[node name="RollDiceButton" type="Button" parent="Control2/Dice"]
+layout_mode = 2
+offset_right = 96.0
+offset_bottom = 88.0
+shortcut = SubResource("Shortcut_brrw2")
+text = "Roll Dice"
+
+[node name="ResultLabel" type="Label" parent="Control2/Dice"]
+layout_mode = 2
+offset_top = 96.0
+offset_right = 96.0
+offset_bottom = 136.0
+text = "1  3  5"
+label_settings = SubResource("LabelSettings_5oqaq")
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="DiceOption1" type="Button" parent="Control2/Dice"]
+layout_mode = 2
+offset_left = 104.0
+offset_right = 240.0
+offset_bottom = 40.0
+disabled = true
+shortcut = SubResource("Shortcut_wmm83")
+
+[node name="DiceOption1L" type="Button" parent="Control2/Dice"]
+layout_mode = 2
+offset_left = 248.0
+offset_right = 288.0
+offset_bottom = 40.0
+disabled = true
+shortcut = SubResource("Shortcut_bekj0")
+text = "L"
+
+[node name="DiceOption2" type="Button" parent="Control2/Dice"]
+layout_mode = 0
+offset_left = 104.0
+offset_top = 48.0
+offset_right = 240.0
+offset_bottom = 88.0
+disabled = true
+shortcut = SubResource("Shortcut_5vwm6")
+
+[node name="DiceOption2L" type="Button" parent="Control2/Dice"]
+layout_mode = 0
+offset_left = 248.0
+offset_top = 48.0
+offset_right = 288.0
+offset_bottom = 88.0
+disabled = true
+shortcut = SubResource("Shortcut_dqu11")
+text = "L"
+
+[node name="DiceOption3" type="Button" parent="Control2/Dice"]
+layout_mode = 0
+offset_left = 104.0
+offset_top = 96.0
+offset_right = 240.0
+offset_bottom = 136.0
+disabled = true
+shortcut = SubResource("Shortcut_3t2gv")
+
+[node name="DiceOption3L" type="Button" parent="Control2/Dice"]
+layout_mode = 0
+offset_left = 248.0
+offset_top = 96.0
+offset_right = 288.0
+offset_bottom = 136.0
+disabled = true
+shortcut = SubResource("Shortcut_dun44")
+text = "L"
+
+[node name="CenterContainer" type="CenterContainer" parent="Control2"]
+custom_minimum_size = Vector2(875, 136)
+layout_mode = 0
+offset_left = 325.0
+offset_top = 21.0
+offset_right = 916.0
+offset_bottom = 157.0
+
+[node name="Card" type="HBoxContainer" parent="Control2/CenterContainer"]
+layout_mode = 2
+theme_override_constants/separation = 20
+metadata/_tab_index = 1
+
+[node name="CardTray" type="HBoxContainer" parent="Control2/CenterContainer/Card"]
+layout_mode = 2
+theme_override_constants/separation = -5
+
+[node name="CardTemplate" parent="Control2/CenterContainer/Card/CardTray" instance=ExtResource("7_h0jj3")]
+layout_mode = 2
+
+[node name="CardTemplate3" parent="Control2/CenterContainer/Card/CardTray" instance=ExtResource("7_h0jj3")]
+layout_mode = 2
+
+[node name="CardTemplate2" parent="Control2/CenterContainer/Card/CardTray" instance=ExtResource("7_h0jj3")]
+layout_mode = 2
+
+[node name="CardTemplate4" parent="Control2/CenterContainer/Card/CardTray" instance=ExtResource("7_h0jj3")]
+layout_mode = 2
+
+[node name="CardTemplate5" parent="Control2/CenterContainer/Card/CardTray" instance=ExtResource("7_h0jj3")]
+layout_mode = 2
+
+[node name="CardTemplate6" parent="Control2/CenterContainer/Card/CardTray" instance=ExtResource("7_h0jj3")]
+layout_mode = 2
+
+[node name="CardTemplate7" parent="Control2/CenterContainer/Card/CardTray" instance=ExtResource("7_h0jj3")]
+layout_mode = 2
+
+[node name="CardTemplate8" parent="Control2/CenterContainer/Card/CardTray" instance=ExtResource("7_h0jj3")]
+layout_mode = 2
+
+[node name="CardTemplate9" parent="Control2/CenterContainer/Card/CardTray" instance=ExtResource("7_h0jj3")]
+layout_mode = 2
+
+[node name="ActionButtons" type="VBoxContainer" parent="Control2/CenterContainer/Card"]
+layout_mode = 2
+
+[node name="ConfirmCardButton" type="Button" parent="Control2/CenterContainer/Card/ActionButtons"]
+layout_mode = 2
+disabled = true
+text = "Confirm"
+
+[node name="ResetCardButton" type="Button" parent="Control2/CenterContainer/Card/ActionButtons"]
+layout_mode = 2
+disabled = true
+text = "Reset"
+
+[node name="GameOverMenu" parent="." instance=ExtResource("8_bbj7e")]
+visible = false
+position = Vector2(224, 144)
 
 [connection signal="dice_rolled" from="Control" to="." method="_on_dice_rolled"]

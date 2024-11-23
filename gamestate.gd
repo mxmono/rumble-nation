@@ -1,5 +1,7 @@
 extends Node
 
+signal deploy_state_updated
+
 var num_players: int = 2
 var total_soldiers: int = 16
 var num_territories: int = 11
@@ -15,36 +17,47 @@ enum TurnPhase {
 	END
 }
 var current_phase = TurnPhase.CHOICE
-var player_presets = [
+var current_dice: Array = []
+var player_priority: Array = []  # out sequence, values are player ids
+var placement: Array = []  # winning placement, first player is the first place
+
+# presets
+const PLAYER_PRESETS = [
 	{
 		"name": "Reddo",
 		"icon": preload("res://icons/char1.png"),
-		"leader": preload("res://icons/lead1.png"),
+		"icon_leader": preload("res://icons/lead1.png"),
 		"reinforce":  preload("res://icons/reinforce1.png"),
-		"color": Color(1, 0, 0),
+		"color": Color(0.97, 0.35, 0.48),
+		"alt_atlas_id": 1,
 	},
 	{
 		"name": "Blu",
 		"icon": preload("res://icons/char2.png"),
-		"leader": preload("res://icons/lead2.png"),
+		"icon_leader": preload("res://icons/lead2.png"),
 		"reinforce":  preload("res://icons/reinforce2.png"),
-		"color": Color(0, 0.58, 0.71)
+		"color": Color(0, 0.58, 0.71),
+		"alt_atlas_id": 2,
 	},
 	{
 		"name": "Yello",
 		"icon": preload("res://icons/char3.png"),
-		"leader": preload("res://icons/lead3.png"),
+		"icon_leader": preload("res://icons/lead3.png"),
 		"reinforce":  preload("res://icons/reinforce3.png"),
-		"color": Color(0.79, 0.49, 0.24)
+		"color": Color(0.79, 0.49, 0.24),
+		"alt_atlas_id": 3,
 	},
 	{
 		"name": "Greeny",
 		"icon": preload("res://icons/char4.png"),
-		"leader": preload("res://icons/lead4.png"),
+		"icon_leader": preload("res://icons/lead4.png"),
 		"reinforce":  preload("res://icons/reinforce4.png"),
-		"color": Color(0, 0.57, 0.53)
+		"color": Color(0, 0.57, 0.53),
+		"alt_atlas_id": 4,
 	},
 ]
+const CARDS = ["Kasei", "Monomi", "Hitojichi", "Tsuihou", "Muhon", "Otori", "Suigun", "Yamagoe", "Taikyaku", "Shinobi", "Buntai", "Jouraku"]
+const LEADERS = ["Mouri", "Chosokabe", "Uesugi", "Oda", "Takeda"]
 
 # array of players, each element is a dictionary, eg
 # [
@@ -72,8 +85,11 @@ var board_state = {
 		{"land": [7, 9], "water": [10]},		# 8
 		{"land": [6, 7, 8], "water": []},		# 9
 		{"land": [], "water": [8]},				# 10
-	]
+	],
+	"territory_winner": [],
 }
+var drawn_cards = []
+var drawn_leaders = []
 
 
 func _ready() -> void:
@@ -82,6 +98,10 @@ func _ready() -> void:
 	
 	# initialize board state
 	initialize_board_state()
+	
+	# deal cards and leaders
+	deal_cards()
+	deal_leaders()
 
 
 func reset_all_states():
@@ -95,17 +115,29 @@ func reset_all_states():
 				"active": true,
 				"score": 0,
 				"territories": [],
-				"used_card": false
+				"used_card": false,
+				"used_leader": false,
+				"priority": -1,
+				"placement": -1,
 			}
 		)
 	print(self.players)
 	current_player = 0
+	self.player_priority = []
+	self.placement = []
+	
+	# reset dice
+	current_dice = []
 	
 	# reset board states
 	initialize_board_state()
 	
 	# reset card states
+	drawn_cards = []
+	drawn_leaders = []
 	current_card = null
+	deal_cards()
+	deal_leaders()
 	
 	# reset turn state
 	current_phase = TurnPhase.CHOICE
@@ -125,7 +157,10 @@ func initialize_players():
 				"active": true,
 				"score": 0,
 				"territories": [],
-				"used_card": false
+				"used_card": false,
+				"used_leader": false,
+				"priority": -1,
+				"placement": -1,
 			}
 		)
 
@@ -155,10 +190,50 @@ func initialize_board_state():
 			self.board_state["territory_connections"][i]["land"] +
 			self.board_state["territory_connections"][i]["water"]
 		)
+	
+	# clear winners
+	self.board_state["territory_winner"] = []
+
+
+func deal_cards():
+	"""Deal tactics cards based on number of players."""
+	var n_cards = self.num_players + 1
+	self.drawn_cards = []
+	var cards = CARDS.duplicate()
+	cards.shuffle()
+	if cards.size() >= n_cards:
+		self.drawn_cards = cards.slice(0, n_cards)
+	else:
+		# Allow replacements: draw numbers with potential duplicates
+		for i in range(n_cards):
+			var random_index = randi() % cards.size()
+			self.drawn_cards.append(cards[random_index])
+
+
+func deal_leaders():
+	"""Deal leader cards."""
+	var n_leaders = self.num_players
+	self.drawn_leaders = []
+	var leaders = LEADERS.duplicate()
+	leaders.shuffle()
+	if leaders.size() >= n_leaders:
+		self.drawn_leaders = leaders.slice(0, n_leaders)
+	else:
+		# Allow replacements: draw numbers with potential duplicates
+		for l in range(n_leaders):
+			var random_index = randi() % leaders.size()
+			self.drawn_leaders.append(leaders[random_index])
+
+
+func update_dice(dice_reults: Array):
+	self.current_dice = dice_reults
 
 
 func update_player_state(player_index: int, state_dict: Dictionary):
 	self.players[player_index].merge(state_dict, true)
+	# as num of players change, need to redeal cards
+	deal_cards()
+	deal_leaders()
 
 
 func update_board_tally(territory_index: int, player_index: int, state_dict: Dictionary):
@@ -188,8 +263,8 @@ func update_game_state_on_deployed(player_index, territory_index, deploy_count, 
 		update_board_tally_by_delta(
 			territory_index, player_index, {"soldier": deploy_count}
 		)
-	print("current tally --------------------------------------")
-	print(board_state["territory_tally"])
+	#print("current tally --------------------------------------")
+	#print(board_state["territory_tally"])
 	#endregion
 	
 	#region update territories tagged to the player (players["territories"])
@@ -221,6 +296,16 @@ func update_game_state_on_deployed(player_index, territory_index, deploy_count, 
 			self.players[player_index]["soldier"] += (-deploy_count) - 1
 		else:  # eg, go up 2 soldiers
 			self.players[player_index]["soldier"] += (-deploy_count)
-	print("current player state ---------------------------------")
-	print(players)
+	#print("current player state ---------------------------------")
+	#print(players)
 	#endregion
+	
+	# emit signals for ui drawing etc.
+	deploy_state_updated.emit()
+
+
+func all_players_out() -> bool:
+	for player in self.players:
+		if player["active"]:
+			return false 
+	return true

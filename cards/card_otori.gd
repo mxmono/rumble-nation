@@ -63,7 +63,7 @@ func get_card_step_territories(step: int) -> Array:
 	
 	# step 2:  same territory as before, just a different player
 	if step == 1:
-		return self.staged_moves[0][1]
+		return [self.staged_moves[0][1]]
 	
 	# step 3: any adjacent to previous selected
 	if step == 2:
@@ -71,6 +71,6 @@ func get_card_step_territories(step: int) -> Array:
 	
 	# step 4: same as prev selected
 	if step == 3:
-		self.staged_moves[2][1]
+		return [self.staged_moves[2][1]]
 	
 	return []

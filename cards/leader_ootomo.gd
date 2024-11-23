@@ -116,7 +116,7 @@ func get_card_step_territories(step: int) -> Array:
 	
 	# step 2: same as step 1 (replce move)
 	if step == 1:
-		return self.staged_moves[0][1]
+		return [self.staged_moves[0][1]]
 	
 	# step 3: same criteria as step 1, but step 1 territory is no longer valid
 	if step == 2:
@@ -128,6 +128,6 @@ func get_card_step_territories(step: int) -> Array:
 	
 	# step 4: same as step 3:
 	if step == 3:
-		return self.staged_moves[2][1]
+		return [self.staged_moves[2][1]]
 	
 	return []

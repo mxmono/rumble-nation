@@ -57,6 +57,6 @@ func get_card_step_territories(step: int) -> Array:
 	
 	# step 2s: adjacent to leader
 	if step % 2 == 1:
-		return TerritoryHelper.get_adjacent_by_connection_type(self.leader_territory, "all")
+		return TerritoryHelper.get_adjacent_by_connection_type(self.leader_territory, "land")
 	
 	return []

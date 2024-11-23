@@ -54,6 +54,6 @@ func get_card_step_territories(step: int) -> Array:
 	
 	# step 2: previously selected territory
 	if step == 1:
-		return self.staged_moves[0][1]
+		return [self.staged_moves[0][1]]
 		
 	return []

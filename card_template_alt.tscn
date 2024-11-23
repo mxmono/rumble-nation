@@ -1,0 +1,84 @@
+[gd_scene load_steps=7 format=3 uid="uid://cfpdcdnkahlbf"]
+
+[ext_resource type="Script" path="res://cards/card.gd" id="1_uiy2b"]
+[ext_resource type="Texture2D" uid="uid://c0yamhoxvtae5" path="res://icons/cards/shinobi.png" id="2_lyd66"]
+
+[sub_resource type="LabelSettings" id="LabelSettings_auwr3"]
+font_size = 12
+font_color = Color(0.223103, 0.223103, 0.223102, 1)
+
+[sub_resource type="LabelSettings" id="LabelSettings_8wlhs"]
+font_size = 20
+font_color = Color(0.20871, 0.20871, 0.20871, 1)
+
+[sub_resource type="LabelSettings" id="LabelSettings_4rg4u"]
+font_size = 12
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_qix56"]
+bg_color = Color(0.6, 0.6, 0.6, 0)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 3
+border_color = Color(0.280401, 0.173753, 0.0890148, 1)
+
+[node name="CardTemplate" type="Button"]
+custom_minimum_size = Vector2(96, 136)
+offset_right = 96.0
+offset_bottom = 136.0
+theme_override_colors/font_disabled_color = Color(0.299547, 0.299547, 0.299547, 1)
+script = ExtResource("1_uiy2b")
+
+[node name="ColorRect" type="ColorRect" parent="."]
+layout_mode = 2
+offset_right = 96.0
+offset_bottom = 136.0
+color = Color(0.840704, 0.81244, 0.834116, 1)
+
+[node name="Shinobi" type="Sprite2D" parent="."]
+position = Vector2(48, 88)
+texture = ExtResource("2_lyd66")
+
+[node name="ENTitle" type="Label" parent="."]
+layout_mode = 2
+offset_top = 8.0
+offset_right = 96.0
+offset_bottom = 25.0
+text = "Card Title"
+label_settings = SubResource("LabelSettings_auwr3")
+horizontal_alignment = 1
+vertical_alignment = 2
+
+[node name="JPTitle" type="Label" parent="."]
+layout_mode = 2
+offset_top = 24.0
+offset_right = 96.0
+offset_bottom = 52.0
+text = " 标题"
+label_settings = SubResource("LabelSettings_8wlhs")
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Description" type="Label" parent="."]
+visible = false
+layout_mode = 2
+offset_left = 8.0
+offset_top = 56.0
+offset_right = 144.0
+offset_bottom = 160.0
+text = "sample card description sample card description sample card description"
+label_settings = SubResource("LabelSettings_4rg4u")
+autowrap_mode = 3
+
+[node name="Mask" type="ColorRect" parent="."]
+visible = false
+layout_mode = 2
+offset_right = 128.0
+offset_bottom = 168.0
+color = Color(0, 0, 0, 0.372549)
+
+[node name="CardBorder" type="Panel" parent="."]
+layout_mode = 2
+offset_right = 96.0
+offset_bottom = 136.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_qix56")

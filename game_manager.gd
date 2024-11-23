@@ -31,7 +31,7 @@ func _player_connected(id):
 
 # Callback from SceneTree.
 func _player_disconnected(id):
-	if has_node("/root/GameController"): # Game is in progress.
+	if has_node("/root/Game"): # Game is in progress.
 		if multiplayer.is_server():
 			game_error.emit("Player " + players[id] + " disconnected")
 			end_game()
@@ -92,9 +92,9 @@ func begin_game():
 	load_world.rpc()
 
 func end_game():
-	if has_node("/root/GameController"): # Game is in progress.
+	if has_node("/root/Game"): # Game is in progress.
 		# End it
-		get_node("/root/GameController").queue_free()
+		get_node("/root/Game").queue_free()
 
 	game_ended.emit()
 	players.clear()

@@ -55,10 +55,11 @@ func update_player_settings():
 		var preset_index = player_settings[i]["icon"].selected
 		var update_dict = {
 				"name": player_settings[i]["name"].text,
-				"icon": GameState.player_presets[preset_index]["icon"],
-				"icon_leader": GameState.player_presets[preset_index]["leader"],
-				"icon_reinforce": GameState.player_presets[preset_index]["reinforce"],
-				"color": GameState.player_presets[preset_index]["color"]
+				"icon": GameState.PLAYER_PRESETS[preset_index]["icon"],
+				"icon_leader": GameState.PLAYER_PRESETS[preset_index]["icon_leader"],
+				"icon_reinforce": GameState.PLAYER_PRESETS[preset_index]["reinforce"],
+				"color": GameState.PLAYER_PRESETS[preset_index]["color"],
+				"alt_atlas_id": GameState.PLAYER_PRESETS[preset_index]["alt_atlas_id"],
 			}
 
 		GameState.update_player_state(i, update_dict)
@@ -99,12 +100,12 @@ func _on_player_icon_changed(icon, i):
 	
 	# if the name is in default names or is empty, also change the name with the icon selection
 	var preset_names = []
-	for preset in GameState.player_presets:
+	for preset in GameState.PLAYER_PRESETS:
 		preset_names.append(preset["name"])
 	
 	if preset_names.has(GameState.players[i]["name"]) or GameState.players[i]["name"] == "":
 		var preset_index = player_settings[i]["icon"].selected
-		player_settings[i]["name"].set_text(GameState.player_presets[preset_index]["name"])
+		player_settings[i]["name"].set_text(GameState.PLAYER_PRESETS[preset_index]["name"])
 	
 	update_player_settings()
 
