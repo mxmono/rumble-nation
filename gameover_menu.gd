@@ -113,5 +113,6 @@ func _on_rematch_button_pressed():
 		GameState.players[(winner + 2) % GameState.num_players],
 		GameState.players[(winner + 3) % GameState.num_players],
 	]
+	GameState.players = GameState.players.slice(0, GameState.num_players)
 	GameState.reset_all_states()
 	get_tree().reload_current_scene()

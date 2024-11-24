@@ -39,6 +39,8 @@ func _on_territory_clicked(territory: int, mouse_position: Vector2):
 			place_preview.move_to_display["num_soldiers"] + int(place_preview.move_to_display["has_leader"]),
 			place_preview.move_to_display["has_leader"],
 		)
+		# reset the moves of the preview
+		place_preview.update_move(-1, false)
 
 
 func execute_card_step(territory_clicked: int, mouse_position: Vector2):

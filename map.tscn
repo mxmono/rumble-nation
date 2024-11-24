@@ -1,12 +1,491 @@
 [gd_scene load_steps=9 format=3 uid="uid://btakum1qc8ovv"]
 
 [ext_resource type="Texture2D" uid="uid://dtn405d2autni" path="res://icons/map.png" id="1_rg7fb"]
-[ext_resource type="Script" path="res://board_old.gd" id="1_upj78"]
-[ext_resource type="Script" path="res://territory.gd" id="2_1w8ia"]
 [ext_resource type="FontFile" uid="uid://bgwd66m3orfrw" path="res://fonts/VT323-Regular.ttf" id="2_g0uqw"]
 [ext_resource type="Texture2D" uid="uid://7p3l4uq1qut1" path="res://icons/map-border.png" id="5_2nac4"]
 [ext_resource type="Texture2D" uid="uid://dn8rpumuk8jli" path="res://icons/lead1.png" id="6_1c4uv"]
 [ext_resource type="Texture2D" uid="uid://cvhkdf5tbnm6d" path="res://icons/char1.png" id="7_apwsk"]
+
+[sub_resource type="GDScript" id="GDScript_lifey"]
+script/source = "#extends Node2D
+#
+#signal card_move_selected(moves)
+#signal card_move_reverted(moves) # move is an array of [player, territory_index, deploy_count, has_leader]s
+#
+## a list of territory Area2D's ordered by assigned points, ie the 1st territory has 2 points
+#@export var territories = []
+## a list of territory Area2D's in their original orders (ie territory1, territory2, ...)
+#@export var territories_default = []
+## dictionary mapping of {points: index}
+#@export var territory_points_to_index = {}
+## dictionary mapping of {index: points}
+#@export var territory_index_to_points = {}
+#
+#const CARD_ACTION_PARENT = \"/root/Game/Control/GameButtons/Card/ActionButtons/\"
+#const LEADER_ACTION_PARENT = \"/root/Game/Control/GameButtons/Leader/ActionButtons/\"
+#@onready var confirm_card_button = get_node(CARD_ACTION_PARENT + \"ConfirmCardButton\")
+#@onready var reset_card_button = get_node(CARD_ACTION_PARENT + \"ResetCardButton\")
+#@onready var confirm_leader_button = get_node(LEADER_ACTION_PARENT + \"ConfirmCardButton\")
+#@onready var reset_leader_button = get_node(LEADER_ACTION_PARENT + \"ResetCardButton\")
+#
+#
+#func _ready() -> void:
+#
+	## conect territory click signals
+	#for territory in $Map.get_children():
+		#territory.territory_clicked.connect(_on_territory_clicked)
+		#territories_default.append(territory)
+	#
+	#reset_card_button.pressed.connect(_on_card_reset)
+	#reset_leader_button.pressed.connect(_on_card_reset)
+#
+	#for territory in $Map.get_children():
+		#territory_points_to_index[territory.get(\"territory_points\")] = territory.get(\"territory_index\")
+		#territory_index_to_points[territory.get(\"territory_index\")] = territory.get(\"territory_points\")
+#
+#
+#func highlight_territories(territory_indices: Array, color = Color(1, 1, 0, 0.5)):
+	#for territory in $Map.get_children():
+		#if territory.territory_index in territory_indices:
+			#var visual_polygon = territory.get_node(\"Polygon2D\")
+			#var highlight_material = CanvasItemMaterial.new()
+			#highlight_material.blend_mode = CanvasItemMaterial.BLEND_MODE_ADD
+			#visual_polygon.material = highlight_material
+			#visual_polygon.color = color
+#
+#
+#func unhighlight_territories(territory_indices: Array):
+	#for territory in $Map.get_children():
+		#if territory.territory_index in territory_indices:
+			#var visual_polygon = territory.get_node(\"Polygon2D\")
+			#var original_material
+			#visual_polygon.material = original_material
+			#visual_polygon.color = Color(1, 1, 1, 0) 
+#
+#
+## Respond to territory clicks
+#func _on_territory_clicked(territory_index, mouse_position):
+	#print(\"Territory clicked: \", territory_index)
+#
+	## if it's in territory selection phase from playing a card, emit the selected territory
+	#var game_controller = get_node(\"/root/Game\")
+	#var card = GameState.current_card
+	#var current_player = GameState.current_player
+	#
+	## if we are in card phase
+	#if GameState.current_phase == GameState.TurnPhase.CARD and card != null:
+		## only proceed with card effect if clicking on a territory in current valid territories
+		## find which territories are eligible for current step
+		#var current_step_territories = get_card_step_territories(card)
+		#if not territory_index in current_step_territories:
+			#return
+		#
+		## eg if we have two moves (size = 2) and index is 0 (initial), or 1 (after 1 move)
+		#if card.effect_index < card.effect.size():
+			## select opponent if an opponent is required and hasn't been selected
+			#if card.selected_opponent == -1 and card.effect[card.effect_index][\"player\"] == \"other\":
+				## find overlap of valid target and targets available on the clicked territory
+				#var valid_targets = card.get_valid_targets_on_territory(current_player, territory_index)
+				#print(valid_targets)
+				#
+				## if only 1 valid target, no need for selection, set target directly
+				#if valid_targets.size() == 1:
+					#card.selected_opponent = valid_targets[0]
+				#
+				## otherwise pop up a target selection menu
+				#else:
+					## temporarily store clicked territory, waiting for target selection in pop up menu
+					#card.last_selected_territory = territory_index
+					## show the target selection menu
+					#show_target_selection_menu(mouse_position, valid_targets)
+					## exit the function
+					#return
+			#
+			## if it's leader card and requires leader selection
+			#if card.card_type == \"leader\" and card.get(\"is_leader_optional_or_undecided\") and card.effect_index == 0:
+				#card.last_selected_territory = territory_index
+				## only show leader selection window if there are options (ie if only leader is on territory...)
+				#if GameState.board_state[\"territory_tally\"][territory_index][current_player][\"soldier\"] > 0:
+					#show_leader_selection_window(mouse_position)
+				#else:
+					#_on_apply_to_leader_selected(true)
+				#return
+			#
+			## if clicked territory is one of the valid territories for this card step, take actions
+			#if territory_index in current_step_territories:
+				#card.last_selected_territory = territory_index
+				## check which player to deploy based on card step player keyword
+				#var player_to_deploy = current_player
+				#if card.effect[card.effect_index][\"player\"] == \"other\":
+					#player_to_deploy = card.selected_opponent
+				#
+				## update effect (used for cards like buntai <deploy count>, jouraku)
+				#card.update_effect(current_player)
+				#
+				## queue up the effect to staged moves
+				#card.staged_moves.append(
+					#[player_to_deploy, territory_index, card.effect[card.effect_index][\"deploy\"], card.effect[card.effect_index].get(\"has_leader\")]
+				#)
+				#
+				## emit staged moves if allows emit (for multi-step cards)
+				#if card.effect[card.effect_index].get(\"emit\"):
+					#var moves_to_emit = get_unemitted_moves(card)
+					#card_move_selected.emit(moves_to_emit)
+					#print(\"emited early card move: \", str(moves_to_emit))
+				#
+				## for cards like jouraku, the user can confirm halfway (not realizing full potential)
+				#enable_early_action_button_if_valid(card)
+				#
+				## once the action is queued (click is registered), unhighlight all territories
+				#unhighlight_territories(self.territory_index_to_points.keys())
+			#
+				## update card effect stage index
+				#card.effect_index += 1
+				#
+				## check if next step requires selection
+				#while card.effect_index < card.effect.size():
+					## if does not require selection, loop until next one that requires selection
+					#if not card.effect[card.effect_index][\"territory_selection_required\"]:
+						#player_to_deploy = current_player
+						#if card.effect[card.effect_index][\"player\"] == \"other\":
+							#player_to_deploy = card.selected_opponent
+						## TODO: territory_index will carry over from prev selected step by default
+						## update effect (used for cards like buntai <deploy count>, jouraku)
+						#card.update_effect(current_player)
+						#card.staged_moves.append(
+							#[player_to_deploy, territory_index, card.effect[card.effect_index][\"deploy\"], card.effect[card.effect_index].get(\"has_leader\")]
+						#)
+						#
+						## emit staged moves if allows emit (for multi-step cards)
+						#if card.effect[card.effect_index].get(\"emit\"):
+							#var moves_to_emit = get_unemitted_moves(card)
+							#card_move_selected.emit(moves_to_emit)
+							#print(\"emited early card move: \", str(moves_to_emit))
+							#enable_early_action_button_if_valid(card)
+							#
+						#card.effect_index += 1
+					#else:
+						#break
+				#
+				#print(card.staged_moves)
+				#print(\"current effect index: \", card.effect_index)
+				#
+				## if there is still a next step, highlight next eligible territories
+				## eg if we just took step 1, card_effect_index + 1 == 1, size = 2 (if two steps)
+				#if card.effect_index < card.effect.size():
+					#var next_step_territories = get_card_step_territories(card)
+					#print(\"next step territories: \", next_step_territories)
+					## highlight the next eligible territories
+					#var player_color = GameState.players[current_player][\"color\"]
+					#highlight_territories(next_step_territories, player_color)
+	#
+				## if after clicking the territory, we have all sequence of moves, can emit the signals
+				#elif card.effect_index == card.effect.size():
+					## if the last move has already emitted, don't emit
+					#if not card.effect[-1].get(\"emit\"):
+						#var moves_to_emit = get_unemitted_moves(card)
+						#if moves_to_emit:
+							#card_move_selected.emit(moves_to_emit)  # handles in game controller, territroy
+					#
+					## unhiglight all territories
+					#unhighlight_territories(self.territory_index_to_points.keys())
+#
+##func _input(event):
+	##if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
+		##print(\"click position: \", event.position)
+		#
+## show target selection menu when clicked on a valid territory
+#func show_target_selection_menu(mouse_position, valid_opponents):
+	## clean up if needed
+	#if has_node(\"PopUp\"):
+		#$PopUp.queue_free()
+	#
+	## inistantiate the popup
+	#var target_selection_popup = preload(\"res://popup.tscn\").instantiate()
+	#
+	## generate options per valid opponents
+	#for valid_opponent in valid_opponents:
+		#var opponent_name = GameState.players[valid_opponent][\"name\"]
+		#var target_button = Button.new()
+		#target_button.text = opponent_name
+		#target_button.icon = GameState.players[valid_opponent][\"icon\"]
+		#target_button.name = \"Player\" +  str(valid_opponent)
+		#
+		## connect button to pressed signal
+		#target_button.pressed.connect(_on_target_selected.bind(valid_opponent))
+		#
+		## add the buttons to pop up menu
+		#target_selection_popup.get_node(\"PopupPanel/VBoxContainer\").add_child(target_button)
+	#
+	## add pop up to scene tree
+	#add_child(target_selection_popup)
+	#target_selection_popup.get_node(\"PopupPanel\").popup()
+	#target_selection_popup.get_node(\"PopupPanel\").position = mouse_position
+#
+#func show_leader_selection_window(mouse_position):
+	## clean up if needed
+	#if has_node(\"PopUp\"):
+		#$PopUp.queue_free()
+	#
+	## inistantiate the popup
+	#var current_player = GameState.current_player
+	#var target_selection_popup = preload(\"res://popup.tscn\").instantiate()
+	#
+	#for i in range(2):
+		#var button = Button.new()
+		#button.text = [\"Apply to Soldiers Only\", \"Apply to Leader\"][i]
+		#button.icon = GameState.players[current_player][[\"icon\", \"icon_leader\"][i]]
+	#
+		## connect button to pressed signal, 0=false=do not apply to leader
+		#button.pressed.connect(_on_apply_to_leader_selected.bind(bool(i)))
+	#
+		## add the buttons to pop up menu
+		#target_selection_popup.get_node(\"PopupPanel/VBoxContainer\").add_child(button)
+#
+	## add pop up to scene tree
+	#add_child(target_selection_popup)
+	#target_selection_popup.get_node(\"PopupPanel\").popup()
+	#target_selection_popup.get_node(\"PopupPanel\").position = mouse_position
+#
+## when button on target selection pop up is selected
+#func _on_target_selected(valid_opponent):
+	#var card = GameState.current_card
+	#if card != null:
+		#card.selected_opponent = valid_opponent
+		#if has_node(\"PopUp\"):
+			#$PopUp.queue_free()
+		#_on_territory_clicked(card.last_selected_territory, Vector2(0, 0))  # mock mouse position
+#
+#func _on_apply_to_leader_selected(apply_to_leader: bool):
+	#var card = GameState.current_card
+	#if card != null:
+		#card.apply_to_leader = apply_to_leader
+		#card.is_leader_optional_or_undecided = false
+		#if has_node(\"PopUp\"):
+			#$PopUp.queue_free()
+		#_on_territory_clicked(card.last_selected_territory, Vector2(0, 0))
+#
+#func get_card_step_territories(card):
+	#\"\"\"Get eligible territories (to highligh and enable click) for a step.\"\"\"
+	#if card.effect_index >= card.effect.size():
+		#return []
+	#
+	#return card.get_card_step_territories(card.effect_index)
+#
+## get which moves to emit, start from last unemitted move
+#func get_unemitted_moves(card) -> Array:
+	#var moves_to_emit = [card.staged_moves[0]]
+	#
+	## otherwise, emit from last unemitted move to current move
+	#if card.staged_moves.size() > 1:
+		#for step in range(1, card.staged_moves.size()):
+			## if prev step has emit, restart from current step
+			#if card.effect[step - 1].get(\"emit\"):
+				#moves_to_emit = [card.staged_moves[step]]
+			## if prev step is not emit, append current step
+			#else:
+				#moves_to_emit.append(card.staged_moves[step])
+	#
+	#return moves_to_emit
+#
+#
+#func _on_card_reset():
+	## reverse deployment
+	#var card = GameState.current_card
+	#var revert_moves = []
+	## card_moves_stage is [[player, territory_index, deploy_count, has_leader], ...]
+	#for i in range(card.staged_moves.size()):
+		#var move = card.staged_moves[i]
+		#revert_moves.append([move[0], move[1], -move[2], move[3]])
+	#
+	## clear moves associated with the card itself and reset move count
+	#card.reset_card()
+#
+	#if get_parent().has_node(\"TargetPopUpWindow\"):
+		#$TargetPopUpWindow.queue_free()
+	#
+	## emit revert signal
+	#card_move_reverted.emit(revert_moves)
+	#print(\"emitted revert:\", revert_moves)
+	#
+	## reintroduce effects on card selected (eg going back to card selected status)
+	##_on_card_selected(card)
+#
+#
+#func enable_early_action_button_if_valid(card):
+	#if card.effect[card.effect_index].get(\"finish_allowed\"):
+		#confirm_card_button.disabled = false
+		#reset_card_button.disabled = false
+		#confirm_leader_button.disabled = false
+		#reset_leader_button.disabled = false
+"
+
+[sub_resource type="GDScript" id="GDScript_n8un5"]
+script/source = "#\"\"\"Not used.\"\"\"
+#extends Node2D
+#
+#signal territory_clicked(territory_index, mouse_position)
+#signal piece_placed(piece)
+#
+#@export var territory_name: String = self.name
+#@export var territory_index: int = 0
+#@export var territory_points: int = 0
+#@export var player_piece_scale = Vector2(1.2, 1.2)
+#
+#@export var territory_tally = []
+#var piece_offset = Vector2(15, 0)
+#var player_piece_offset = Vector2(0, 30)
+#
+#var original_material  # Store the original material
+#var highlight_material  # Material used for highlighting with blend mode
+#
+#@onready var collision_polygon = $CollisionPolygon2D
+#@onready var visual_polygon = $Polygon2D
+#
+## Called when the node enters the scene tree for the first time.
+#func _ready() -> void:
+	#
+	#for i in range(GameState.num_players):
+		#territory_tally.append({\"soldier\": 0, \"leader\": 0, \"reinforcement\": 0})
+	#
+	## Set the points of the visual Polygon2D to match the CollisionPolygon2D
+	#visual_polygon.polygon = collision_polygon.polygon
+	#visual_polygon.position = collision_polygon.position
+	#visual_polygon.color = Color(1, 1, 1, 0)
+#
+	## Create a new CanvasItemMaterial for highlighting
+	#highlight_material = CanvasItemMaterial.new()
+	#highlight_material.blend_mode = CanvasItemMaterial.BLEND_MODE_MUL
+	#
+	## highlight territory on hover
+	##self.mouse_entered.connect(_on_mouse_entered)
+	##self.mouse_exited.connect(_on_mouse_exited)
+	#
+	## Connect the input_event signal from Area2D to handle clicks
+	#self.input_event.connect(_on_territory_click)
+	#
+	## connect dice selection
+	#var control_scene = get_node(\"/root/Game/Control\")
+	#control_scene.dice_selected.connect(_on_dice_selected)
+	#
+	## connect card selection
+	#var board_scene = get_node(\"/root/Game/Map\")
+	#board_scene.card_move_selected.connect(_on_card_move_selected)
+	#board_scene.card_move_reverted.connect(_on_card_move_reverted)
+#
+#
+#func unhighlight_territory():
+	#visual_polygon.material = original_material
+	#visual_polygon.color = Color(1, 1, 1, 0) 
+#
+#
+#func draw_piece_sprites():
+	#\"\"\"Redraw all deployments based on territory_tally.
+	#Redrawing all is beneficial due to resets and reverts.\"\"\"
+#
+	#var piece_container = $PieceContainer
+	#
+	## clear existing pieces if any:
+	#for piece in piece_container.get_children():
+		#piece.queue_free()
+	#
+	## first draw soldiers
+	#for player in range(GameState.num_players):
+		#
+		#var icon = GameState.players[player][\"icon\"]
+		#var icon_leader = GameState.players[player][\"icon_leader\"]
+		#var icon_reinforcement = GameState.players[player][\"icon_reinforce\"]
+		#
+		#var territory_tally = GameState.board_state[\"territory_tally\"][self.territory_index]
+		#
+		#var color_adjustment = GameState.players[player][\"color\"]
+		#for i in range(territory_tally[player][\"soldier\"]):
+			#var piece_sprite = Sprite2D.new()
+			#piece_sprite.scale = player_piece_scale
+			#piece_sprite.texture = icon
+			##piece_sprite.modulate = color_adjustment
+			#piece_sprite.position = i * piece_offset + player * player_piece_offset
+			#piece_container.add_child(piece_sprite)
+#
+		## draw leader in the front if there is a leader
+		#if territory_tally[player][\"leader\"] > 0:
+			#var leader_sprite = Sprite2D.new()
+			#leader_sprite.scale = player_piece_scale * 1.5
+			#leader_sprite.texture = icon_leader
+			#leader_sprite.position = Vector2(-30, 0) + player * player_piece_offset
+			#piece_container.add_child(leader_sprite)
+		#
+		## draw reinforcements
+		#if territory_tally[player][\"reinforcement\"] > 0:
+			#for i in range(territory_tally[player][\"reinforcement\"]):
+				#var reinforce_sprite = Sprite2D.new()
+				#reinforce_sprite.scale = player_piece_scale * 0.5
+				#reinforce_sprite.texture = icon_reinforcement
+				#reinforce_sprite.position = territory_tally[player][\"soldier\"] * piece_offset + i * piece_offset * 0.5 + player * player_piece_offset
+				#piece_container.add_child(reinforce_sprite)
+#
+## Handles click events on the territory
+#func _on_territory_click(viewport, event, shape_idx):
+	#if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
+		#territory_clicked.emit(territory_index, event.global_position)
+#
+#func _on_dice_selected(territory_index, deploy_count, has_leader):
+	## only take action if this is the territory that got deployed
+	#var current_player = GameState.current_player
+	#if self.territory_index == territory_index:
+		#_on_deployed(current_player, territory_index, deploy_count, has_leader)
+#
+#func _on_deployed(player, territory_index, deploy_count, has_leader):
+	#\"\"\"This function alone should handle changes between deployment states.\"\"\"
+	#
+	#GameState.update_game_state_on_deployed(player, territory_index, deploy_count, has_leader)
+	#
+	## redraw sprites based on latest tally
+	#draw_piece_sprites()
+#
+#func _on_card_move_selected(moves):
+	## moves is [[player, territory_index, deploy_count, has_leader], ...]
+	#for move in moves:
+		#if self.territory_index == move[1]:
+			## update the tally and sprite
+			#_on_deployed(move[0], self.territory_index, move[2], move[3])
+#
+#func _on_card_move_reverted(moves):
+	 ## move is an array of [player, territory_index, deploy_count, has_leader]s
+	#for move in moves:
+		#if self.territory_index == move[1]:
+			#_on_deployed(move[0], self.territory_index, move[2], move[3])
+#
+#func reinforce(num_players, player):
+	#\"\"\"Reinforce to all adjacent territories.\"\"\"
+	## get connected territories and how many pieces to reinforce
+	#var territory_connections = GameState.board_state[\"territory_connections\"]
+	#var current_connections = territory_connections[self.territory_index]
+	#var pieces_to_reinforce = 1
+	#if num_players > 2:
+		#pieces_to_reinforce = 2
+	#
+	## loop through territories to reinforce
+	#print(self.territory_index)
+	#var territories_default = get_node(\"/root/Game/Map\").territories_default
+	#for territory_index in current_connections[\"all\"]:
+		#var territory_to_reinforce = territories_default[territory_index]
+		## only reinforce to bigger tiles with current player's pieces
+		#if territory_to_reinforce.territory_points > self.territory_points:
+			#var tally = GameState.board_state[\"territory_tally\"][territory_to_reinforce.territory_index][player]
+			#if tally[\"soldier\"] + tally[\"leader\"] > 0:
+				#territory_to_reinforce.receive_reinforcements(pieces_to_reinforce, player)
+#
+#func receive_reinforcements(pieces_to_reinforce, player):
+	#\"\"\"Receive reinforcements at scoring phase.\"\"\"
+	#GameState.update_board_tally_by_delta(
+		#self.territory_index, player, {\"reinforcement\": pieces_to_reinforce}
+	#)
+	#draw_piece_sprites()
+	#print(\"territory %s with points %s received player %s's %s reinforcements\" % 
+		#[str(self.territory_index), str(self.territory_points), str(player), str(pieces_to_reinforce)]
+	#)
+"
 
 [sub_resource type="LabelSettings" id="LabelSettings_8fms1"]
 line_spacing = 0.0
@@ -16,7 +495,7 @@ outline_size = 8
 outline_color = Color(0.382726, 0.392696, 0.383009, 1)
 
 [node name="Map" type="Node2D"]
-script = ExtResource("1_upj78")
+script = SubResource("GDScript_lifey")
 
 [node name="Map" type="Sprite2D" parent="."]
 position = Vector2(568, 284)
@@ -26,7 +505,7 @@ texture = ExtResource("1_rg7fb")
 [node name="Territory0" type="Area2D" parent="Map"]
 position = Vector2(-60.8395, -27.5414)
 scale = Vector2(0.112875, 0.112875)
-script = ExtResource("2_1w8ia")
+script = SubResource("GDScript_n8un5")
 
 [node name="Polygon2D" type="Polygon2D" parent="Map/Territory0"]
 
@@ -48,7 +527,7 @@ horizontal_alignment = 1
 [node name="Territory1" type="Area2D" parent="Map"]
 position = Vector2(-56.5502, -6.65961)
 scale = Vector2(0.112875, 0.112875)
-script = ExtResource("2_1w8ia")
+script = SubResource("GDScript_n8un5")
 
 [node name="Polygon2D" type="Polygon2D" parent="Map/Territory1"]
 
@@ -70,7 +549,7 @@ horizontal_alignment = 1
 [node name="Territory2" type="Area2D" parent="Map"]
 position = Vector2(-59.5979, 14.6737)
 scale = Vector2(0.112875, 0.112875)
-script = ExtResource("2_1w8ia")
+script = SubResource("GDScript_n8un5")
 
 [node name="Polygon2D" type="Polygon2D" parent="Map/Territory2"]
 
@@ -92,7 +571,7 @@ horizontal_alignment = 1
 [node name="Territory3" type="Area2D" parent="Map"]
 position = Vector2(-39.1675, -24.1552)
 scale = Vector2(0.112875, 0.112875)
-script = ExtResource("2_1w8ia")
+script = SubResource("GDScript_n8un5")
 
 [node name="Polygon2D" type="Polygon2D" parent="Map/Territory3"]
 
@@ -114,7 +593,7 @@ horizontal_alignment = 1
 [node name="Territory4" type="Area2D" parent="Map"]
 position = Vector2(-27.8801, -24.7196)
 scale = Vector2(0.112875, 0.112875)
-script = ExtResource("2_1w8ia")
+script = SubResource("GDScript_n8un5")
 
 [node name="Polygon2D" type="Polygon2D" parent="Map/Territory4"]
 
@@ -136,7 +615,7 @@ horizontal_alignment = 1
 [node name="Territory5" type="Area2D" parent="Map"]
 position = Vector2(-9.59437, -22.8007)
 scale = Vector2(0.112875, 0.112875)
-script = ExtResource("2_1w8ia")
+script = SubResource("GDScript_n8un5")
 
 [node name="Polygon2D" type="Polygon2D" parent="Map/Territory5"]
 position = Vector2(0, -3.05176e-05)
@@ -159,7 +638,7 @@ horizontal_alignment = 1
 [node name="Territory6" type="Area2D" parent="Map"]
 position = Vector2(-11.1746, 3.61199)
 scale = Vector2(0.112875, 0.112875)
-script = ExtResource("2_1w8ia")
+script = SubResource("GDScript_n8un5")
 
 [node name="Polygon2D" type="Polygon2D" parent="Map/Territory6"]
 
@@ -181,7 +660,7 @@ horizontal_alignment = 1
 [node name="Territory7" type="Area2D" parent="Map"]
 position = Vector2(-0.903004, -19.5273)
 scale = Vector2(0.112875, 0.112875)
-script = ExtResource("2_1w8ia")
+script = SubResource("GDScript_n8un5")
 
 [node name="Polygon2D" type="Polygon2D" parent="Map/Territory7"]
 
@@ -203,7 +682,7 @@ horizontal_alignment = 1
 [node name="Territory8" type="Area2D" parent="Map"]
 position = Vector2(3.95061, -25.8483)
 scale = Vector2(0.112875, 0.112875)
-script = ExtResource("2_1w8ia")
+script = SubResource("GDScript_n8un5")
 
 [node name="Polygon2D" type="Polygon2D" parent="Map/Territory8"]
 
@@ -225,7 +704,7 @@ horizontal_alignment = 1
 [node name="Territory9" type="Area2D" parent="Map"]
 position = Vector2(17.4956, 4.17636)
 scale = Vector2(0.112875, 0.112875)
-script = ExtResource("2_1w8ia")
+script = SubResource("GDScript_n8un5")
 
 [node name="Polygon2D" type="Polygon2D" parent="Map/Territory9"]
 
@@ -247,7 +726,7 @@ horizontal_alignment = 1
 [node name="Territory10" type="Area2D" parent="Map"]
 position = Vector2(25.0582, -28.1058)
 scale = Vector2(0.112875, 0.112875)
-script = ExtResource("2_1w8ia")
+script = SubResource("GDScript_n8un5")
 
 [node name="Polygon2D" type="Polygon2D" parent="Map/Territory10"]
 
