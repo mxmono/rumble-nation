@@ -13,11 +13,15 @@ signal leader_target_selected(apply_to_leader: bool, territory_clicked: int)
 @onready var green_cell: Vector2i = Vector2i(0, 1)  # atlas coords for default territory cell (green)
 @onready var gray_cell: Vector2i = Vector2i(0, 0)  # base cell used for alt (the grayscale one)
 @onready var initial_tile_map_data = []  # store original tilemap data
+@onready var placement_preview = $PlacePreview
 
 # piece drawing
 var player_piece_scale: Vector2 = Vector2(1.2, 1.2)
 var piece_offset = Vector2(15, 0)
 var player_piece_offset = Vector2(0, 30)
+
+# drawing state for placement
+var last_hovered_territory: int = -1
 
 
 func _ready() -> void:
@@ -49,15 +53,40 @@ func _ready() -> void:
 	game_scene.game_scored.connect(_on_game_scored)
 
 
+func _physics_process(delta: float) -> void:
+	
+	hide_placement_popup()
+	
+	# if in reroll or place phase (ie we have dice results)
+	if (
+		GameState.current_phase == GameState.TurnPhase.REROLL or
+		GameState.current_phase == GameState.TurnPhase.PLACE
+	):
+		if GameState.current_dice != []:
+			# detect mouse hovering
+			var cell = tilemap_constant.local_to_map(tilemap_constant.get_local_mouse_position())
+			var data = tilemap_constant.get_cell_tile_data(cell)
+			var tile_id = -1
+			if data:
+				tile_id = data.get_custom_data("area_id")
+			
+			# see if hovered over area is a valid area in current dice combo
+			# move options is an array of dictionaries
+			var move_options = Helper.combine_dice(GameState.current_dice)
+			for move_option in move_options:
+				if tile_id == move_option["territory_index"]:
+					show_placement_popup(tile_id, move_option)
+
+
 func _input(event):
 	# on clicking the cell, emit signal on which territory is clicked and mouse position
-	if event is InputEventMouseButton and event.pressed:
+	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
 		var clicked_cell = tilemap_constant.local_to_map(tilemap_constant.get_local_mouse_position())
 		var data = tilemap_constant.get_cell_tile_data(clicked_cell)
 		var tile_id = -1
 		if data:
 			tile_id = data.get_custom_data("area_id")
-
+		
 		if tile_id != -1:
 			territory_clicked.emit(tile_id, event.global_position)
 
@@ -190,6 +219,41 @@ func _on_card_selected(card: Card):
 func _on_card_revert_move_deployed():
 	# revert is like reselecting the card
 	_on_card_selected(GameState.current_card)
+
+
+func show_placement_popup(territory: int, move_option: Dictionary):
+	# clear existing pieces
+	for piece in self.placement_preview.get_children():
+		piece.queue_free()
+		
+	self.placement_preview.show()
+	
+	# update the numbers shown (if first time)
+	if self.placement_preview.move_to_display["num_soldiers"] == -1:
+		self.placement_preview.update_move(move_option["deploy_count"], false)
+	
+	# if changing tiles
+	if territory != self.last_hovered_territory:
+		# keep the leader, ie if leader is toggled on, keep on
+		if self.placement_preview.move_to_display["has_leader"]:
+			# only when leader is available (inbetween turns)
+			if GameState.players[GameState.current_player]["leader"] >= 0:
+				self.placement_preview.update_move(move_option["deploy_count"] - 1, true)
+			else:
+				self.placement_preview.update_move(move_option["deploy_count"], false)
+		else:
+			self.placement_preview.update_move(move_option["deploy_count"], false)
+				
+		self.last_hovered_territory = territory
+	
+	self.placement_preview.draw_pieces()
+	
+	# follow the mouse
+	self.placement_preview.global_position = get_viewport().get_mouse_position() + Vector2(10, 0)
+
+
+func hide_placement_popup():
+	self.placement_preview.hide()
 
 
 func show_target_selection_popup(mouse_position: Vector2, valid_opponents: Array, territory_clicked: int):

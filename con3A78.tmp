@@ -1,4 +1,4 @@
-[gd_scene load_steps=27 format=3 uid="uid://bhuosep1twjl0"]
+[gd_scene load_steps=19 format=3 uid="uid://bhuosep1twjl0"]
 
 [ext_resource type="Script" path="res://control.gd" id="1_x8hjk"]
 [ext_resource type="Script" path="res://ui_control.gd" id="2_ugd3a"]
@@ -66,38 +66,6 @@ unicode = 51
 
 [sub_resource type="Shortcut" id="Shortcut_e71ni"]
 events = [SubResource("InputEventKey_y2jlo")]
-
-[sub_resource type="InputEventKey" id="InputEventKey_b8on6"]
-device = -1
-keycode = 32
-unicode = 32
-
-[sub_resource type="Shortcut" id="Shortcut_mfhve"]
-events = [SubResource("InputEventKey_b8on6")]
-
-[sub_resource type="InputEventKey" id="InputEventKey_ay6o5"]
-device = -1
-keycode = 82
-unicode = 114
-
-[sub_resource type="Shortcut" id="Shortcut_mgq8g"]
-events = [SubResource("InputEventKey_ay6o5")]
-
-[sub_resource type="InputEventKey" id="InputEventKey_ubq8r"]
-device = -1
-keycode = 32
-unicode = 32
-
-[sub_resource type="Shortcut" id="Shortcut_t888m"]
-events = [SubResource("InputEventKey_ubq8r")]
-
-[sub_resource type="InputEventKey" id="InputEventKey_afa76"]
-device = -1
-keycode = 82
-unicode = 114
-
-[sub_resource type="Shortcut" id="Shortcut_bclci"]
-events = [SubResource("InputEventKey_afa76")]
 
 [node name="Control" type="Control"]
 layout_mode = 3
@@ -223,13 +191,11 @@ layout_mode = 2
 [node name="ConfirmCardButton" type="Button" parent="GameButtons/Card/ActionButtons"]
 layout_mode = 2
 disabled = true
-shortcut = SubResource("Shortcut_mfhve")
 text = "Confirm"
 
 [node name="ResetCardButton" type="Button" parent="GameButtons/Card/ActionButtons"]
 layout_mode = 2
 disabled = true
-shortcut = SubResource("Shortcut_mgq8g")
 text = "Reset"
 
 [node name="Leader" type="VBoxContainer" parent="GameButtons"]
@@ -246,13 +212,11 @@ layout_mode = 2
 [node name="ConfirmCardButton" type="Button" parent="GameButtons/Leader/ActionButtons"]
 layout_mode = 2
 disabled = true
-shortcut = SubResource("Shortcut_t888m")
 text = "Confirm"
 
 [node name="ResetCardButton" type="Button" parent="GameButtons/Leader/ActionButtons"]
 layout_mode = 2
 disabled = true
-shortcut = SubResource("Shortcut_bclci")
 text = "Reset"
 
 [node name="UI" type="Control" parent="."]

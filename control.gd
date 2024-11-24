@@ -25,7 +25,7 @@ func _on_roll_dice_requested():
 	# roll the dice, get results, and possible moves
 	var dice_results = [roll_dice(), roll_dice(), roll_dice()]
 	dice_results.sort()
-	var move_options = combine_dice(dice_results)
+	var move_options = Helper.combine_dice(dice_results)
 	
 	# update game state
 	GameState.update_dice(dice_results)
@@ -39,36 +39,8 @@ func roll_dice() -> int:
 		return randi() % 6 + 1
 
 
-func combine_dice(dice_results: Array) -> Array:
-	"""Combine three dice results into move options."""
-	var current_player = GameState.current_player
-	var territory_points = GameState.board_state["territory_points"]
-	
-	# calculate all move options
-	var move_options = []
-	for i in range(3):
-		# deploy count is bound by how many pieces are left
-		var deploy_count = (dice_results[i % 3] + 1) / 2
-		deploy_count = min(
-			deploy_count,
-			GameState.players[current_player]["soldier"] + GameState.players[current_player]["leader"]
-		)
-		var territory_score = dice_results[(i + 1) % 3] + dice_results[(i + 2) % 3]
-		var territory_index = territory_points.find(territory_score)
-		var option = {
-			"deploy_count": deploy_count,
-			"territory_score": territory_score, 
-			"territory_index": territory_index
-		}
-		# only add if the move is not repeated
-		if not move_options.has(option):
-			move_options.append(option)
-
-	return move_options
-
-
 func _on_dice_option_selected(i, has_leader):
-	var dice_move_options = combine_dice(GameState.current_dice)
+	var dice_move_options = Helper.combine_dice(GameState.current_dice)
 
 	# kind of broadcasting dice_option_selected from ui component to other nodes
 	dice_selected.emit(

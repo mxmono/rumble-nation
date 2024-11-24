@@ -58,13 +58,30 @@ func _ready() -> void:
 	# once the cards are initialized, connect their signals
 	self.card_buttons = card_tray.get_children() + leader_tray.get_children()
 	for card_button in card_buttons:
-		print(card_button.card_name)
 		card_button.card_selected.connect(_on_card_selected)
 
 
 func _process(delta):
 	self.card_buttons = self.card_tray.get_children()
 	self.card_buttons += self.leader_tray.get_children()
+
+
+func _input(event):
+	# switch tabs with TAB key
+	if Input.is_key_pressed(KEY_TAB):
+		get_node(CONTROL_PANEL).current_tab = (get_node(CONTROL_PANEL).current_tab + 1) % 3
+	
+	# add shortcut to cards
+	var keys = [KEY_1, KEY_2, KEY_3, KEY_4, KEY_5]
+	if get_node(CONTROL_PANEL).current_tab == 1:
+		for i in self.card_tray.get_children().size():
+			if Input.is_key_pressed(keys[i]):
+				self.card_tray.get_children()[i]._on_card_selected()
+	
+	if get_node(CONTROL_PANEL).current_tab == 2:
+		for i in self.leader_tray.get_children().size():
+			if Input.is_key_pressed(keys[i]):
+				self.leader_tray.get_children()[i]._on_card_selected()
 
 
 func _on_phase_started(phase):
@@ -121,6 +138,7 @@ func _on_phase_started(phase):
 
 		GameState.TurnPhase.END:
 			roll_dice_button.text = "Roll Dice"
+			dice_result_label.text = ""
 			
 			disable_roll_dice()
 			disable_dice_options()

@@ -74,6 +74,7 @@ offset_right = 40.0
 offset_bottom = 40.0
 
 [node name="Panel" type="Panel" parent="Main"]
+layout_mode = 0
 offset_right = 832.0
 offset_bottom = 399.0
 
@@ -84,6 +85,7 @@ offset_bottom = 400.0
 color = Color(0, 0, 0, 0.5)
 
 [node name="CloseButton" type="Button" parent="Main"]
+layout_mode = 0
 offset_left = 800.0
 offset_right = 832.0
 offset_bottom = 32.0
@@ -102,6 +104,7 @@ animation = &"4"
 
 [node name="Place1Label" type="RichTextLabel" parent="Main"]
 custom_minimum_size = Vector2(300, 40)
+layout_mode = 0
 offset_left = 16.0
 offset_top = 152.0
 offset_right = 816.0
@@ -111,6 +114,7 @@ bbcode_enabled = true
 text = "[center][font size=48]Reddo 27 [/font][img width=32]res://icons/sword2.png[/img] [img width=32]res://icons/card-both.png[/img]"
 
 [node name="Scores" type="HBoxContainer" parent="Main"]
+layout_mode = 0
 offset_left = 16.0
 offset_top = 232.0
 offset_right = 816.0
@@ -142,6 +146,7 @@ bbcode_enabled = true
 text = "[img width=32]res://icons/medal2.png[/img][img width=32]res://icons/char2.png[/img][font size=24] Redoooo 27 [/font][img width=24]res://icons/sword2.png[/img] [img width=24]res://icons/card-both.png[/img]"
 
 [node name="HBoxContainer" type="HBoxContainer" parent="Main"]
+layout_mode = 0
 offset_left = 192.0
 offset_top = 304.0
 offset_right = 640.0

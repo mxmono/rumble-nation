@@ -6,6 +6,8 @@ signal leader_target_selection_requested(mouse_position: Vector2, territory_clic
 signal card_move_selected(moves: Array)
 
 @onready var board_ui = $UI
+@onready var place_preview = $UI/PlacePreview
+@onready var control_scene = get_node("/root/Game/Control")
 
 
 func _ready():
@@ -29,6 +31,14 @@ func _on_territory_clicked(territory: int, mouse_position: Vector2):
 	# if it's card phase, proceed with card actions
 	if GameState.current_phase == GameState.TurnPhase.CARD and GameState.current_card != null:
 		execute_card_step(territory, mouse_position)
+	
+	# if it's placement phase (place or reroll)
+	elif GameState.current_phase == GameState.TurnPhase.PLACE or GameState.current_phase == GameState.TurnPhase.REROLL:
+		control_scene.dice_selected.emit(
+			territory,
+			place_preview.move_to_display["num_soldiers"] + int(place_preview.move_to_display["has_leader"]),
+			place_preview.move_to_display["has_leader"],
+		)
 
 
 func execute_card_step(territory_clicked: int, mouse_position: Vector2):
