@@ -3,6 +3,7 @@ extends Card
 
 func _ready() -> void:
 	card_name = "BunTai / Squad Split"
+	_card_name = "buntai"
 	card_name_jp = "分隊"
 	description = "Move half (round down) of your soldiers from one territory to any one adjacent territory."
 	

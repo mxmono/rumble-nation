@@ -6,6 +6,7 @@ signal card_selected(card)
 
 @export var card_type: String = "normal"
 @export var card_name: String = "Base Card"
+@export var _card_name: String = "base"
 @export var card_name_jp: String = "卡片"
 @export var description: String = "Description of the card"
 var effect = []  # an array of dictionaries of moves
@@ -20,7 +21,23 @@ func _ready() -> void:
 	$JPTitle.text = card_name_jp
 	$Description.text = description
 	
+	var card_sprite_path = "res://icons/cards/%s.png" % self._card_name.to_lower()
+	print(card_sprite_path)
+	if ResourceLoader.exists(card_sprite_path):
+		print("resource exists")
+		$Hover/Sprite.texture = load(card_sprite_path)
+	
 	self.pressed.connect(_on_card_selected)
+	self.mouse_entered.connect(_on_mouse_entered)
+	self.mouse_exited.connect(_on_mouse_exited)
+
+
+func _on_mouse_entered():
+	$Hover.show()
+	
+
+func _on_mouse_exited():
+	$Hover.hide()
 
 
 func _process(delta):

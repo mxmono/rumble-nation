@@ -3,6 +3,7 @@ extends Leader
 
 func _ready() -> void:
 	card_name = "Ootomo Sourin"
+	_card_name = "ootomo"
 	card_name_jp = "大友宗麟"
 	description = "Bounce 1 opponent's soldier and replace it with 1 from your hand in a territory adjacent to your leader up to 2 times (can target different opponents)."
 	

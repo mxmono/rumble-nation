@@ -3,6 +3,7 @@ extends Leader
 
 func _ready() -> void:
 	card_name = "Oda Nobunaga"
+	_card_name = "oda"
 	card_name_jp = "織田信長"
 	description = "Move your leader to an adjacent territory. You can move up to 1 soldier with your leader."
 	

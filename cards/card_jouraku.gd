@@ -3,6 +3,7 @@ extends Card
 
 func _ready() -> void:
 	card_name = "JouRaku / Capital March"
+	_card_name = "jouraku"
 	card_name_jp = "上洛"
 	description = "Deploy any number of your own soldiers from any number of territories adjacent to Kyo to Kyo."
 	

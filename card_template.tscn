@@ -81,3 +81,19 @@ offset_right = 232.0
 offset_bottom = 96.0
 mouse_filter = 2
 color = Color(0, 0, 0, 0.372549)
+
+[node name="Hover" type="Panel" parent="."]
+visible = false
+layout_mode = 0
+offset_left = -88.0
+offset_top = 8.0
+offset_right = -8.0
+offset_bottom = 88.0
+
+[node name="BG" type="Panel" parent="Hover"]
+layout_mode = 0
+offset_right = 80.0
+offset_bottom = 80.0
+
+[node name="Sprite" type="Sprite2D" parent="Hover"]
+position = Vector2(40, 40)

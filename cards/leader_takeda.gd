@@ -3,6 +3,7 @@ extends Leader
 
 func _ready() -> void:
 	card_name = "Takeda Shingen"
+	_card_name = "takeda"
 	card_name_jp = "武田信玄"
 	description = "Expel up to 3 of one opponent's soldiers from your leader territory to any number of adjancent territories."
 	

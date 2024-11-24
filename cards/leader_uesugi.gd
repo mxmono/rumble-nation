@@ -3,6 +3,7 @@ extends Leader
 
 func _ready() -> void:
 	card_name = "Uesugi Kenshin"
+	_card_name = "uesugi"
 	card_name_jp = "上杉謙信"
 	description = "Move up to 3 of your soldiers from your leader territory to any number of adjacent territories by land."
 	

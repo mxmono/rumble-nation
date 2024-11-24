@@ -3,6 +3,7 @@ extends Card
 
 func _ready() -> void:
 	card_name = "MuHon / Coup"
+	_card_name = "muhon"
 	card_name_jp = "謀反"
 	description = "Bounce 1 opponent's soldier and replace it with 1 soldier from your hand."
 	effect = [

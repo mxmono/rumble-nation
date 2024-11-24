@@ -3,6 +3,7 @@ extends Leader
 
 func _ready() -> void:
 	card_name = "Mouri Motonari"
+	_card_name = "mouri"
 	card_name_jp = "毛利元就"
 	description = "Deploy 1 of your soldiers from hand to a territory adjacent to the territory your leader occupies up to 3 times."
 	# effect is updated on selection

@@ -83,10 +83,9 @@ offset_left = 1032.0
 offset_top = 48.0
 offset_right = 1264.0
 offset_bottom = 656.0
-current_tab = 2
+current_tab = 0
 
 [node name="Dice" type="Control" parent="GameButtons"]
-visible = false
 layout_mode = 2
 metadata/_tab_index = 0
 
@@ -200,6 +199,7 @@ disabled = true
 text = "Reset"
 
 [node name="Leader" type="VBoxContainer" parent="GameButtons"]
+visible = false
 layout_mode = 2
 metadata/_tab_index = 2
 

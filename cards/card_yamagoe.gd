@@ -3,6 +3,7 @@ extends Card
 
 func _ready() -> void:
 	card_name = "YamaGoE / Moutain Cross"
+	_card_name = "yamagoe"
 	card_name_jp = "山越え"
 	description = "Move 2 of your soldiers from one territory to an adjacent territory by land."
 	effect = [

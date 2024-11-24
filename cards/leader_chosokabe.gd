@@ -3,6 +3,7 @@ extends Leader
 
 func _ready() -> void:
 	card_name = "Chosokabe M"
+	_card_name = "chosokabe"
 	card_name_jp = "長宗我部元親"
 	description = "Move up to 3 pieces (leader or soldier) from your leader territory to any number of adjacent territories by water."
 	effect = []
