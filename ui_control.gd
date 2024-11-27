@@ -90,12 +90,15 @@ func _on_phase_started(phase):
 
 		GameState.TurnPhase.CHOICE:
 			set_control_to_player_color()
-			
 			enable_roll_dice()
 			disable_dice_options()
 			
 			enable_cards_if_all_players_active()
 			disable_card_actions()
+
+			if GameState.players[GameState.current_player]["is_ai"]:
+				disable_cards()
+				disable_roll_dice()
 			
 		GameState.TurnPhase.CARD:
 			highlight_selected_card()
@@ -131,10 +134,13 @@ func _on_phase_started(phase):
 			roll_dice_button.text = "Roll Dice"
 			
 			disable_roll_dice()
-			disable_dice_options()
+			enable_dice_options()
 			
 			disable_cards()
 			disable_card_actions()
+			
+			if GameState.players[GameState.current_player]["is_ai"]:
+				disable_dice_options()
 
 		GameState.TurnPhase.END:
 			roll_dice_button.text = "Roll Dice"
@@ -332,3 +338,7 @@ func _on_dice_rolled(dice_results: Array, move_options: Array):
 			button.disabled = true
 		else:
 			button.disabled = false
+		
+		if GameState.players[current_player]["is_ai"]:
+			button.disabled = true
+			button_leader.disabled = true

@@ -10,8 +10,12 @@ func _ready() -> void:
 
 
 func _input(event):
-	# skip if there's no leader option
-	if GameState.players[GameState.current_player]["leader"] <= 0:
+	# skip if only one possible configuration
+	if (
+		GameState.players[GameState.current_player]["soldier"] + 
+		GameState.players[GameState.current_player]["leader"] == 
+		move_to_display["num_soldiers"] + int(move_to_display["has_leader"])
+	):
 		return
 	
 	# if scrolling during placement phase, show alternate placement popup

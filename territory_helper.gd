@@ -34,6 +34,11 @@ func get_players_on_territory(territory: int) -> Array:
 	return players
 
 
+func is_territory_empty(territory: int) -> bool:
+	"""If territroy has no pieces."""
+	return get_players_on_territory(territory).is_empty()
+
+
 func get_player_territory_tally(player:int, territory: int) -> Dictionary:
 	return GameState.board_state["territory_tally"][territory][player]
 

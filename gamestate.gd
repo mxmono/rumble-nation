@@ -30,6 +30,7 @@ const PLAYER_PRESETS = [
 		"reinforce":  preload("res://icons/reinforce1.png"),
 		"color": Color(0.97, 0.35, 0.48),
 		"alt_atlas_id": 1,
+		"is_ai": false,
 	},
 	{
 		"name": "Blu",
@@ -38,6 +39,7 @@ const PLAYER_PRESETS = [
 		"reinforce":  preload("res://icons/reinforce2.png"),
 		"color": Color(0, 0.58, 0.71),
 		"alt_atlas_id": 2,
+		"is_ai": false,
 	},
 	{
 		"name": "Yello",
@@ -46,6 +48,7 @@ const PLAYER_PRESETS = [
 		"reinforce":  preload("res://icons/reinforce3.png"),
 		"color": Color(0.79, 0.49, 0.24),
 		"alt_atlas_id": 3,
+		"is_ai": true,
 	},
 	{
 		"name": "Greeny",
@@ -54,6 +57,7 @@ const PLAYER_PRESETS = [
 		"reinforce":  preload("res://icons/reinforce4.png"),
 		"color": Color(0, 0.57, 0.53),
 		"alt_atlas_id": 4,
+		"is_ai": true,
 	},
 ]
 const CARDS = ["Kasei", "Monomi", "Hitojichi", "Tsuihou", "Muhon", "Otori", "Suigun", "Yamagoe", "Taikyaku", "Shinobi", "Buntai", "Jouraku"]
@@ -246,7 +250,7 @@ func update_board_tally_by_delta(territory_index: int, player_index: int, delta_
 		self.board_state["territory_tally"][territory_index][player_index][key] += delta_dict[key]
 
 
-func update_game_state_on_deployed(player_index, territory_index, deploy_count, has_leader):
+func update_game_state_on_deployed(player_index, territory_index, deploy_count, has_leader, emit=true):
 	"""This function alone should handle changes between deployment states."""
 	#region update board tally (board_state["territory_tally"])
 	if has_leader:
@@ -301,7 +305,8 @@ func update_game_state_on_deployed(player_index, territory_index, deploy_count, 
 	#endregion
 	
 	# emit signals for ui drawing etc.
-	deploy_state_updated.emit()
+	if emit:
+		deploy_state_updated.emit()
 
 
 func all_players_out() -> bool:

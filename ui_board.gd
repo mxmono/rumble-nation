@@ -234,16 +234,30 @@ func show_placement_popup(territory: int, move_option: Dictionary):
 	
 	# if changing tiles
 	if territory != self.last_hovered_territory:
-		# keep the leader, ie if leader is toggled on, keep on
-		if self.placement_preview.move_to_display["has_leader"]:
-			# only when leader is available (inbetween turns)
-			if GameState.players[GameState.current_player]["leader"] >= 0:
-				self.placement_preview.update_move(move_option["deploy_count"] - 1, true)
-			else:
-				self.placement_preview.update_move(move_option["deploy_count"], false)
-		else:
+		# if only either leader or soldier left, show them respectively
+		if GameState.players[GameState.current_player]["soldier"] == 0:
+			self.placement_preview.update_move(0, true)
+		
+		elif GameState.players[GameState.current_player]["leader"] == 0:
 			self.placement_preview.update_move(move_option["deploy_count"], false)
-				
+		
+		else:
+			# keep the leader, ie if leader is toggled on, keep on
+			if self.placement_preview.move_to_display["has_leader"]:
+				# only when leader is available (inbetween turns)
+				if GameState.players[GameState.current_player]["leader"] >= 0:
+					self.placement_preview.update_move(move_option["deploy_count"] - 1, true)
+				else:
+					self.placement_preview.update_move(move_option["deploy_count"], false)
+			else:
+				# if there are enough soldiers to play all soldiers, play all soldiers
+				# if eg only 1 soldier and 1 leader left and deploy count = 2, playe 1 each
+				if move_option["deploy_count"] >  GameState.players[GameState.current_player]["soldier"]:
+					self.placement_preview.update_move(move_option["deploy_count"] - 1, true)
+				else:
+					self.placement_preview.update_move(move_option["deploy_count"], false)
+					
+					
 		self.last_hovered_territory = territory
 	
 	self.placement_preview.draw_pieces()

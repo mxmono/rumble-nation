@@ -34,6 +34,10 @@ func _on_roll_dice_requested():
 	dice_rolled.emit(dice_results, move_options)
 
 
+func click_roll_dice():
+	_on_roll_dice_requested()
+
+
 func roll_dice() -> int:
 		randomize()
 		return randi() % 6 + 1
@@ -48,6 +52,11 @@ func _on_dice_option_selected(i, has_leader):
 		dice_move_options[i]["deploy_count"],
 		has_leader,
 	)
+
+
+func select_dice_option(i, has_leader):
+	# ai act function
+	_on_dice_option_selected(i, has_leader)
 
 
 func _on_card_selected(card: Card):

@@ -1,4 +1,4 @@
-[gd_scene load_steps=26 format=3 uid="uid://g5nmapmpmw6v"]
+[gd_scene load_steps=27 format=3 uid="uid://g5nmapmpmw6v"]
 
 [ext_resource type="Script" path="res://turn_logic.gd" id="1_8uaah"]
 [ext_resource type="PackedScene" uid="uid://drhj1usffqkax" path="res://pause_menu.tscn" id="2_du5q5"]
@@ -8,6 +8,7 @@
 [ext_resource type="PackedScene" uid="uid://bytjjtpjcxxe2" path="res://board.tscn" id="6_yhtb1"]
 [ext_resource type="PackedScene" uid="uid://clmaiveja705w" path="res://card_template.tscn" id="7_h0jj3"]
 [ext_resource type="PackedScene" uid="uid://toymkd56ew5r" path="res://gameover_menu.tscn" id="8_bbj7e"]
+[ext_resource type="Script" path="res://ai_agent.gd" id="9_5ilpu"]
 
 [sub_resource type="Theme" id="Theme_xckhs"]
 default_font = ExtResource("4_jbmg8")
@@ -277,5 +278,8 @@ text = "Reset"
 [node name="GameOverMenu" parent="." instance=ExtResource("8_bbj7e")]
 visible = false
 position = Vector2(224, 144)
+
+[node name="AI" type="Node" parent="."]
+script = ExtResource("9_5ilpu")
 
 [connection signal="dice_rolled" from="Control" to="." method="_on_dice_rolled"]

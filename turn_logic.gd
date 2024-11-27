@@ -82,7 +82,7 @@ func _on_card_move_selected(moves):
 	# moves is an array of [[player, territory_index, deploy_count, has_leader]]
 	# when player clicked on territories to apply effect of the card, update deployment
 	for move in moves:
-		GameState.update_game_state_on_deployed(move[0], move[1], move[2], move[3])
+		GameState.update_game_state_on_deployed(move[0], move[1], move[2], move[3], true)
 	
 	# proceed to confirm or reset card
 	# only do so if the card effect has fully finished, as signal can be emitted for multi-step midway
@@ -94,7 +94,7 @@ func _on_card_move_selected(moves):
 func _on_card_move_reverted(moves):
 	# update game state
 	for move in moves:
-		GameState.update_game_state_on_deployed(move[0], move[1], -move[2], move[3])
+		GameState.update_game_state_on_deployed(move[0], move[1], -move[2], move[3], true)
 	
 	# on card move reverted, same as the same card is selected again
 	_on_card_selected(GameState.current_card)
@@ -140,7 +140,7 @@ func _on_dice_rolled(dice_results, move_options):
 
 func _on_dice_selected(territory: int, deploy_count: int, has_leader: bool):
 	GameState.update_game_state_on_deployed(
-		GameState.current_player, territory, deploy_count, has_leader
+		GameState.current_player, territory, deploy_count, has_leader, true
 	)
 	
 	# reset dice options
@@ -175,6 +175,25 @@ func end_turn():
 func scoring_phase():
 	print("entering scoring phase")
 	
+	var player_scores = resolve_game(GameState.player_priority)
+	
+	var placement = get_placements(player_scores, GameState.player_priority)
+	
+	# update game state
+	GameState.placement = placement
+	for i in range(placement.size()):
+		var player = placement[i]
+		GameState.players[player]["placement"] = i
+	
+	print("final placement: ", GameState.placement)
+	
+	# emit signal that scoring is done for ui
+	game_scored.emit()
+
+
+func resolve_game(player_priority: Array) -> Array:
+	"""Return an array of player scores. GameState changes."""
+	
 	# get an array of territory indices by territory points ascending
 	var territories_by_points = []
 	for territory_points in range(2, 13):
@@ -187,115 +206,93 @@ func scoring_phase():
 		
 		# check who wins
 		var territory_tally = GameState.board_state["territory_tally"][territory]
-		var scores = []
+		var territory_scores = []
 		for player_tally in territory_tally:
-			scores.append(
+			territory_scores.append(
 				player_tally["soldier"] + player_tally["reinforcement"] + player_tally["leader"] * 2
 			)
-		var win_order_players =  get_player_win_order(scores, GameState.player_priority)
-		var first_place_player = -1
-		var second_place_player = -1
-		if win_order_players.size() >= 1:
-			first_place_player = win_order_players[0]
-			if win_order_players.size() > 1:
-				second_place_player = win_order_players[1]
+			
+		var territory_placement = get_placements(territory_scores, player_priority)
 		
 		# update winner for each territory in game state
 		if GameState.board_state["territory_winner"].size() != GameState.num_territories:
 			GameState.board_state["territory_winner"].resize(GameState.num_territories)
-		GameState.board_state["territory_winner"][territory] = first_place_player
-	
-		if first_place_player == -1:  # if no one wins, go to next territory
-			continue
-		print(GameState.players[first_place_player]["name"], " is first place")
+		GameState.board_state["territory_winner"][territory] = territory_placement[0]
 		
-		if second_place_player != -1:
-			print(GameState.players[second_place_player]["name"], " is second place")
+		# if no one wins the territory, continue
+		if territory_placement.max() == -1:
+			continue
+		print(GameState.players[territory_placement[0]]["name"], " is first place")
+		
+		if territory_placement[1] != -1:
+			print(GameState.players[territory_placement[1]]["name"], " is second place")
 		
 		# reinforce to adjacent territories
-		reinforce(first_place_player, territory)
+		reinforce(territory_placement[0], territory)
 		
 		# credit score to the player
-		GameState.players[first_place_player]["score"] += territory_points
+		GameState.players[territory_placement[0]]["score"] += territory_points
 		
 		# add half score (round down) to 2nd place if more than 2 players
 		if GameState.num_players > 2:
-			if second_place_player != -1:
-				GameState.players[second_place_player]["score"] += territory_points / 2
-				print("credited ", territory_points / 2, " to ", GameState.players[second_place_player]["name"])
+			if territory_placement[1] != -1:
+				GameState.players[territory_placement[1]]["score"] += territory_points / 2
+				print("credited ", territory_points / 2, " to ", GameState.players[territory_placement[1]]["name"])
 
 	# annouce the winner
 	var player_scores = []
 	for player in GameState.players:
 		player_scores.append(player["score"])
+
+	return player_scores
+
+
+func reset_game_state_post_adhoc_resolution():
+	"""If it's an adhoc resolution for AI, reset those states."""
+	GameState.board_state["territory_winner"] = []
 	
+	for player in GameState.players:
+		player["score"] = 0
+	
+	for territory in range(GameState.num_territories):
+		for player in range(GameState.num_players):
+			GameState.update_board_tally(
+				territory, player, {"reinforcement": 0}
+			)
+	
+
+func get_placements(player_scores: Array, player_priority: Array) -> Array:
+	"""Given scores, return an array of player_index ordered by win order.
+	Eg, [1, 2, 0] means first place is player1, last place is player0
+	"""
 	# eg scores = [23, 45, 23, 30], priority = [2, 0, 1, 3] => placement = [1, 3, 2, 0]
-	var placement = []
+	var placements = []
+	
+	# if no one wins (on an empty territory), return all -1s
+	if player_scores.max() == 0:
+		return [-1, -1, -1, -1].slice(0, player_scores.size())
 	
 	# first sort scores by priority, scores_sorted = [23 (2), 23 (0), 45, 30]
 	# find max=45, index=2, priority[2]=1 => player 1 wins
 	# example 2: scores [24, 19], priority [1, 0], sorted [19, 24], max=24, index=1, priority[1]=0
 	var scores_sorted = []
 	for i in range(player_scores.size()):
-		scores_sorted.append(player_scores[GameState.player_priority[i]])
+		scores_sorted.append(player_scores[player_priority[i]])
 	
 	while scores_sorted.max() > -1:
 		var current_max = scores_sorted.max()
 		var current_highest_player_priority_index = scores_sorted.find(current_max)
-		var current_highest_player = GameState.player_priority[current_highest_player_priority_index]
-		GameState.players[current_highest_player]["placement"] = placement.size()
-		placement.append(current_highest_player)
+		var current_highest_player = player_priority[current_highest_player_priority_index]
+		
+		# if already all 0s (can happen on single territory scoring, eg only 1 player occupies)
+		# fill the rest of the placements with -1
+		if current_max == 0:
+			current_highest_player = -1
+		
+		placements.append(current_highest_player)
 		scores_sorted[current_highest_player_priority_index] = -1
 	
-	# update game state
-	GameState.placement = placement
-	print("final placement: ", GameState.placement)
-	
-	# emit signal that scoring is done for ui
-	game_scored.emit()
-
-
-func get_winning_player(scores: Array, player_priority) -> int:
-	"""Based on total score and out sequence (player priority), return winning player"""
-	var max_value = scores.max()  # Find the maximum value in the array
-
-	# no one wins if no pieces
-	if max_value <= 0:
-		return -1
-	var player_index = []  # Array to store the indices of the max value
-	
-	# Loop through the array to find players with the highest score
-	for i in range(scores.size()):
-		if scores[i] == max_value:
-			player_index.append(i)
-	
-	# if tie, check which player is out first, eg players [1, 2] tie
-	# then if the player priority is [2, 1], player 2 wins
-	if player_index.size() > 1:
-		for player in player_priority:
-			if player_index.find(player) != -1:
-				return player
-	
-	# otherwise if only 1 winner, return the winner
-	return player_index[0]
-
-
-func get_player_win_order(scores: Array, player_priority: Array) -> Array:
-	"""Return an array of win order, eg [2, 3, 0, 1], player 2 is first place."""
-	
-	var win_order_players = []  # if there are only 1 player on tile, should only have 1 element
-	var num_players_with_scores = 0
-	for score in scores:
-		if score > 0:
-			num_players_with_scores += 1
-	
-	for i in range(num_players_with_scores):
-		var winning_player = get_winning_player(scores, player_priority)
-		win_order_players.append(winning_player)
-		# set the score of the already identified player to -1
-		scores[winning_player] = -1
-
-	return win_order_players
+	return placements
 
 
 func reinforce(player, from_territory):
@@ -317,7 +314,7 @@ func reinforce(player, from_territory):
 			# only reinforce if player has pieces
 			if tally["soldier"] + tally["leader"] > 0:
 				GameState.update_board_tally_by_delta(
-					connected_territory, player, {"reinforcement": pieces_to_reinforce}
+					connected_territory, player, {"reinforcement": pieces_to_reinforce},
 				)
 				print(
 					"territory %s with points %s received player %s's %s reinforcements" % 

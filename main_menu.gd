@@ -21,11 +21,13 @@ func _ready() -> void:
 				"name": get_node(PLAYER_SETTINGS + "Player%s/LineEdit" % str(i)),
 				"icon": get_node(PLAYER_SETTINGS + "Player%s/Icon/OptionButton" % str(i)),
 				"color": get_node(PLAYER_SETTINGS + "Player%s/Icon/ColorPickerButton" % str(i)),
+				"is_ai": get_node(PLAYER_SETTINGS + "Player%s/Icon/AICheckBox" % str(i))
 			}
 		)
 		player_settings[i]["name"].text_changed.connect(_on_player_name_changed.bind(i))
 		player_settings[i]["icon"].item_selected.connect(_on_player_icon_changed.bind(i))
-	
+		player_settings[i]["is_ai"].pressed.connect(_on_player_ai_changed)
+
 	# get default selection
 	update_player_settings()
 	
@@ -60,9 +62,12 @@ func update_player_settings():
 				"icon_reinforce": GameState.PLAYER_PRESETS[preset_index]["reinforce"],
 				"color": GameState.PLAYER_PRESETS[preset_index]["color"],
 				"alt_atlas_id": GameState.PLAYER_PRESETS[preset_index]["alt_atlas_id"],
+				"is_ai": player_settings[i]["is_ai"].is_pressed(),
 			}
 
 		GameState.update_player_state(i, update_dict)
+	
+	print(GameState.players)
 
 
 func _on_start_game_button_pressed():
@@ -107,6 +112,10 @@ func _on_player_icon_changed(icon, i):
 		var preset_index = player_settings[i]["icon"].selected
 		player_settings[i]["name"].set_text(GameState.PLAYER_PRESETS[preset_index]["name"])
 	
+	update_player_settings()
+
+
+func _on_player_ai_changed():
 	update_player_settings()
 
 

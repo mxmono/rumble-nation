@@ -131,6 +131,10 @@ text = "Color"
 color = Color(1, 0, 0, 1)
 edit_alpha = false
 
+[node name="AICheckBox" type="CheckBox" parent="GameOptions/Local/VBoxContainer/PlayerSettings/Player0/Icon"]
+layout_mode = 2
+text = "AI"
+
 [node name="Player1" type="VBoxContainer" parent="GameOptions/Local/VBoxContainer/PlayerSettings"]
 custom_minimum_size = Vector2(128, 0)
 layout_mode = 2
@@ -168,6 +172,10 @@ size_flags_horizontal = 3
 text = "Color"
 color = Color(1.44392e-06, 0.519398, 0.785104, 1)
 edit_alpha = false
+
+[node name="AICheckBox" type="CheckBox" parent="GameOptions/Local/VBoxContainer/PlayerSettings/Player1/Icon"]
+layout_mode = 2
+text = "AI"
 
 [node name="Player2" type="VBoxContainer" parent="GameOptions/Local/VBoxContainer/PlayerSettings"]
 visible = false
@@ -208,6 +216,10 @@ text = "Color"
 color = Color(0.792773, 0.498224, 0.240032, 1)
 edit_alpha = false
 
+[node name="AICheckBox" type="CheckBox" parent="GameOptions/Local/VBoxContainer/PlayerSettings/Player2/Icon"]
+layout_mode = 2
+text = "AI"
+
 [node name="Player3" type="VBoxContainer" parent="GameOptions/Local/VBoxContainer/PlayerSettings"]
 visible = false
 custom_minimum_size = Vector2(128, 0)
@@ -246,6 +258,10 @@ size_flags_horizontal = 3
 text = "Color"
 color = Color(0, 0.571416, 0.535173, 1)
 edit_alpha = false
+
+[node name="AICheckBox" type="CheckBox" parent="GameOptions/Local/VBoxContainer/PlayerSettings/Player3/Icon"]
+layout_mode = 2
+text = "AI"
 
 [node name="Remote" type="MarginContainer" parent="GameOptions"]
 visible = false

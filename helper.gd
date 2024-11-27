@@ -24,6 +24,20 @@ func union_set(arr1: Array, arr2: Array) -> Array:
 	return arr
 
 
+func get_sort_order_descending(arr: Array) -> Array:
+	"""Get sort order of an array."""
+	
+	var array = arr.duplicate()
+	var current_max = array.max()
+	var sort_order = []
+	while array.size() > 0:
+		sort_order.append(array.find(current_max))
+		array.erase(current_max)
+		current_max = array.max()
+	
+	return sort_order
+
+
 func combine_dice(dice_results: Array) -> Array:
 	"""Combine three dice results into move options."""
 	var current_player = GameState.current_player
