@@ -1,9 +1,8 @@
 [gd_scene load_steps=27 format=3 uid="uid://bhuosep1twjl0"]
 
+[ext_resource type="Theme" uid="uid://bgv6ueaouljqv" path="res://default_theme.tres" id="1_b0jkw"]
 [ext_resource type="Script" path="res://control.gd" id="1_x8hjk"]
 [ext_resource type="Script" path="res://ui_control.gd" id="2_ugd3a"]
-
-[sub_resource type="Theme" id="Theme_luytd"]
 
 [sub_resource type="InputEventKey" id="InputEventKey_8umb0"]
 device = -1
@@ -106,7 +105,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-theme = SubResource("Theme_luytd")
+theme = ExtResource("1_b0jkw")
 script = ExtResource("1_x8hjk")
 
 [node name="GameButtons" type="TabContainer" parent="."]

@@ -34,6 +34,15 @@ func _on_territory_clicked(territory: int, mouse_position: Vector2):
 	
 	# if it's placement phase (place or reroll)
 	elif GameState.current_phase == GameState.TurnPhase.PLACE or GameState.current_phase == GameState.TurnPhase.REROLL:
+		# ignore if clicked territory is not a placement option
+		var move_options = Helper.combine_dice(GameState.current_dice)
+		var territories = []
+		for move_option in move_options:
+			territories.append(move_option["territory_index"])
+		if not territories.has(territory):
+			return
+		
+		# otherwise, emit the dice signal
 		control_scene.dice_selected.emit(
 			territory,
 			place_preview.move_to_display["num_soldiers"] + int(place_preview.move_to_display["has_leader"]),

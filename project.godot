@@ -13,6 +13,8 @@ config_version=5
 config/name="rumble"
 run/main_scene="res://main_menu.tscn"
 config/features=PackedStringArray("4.3", "GL Compatibility")
+boot_splash/image="res://icons/alba256-2.png"
+boot_splash/fullsize=false
 config/icon="res://icons/sword1.png"
 config/windows_native_icon="res://icons/icon.ico"
 

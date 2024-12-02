@@ -10,12 +10,22 @@ func _ready() -> void:
 
 
 func _input(event):
+	# skip if ai
+	if GameState.players[GameState.current_player]["is_ai"]:
+		return
+	
 	# skip if only one possible configuration
 	if (
 		GameState.players[GameState.current_player]["soldier"] + 
 		GameState.players[GameState.current_player]["leader"] == 
 		move_to_display["num_soldiers"] + int(move_to_display["has_leader"])
 	):
+		return
+	
+	# skip if no leader or soldier left
+	if GameState.players[GameState.current_player]["soldier"] == 0:
+		return
+	if GameState.players[GameState.current_player]["leader"] == 0:
 		return
 	
 	# if scrolling during placement phase, show alternate placement popup
@@ -57,7 +67,7 @@ func draw_pieces():
 		piece_sprite.scale = self.player_piece_scale
 		piece_sprite.texture = icon
 		piece_sprite.modulate = Color(1, 1, 1, 0.5)
-		piece_sprite.position += (i + 2 * int(self.move_to_display["has_leader"])) * self.piece_offset + base_offset
+		piece_sprite.position += (i + 1.6 * int(self.move_to_display["has_leader"])) * self.piece_offset + base_offset
 		add_child(piece_sprite)
 
 

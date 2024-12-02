@@ -1,5 +1,6 @@
-[gd_scene load_steps=6 format=3 uid="uid://clmaiveja705w"]
+[gd_scene load_steps=7 format=3 uid="uid://clmaiveja705w"]
 
+[ext_resource type="Theme" uid="uid://bgv6ueaouljqv" path="res://default_theme.tres" id="1_ona63"]
 [ext_resource type="Script" path="res://cards/card.gd" id="1_xhfe4"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_qix56"]
@@ -26,6 +27,7 @@ font_color = Color(0.280401, 0.173753, 0.0890148, 1)
 custom_minimum_size = Vector2(232, 96)
 offset_right = 232.0
 offset_bottom = 96.0
+theme = ExtResource("1_ona63")
 theme_override_colors/font_disabled_color = Color(0.299547, 0.299547, 0.299547, 1)
 script = ExtResource("1_xhfe4")
 
@@ -67,7 +69,7 @@ vertical_alignment = 2
 [node name="Description" type="Label" parent="."]
 layout_mode = 2
 offset_left = 8.0
-offset_top = 35.0
+offset_top = 40.0
 offset_right = 232.0
 offset_bottom = 91.0
 text = "sample card description sample card description sample card description"

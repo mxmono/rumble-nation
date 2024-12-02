@@ -1,14 +1,20 @@
-[gd_scene load_steps=10 format=3 uid="uid://is8a3bvf2un1"]
+[gd_scene load_steps=11 format=3 uid="uid://is8a3bvf2un1"]
 
 [ext_resource type="Script" path="res://main_menu.gd" id="1_qjl8v"]
-[ext_resource type="Texture2D" uid="uid://dopnktebruu8u" path="res://icons/p1.png" id="2_1pqxm"]
+[ext_resource type="Theme" uid="uid://bgv6ueaouljqv" path="res://default_theme.tres" id="2_0ai2m"]
 [ext_resource type="Texture2D" uid="uid://cvhkdf5tbnm6d" path="res://icons/char1.png" id="2_xeckm"]
-[ext_resource type="Texture2D" uid="uid://douhpl2uopg8k" path="res://icons/p2.png" id="3_hi3w4"]
+[ext_resource type="FontFile" uid="uid://cc4xuvidbajq6" path="res://fonts/visitor1.ttf" id="3_h08gb"]
 [ext_resource type="Texture2D" uid="uid://diftevdlg7cmx" path="res://icons/char2.png" id="3_yxxp8"]
-[ext_resource type="Texture2D" uid="uid://qxvj122ohety" path="res://icons/p3.png" id="4_ev16q"]
 [ext_resource type="Texture2D" uid="uid://dptoqt6vyo4of" path="res://icons/char3.png" id="4_tanc7"]
 [ext_resource type="Texture2D" uid="uid://cnn6iguti0pju" path="res://icons/char4.png" id="5_7knxw"]
-[ext_resource type="Texture2D" uid="uid://ciwkf7ti2n4vd" path="res://icons/p4.png" id="5_ok0q4"]
+[ext_resource type="FontFile" uid="uid://b4xj6slwwrknm" path="res://fonts/Noto_Sans_JP/NotoSansJP-VariableFont_wght.ttf" id="8_gi5pg"]
+
+[sub_resource type="LabelSettings" id="LabelSettings_qx30u"]
+font = ExtResource("3_h08gb")
+font_size = 64
+
+[sub_resource type="LabelSettings" id="LabelSettings_lon47"]
+font = ExtResource("8_gi5pg")
 
 [node name="MainMenu" type="Control"]
 layout_mode = 3
@@ -18,15 +24,17 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_qjl8v")
+metadata/_edit_vertical_guides_ = [-164.0]
 
 [node name="PanelContainer" type="PanelContainer" parent="."]
 custom_minimum_size = Vector2(1280, 720)
 layout_mode = 0
 offset_right = 40.0
 offset_bottom = 40.0
+theme = ExtResource("2_0ai2m")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="PanelContainer"]
-custom_minimum_size = Vector2(256, 256)
+custom_minimum_size = Vector2(256, 200)
 layout_mode = 2
 size_flags_horizontal = 4
 size_flags_vertical = 8
@@ -37,12 +45,23 @@ layout_mode = 2
 text = "START GAME"
 
 [node name="SettingsButton" type="Button" parent="PanelContainer/VBoxContainer"]
+visible = false
 layout_mode = 2
 text = "SETTINGS"
 
 [node name="QuitButton" type="Button" parent="PanelContainer/VBoxContainer"]
 layout_mode = 2
 text = "QUIT"
+
+[node name="Label" type="Label" parent="."]
+layout_mode = 2
+offset_left = 256.0
+offset_top = 101.0
+offset_right = 1024.0
+offset_bottom = 164.0
+text = "> RUMBLE NATION <"
+label_settings = SubResource("LabelSettings_qx30u")
+horizontal_alignment = 1
 
 [node name="GameOptions" type="TabContainer" parent="."]
 layout_mode = 1
@@ -52,11 +71,12 @@ anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
 offset_left = -331.0
-offset_top = -231.0
+offset_top = -170.0
 offset_right = 331.0
-offset_bottom = 65.0
+offset_bottom = 126.0
 grow_horizontal = 2
 grow_vertical = 2
+theme = ExtResource("2_0ai2m")
 current_tab = 0
 
 [node name="Local" type="MarginContainer" parent="GameOptions"]
@@ -75,7 +95,7 @@ theme_override_constants/separation = 40
 layout_mode = 2
 theme_override_constants/separation = 50
 
-[node name="Label" type="Label" parent="GameOptions/Local/VBoxContainer/GameSettings"]
+[node name="NumPlayerLabel" type="Label" parent="GameOptions/Local/VBoxContainer/GameSettings"]
 layout_mode = 2
 text = "Number of Players"
 
@@ -88,6 +108,21 @@ popup/item_1/text = "3"
 popup/item_1/id = 1
 popup/item_2/text = "4"
 popup/item_2/id = 2
+
+[node name="PaddingLabel" type="Label" parent="GameOptions/Local/VBoxContainer/GameSettings"]
+layout_mode = 2
+
+[node name="MapLabel" type="Label" parent="GameOptions/Local/VBoxContainer/GameSettings"]
+layout_mode = 2
+text = "Map Selection"
+
+[node name="MapOption" type="OptionButton" parent="GameOptions/Local/VBoxContainer/GameSettings"]
+layout_mode = 2
+selected = 0
+item_count = 2
+popup/item_0/text = "Original"
+popup/item_1/text = "Alt 1"
+popup/item_1/id = 1
 
 [node name="PlayerSettings" type="HBoxContainer" parent="GameOptions/Local/VBoxContainer"]
 layout_mode = 2
@@ -263,6 +298,10 @@ edit_alpha = false
 layout_mode = 2
 text = "AI"
 
+[node name="AutoRollDice" type="CheckBox" parent="GameOptions/Local/VBoxContainer"]
+layout_mode = 2
+text = "Auto roll dice (this disables cards, recommended when playing with AI)"
+
 [node name="Remote" type="MarginContainer" parent="GameOptions"]
 visible = false
 layout_mode = 2
@@ -304,12 +343,12 @@ text = "Icon"
 layout_mode = 2
 selected = 0
 item_count = 4
-popup/item_0/icon = ExtResource("2_1pqxm")
-popup/item_1/icon = ExtResource("3_hi3w4")
+popup/item_0/icon = ExtResource("2_xeckm")
+popup/item_1/icon = ExtResource("3_yxxp8")
 popup/item_1/id = 1
-popup/item_2/icon = ExtResource("4_ev16q")
+popup/item_2/icon = ExtResource("4_tanc7")
 popup/item_2/id = 2
-popup/item_3/icon = ExtResource("5_ok0q4")
+popup/item_3/icon = ExtResource("5_7knxw")
 popup/item_3/id = 3
 
 [node name="EmptyLabel" type="Label" parent="GameOptions/Remote/HBoxContainer/Connect"]
@@ -346,3 +385,60 @@ offset_bottom = 176.0
 [node name="ErrorLabel" type="Label" parent="GameOptions/Remote"]
 layout_mode = 2
 size_flags_vertical = 8
+
+[node name="Rules" type="MarginContainer" parent="GameOptions"]
+visible = false
+layout_mode = 2
+theme_override_constants/margin_left = 30
+theme_override_constants/margin_top = 30
+theme_override_constants/margin_right = 30
+theme_override_constants/margin_bottom = 30
+metadata/_tab_index = 2
+
+[node name="Rules" type="RichTextLabel" parent="GameOptions/Rules"]
+layout_mode = 2
+theme = ExtResource("2_0ai2m")
+bbcode_enabled = true
+text = "[u]Territory[/u]:
+There are 11 territories on the map with points 2-12, representing values one can get from rolling 2 dice.
+
+[u]Basic Placement[/u]:
+Roll 3 dice and place your pieces.
+1 dice decides how many pieces you an place, the sum of the 2 other dice decides where you place them.
+For example, rolling [[color=\"cyan\"]1[/color], [color=\"magenta\"]3[/color], [color=\"yellow\"]4[/color]]:
+    •  you can place [color=\"cyan\"]1[/color] piece on ([color=\"magenta\"]3[/color] + [color=\"yellow\"]4[/color]) = 7
+    •  or 2 ([color=\"magenta\"]3[/color]/2 round up) on ([color=\"cyan\"]1[/color] + [color=\"yellow\"]4[/color]) = 5
+    •  or 2 ([color=\"yellow\"]4[/color]/2) on ([color=\"cyan\"]1[/color] + [color=\"magenta\"]3[/color]) = 4
+
+[u]Game Flow[/u]:
+Players roll dice and place pieces in turn until all players are out. When all players are out of pieces, resolve the game.
+
+[u]Scoring[/u]:
+Every soldier counts as 1 piece, and every leader counts as 2 pieces.
+The player who has more pieces on the territory wins the territory and gets the points.
+For example, when a player wins territory 2, the player gets 2 points.
+In games with >=3 players, the 2nd place player gets half of the points (round down).
+If two players tie, the player who goes out first wins the tie.
+
+[u]Reinforcement[/u]:
+When all players are out, resolve the game from the lowest-point territory (ie 2).
+The player who wins the territory can reinforce to adjacent territories with higher points IF the player has pieces on that territory.
+For example, if Red wins 2, 2 is adjacent to 4 and 5, and Red has pieces on 4, Red can add 1 piece to 4 during game resolution (2 pieces if  >3 players).
+
+[u]Cards[/u]:
+Every player can play up to 1 tactic card and up to 1 leader card in one game.
+The leader card can only be played once the leader piece has been played by the player.
+Player gets REROLL once per turn after having played a card.
+Cards cannot be played by anyone if any player is already out.
+"
+
+[node name="Author" type="Label" parent="."]
+layout_mode = 0
+offset_left = 1018.0
+offset_top = 657.0
+offset_right = 1271.0
+offset_bottom = 708.0
+text = "v2024.12.02
+Adapted from game by Yogi Shinichi"
+label_settings = SubResource("LabelSettings_lon47")
+horizontal_alignment = 2

@@ -8,6 +8,8 @@ const PLAYER_SETTINGS = "GameOptions/Local/VBoxContainer/PlayerSettings/"
 const CONNECT_PANEL = "GameOptions/Remote/HBoxContainer/Connect/"
 const LOBBY_PANEL = "GameOptions/Remote/HBoxContainer/Lobby/"
 @onready var num_players_option = get_node(GAME_OPTIONS_PARENT + "NumPlayersOption")
+@onready var map_option = get_node(GAME_OPTIONS_PARENT + "MapOption")
+@onready var auto_roll_option = $GameOptions/Local/VBoxContainer/AutoRollDice
 @onready var player_settings = []
 
 
@@ -31,10 +33,14 @@ func _ready() -> void:
 	# get default selection
 	update_player_settings()
 	
+	GameState.auto_roll_enabled = auto_roll_option.is_pressed()
+	
 	# connect buttons and updates
 	start_game_button.pressed.connect(_on_start_game_button_pressed)
 	num_players_option.item_selected.connect(_on_num_players_option_selected)
+	map_option.item_selected.connect(_on_map_option_selected)
 	quit_button.pressed.connect(_on_quit_button_pressed)
+	auto_roll_option.pressed.connect(_on_auto_roll_toggled)
 	
 	# remote
 	GameManager.connection_failed.connect(_on_connection_failed)
@@ -78,7 +84,11 @@ func _on_quit_button_pressed():
 	get_tree().quit()
 
 
-func _on_num_players_option_selected(selected_option):
+func _on_auto_roll_toggled():
+	GameState.auto_roll_enabled = not GameState.auto_roll_enabled
+
+
+func _on_num_players_option_selected(selected_option: int):
 	# UI: update player settings section (if only 2 players, only show configuration for 2)
 	if selected_option + 2 == 2:
 		get_node(PLAYER_SETTINGS + "Player2").hide()
@@ -94,6 +104,11 @@ func _on_num_players_option_selected(selected_option):
 	
 	update_player_settings()
 
+
+func _on_map_option_selected(selected_option: int):
+	GameState.map_option = selected_option
+	GameState.initialize_board_state()
+	
 
 func _on_player_name_changed(name, i):
 	update_player_settings()

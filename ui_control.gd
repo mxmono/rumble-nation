@@ -100,6 +100,10 @@ func _on_phase_started(phase):
 				disable_cards()
 				disable_roll_dice()
 			
+			if GameState.auto_roll_enabled:
+				disable_cards()
+				disable_roll_dice()
+			
 		GameState.TurnPhase.CARD:
 			highlight_selected_card()
 			
@@ -134,7 +138,7 @@ func _on_phase_started(phase):
 			roll_dice_button.text = "Roll Dice"
 			
 			disable_roll_dice()
-			enable_dice_options()
+			#enable_dice_options()
 			
 			disable_cards()
 			disable_card_actions()

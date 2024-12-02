@@ -31,7 +31,7 @@ func get_sort_order_descending(arr: Array) -> Array:
 	var current_max = array.max()
 	var sort_order = []
 	while array.size() > 0:
-		sort_order.append(array.find(current_max))
+		sort_order.append(arr.find(current_max))
 		array.erase(current_max)
 		current_max = array.max()
 	

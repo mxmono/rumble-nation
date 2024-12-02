@@ -4,13 +4,14 @@ signal phase_started(phase)
 signal game_scored()
 signal card_revert_move_deployed()  # revert received and game state updated
 
+@onready var control_scene = get_node("/root/Game/Control")
+
 
 func _ready():
 	var board_scene = get_node("/root/Game/Board")
 	board_scene.card_move_selected.connect(_on_card_move_selected)
 	
 	# connect signals
-	var control_scene = get_node("/root/Game/Control")
 	control_scene.dice_selected.connect(_on_dice_selected)
 	control_scene.card_move_reverted.connect(_on_card_move_reverted)
 	control_scene.card_move_confirmed.connect(_on_card_confirmed)
@@ -43,6 +44,11 @@ func process_turn_phase():
 		GameState.TurnPhase.CHOICE:
 			print(current_player_name, " is in the CHOICE phase.")
 			phase_started.emit(GameState.TurnPhase.CHOICE)
+			if GameState.auto_roll_enabled:
+				# if ai, auto roll is already in ai_agent
+				if not GameState.players[GameState.current_player]["is_ai"]:
+					await get_tree().create_timer(1).timeout
+					control_scene.click_roll_dice()
 
 		GameState.TurnPhase.CARD:
 			print(current_player_name, " is in the CARD phase.")

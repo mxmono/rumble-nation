@@ -3,10 +3,13 @@ extends Node
 signal deploy_state_updated
 
 var num_players: int = 2
+var map_option: int = 0
+var auto_roll_enabled = false
 var total_soldiers: int = 16
 var num_territories: int = 11
 var current_player: int = 0
 var current_card = null
+
 enum TurnPhase {
 	CHOICE,
 	CARD,
@@ -62,6 +65,34 @@ const PLAYER_PRESETS = [
 ]
 const CARDS = ["Kasei", "Monomi", "Hitojichi", "Tsuihou", "Muhon", "Otori", "Suigun", "Yamagoe", "Taikyaku", "Shinobi", "Buntai", "Jouraku"]
 const LEADERS = ["Mouri", "Chosokabe", "Uesugi", "Oda", "Takeda"]
+var MAPS = [
+	 [  # original
+		{"land": [], "water": [1, 2, 3]},		# 0
+		{"land": [], "water": [0, 3, 4]},		# 1
+		{"land": [], "water": [0]},				# 2
+		{"land": [4], "water": [0, 1]},			# 3
+		{"land": [3, 5, 6], "water": [1]},		# 4
+		{"land": [4, 6, 7], "water": []},		# 5
+		{"land": [4, 5, 7, 9], "water": []},	# 6
+		{"land": [5, 6, 8, 9], "water": []},	# 7
+		{"land": [7, 9], "water": [10]},		# 8
+		{"land": [6, 7, 8], "water": []},		# 9
+		{"land": [], "water": [8]},				# 10
+	],
+	 [  # alt 1
+		{"land": [], "water": [1, 2, 3]},		# 0
+		{"land": [], "water": [0, 3, 4]},		# 1
+		{"land": [], "water": [0, 4]},			# 2
+		{"land": [4], "water": [0, 1]},			# 3
+		{"land": [3, 5, 6], "water": [1, 2]},	# 4
+		{"land": [4, 6, 7], "water": []},		# 5
+		{"land": [4, 5, 7, 9], "water": []},	# 6
+		{"land": [5, 6, 8, 9], "water": []},	# 7
+		{"land": [7, 9], "water": [10]},		# 8
+		{"land": [6, 7, 8], "water": [10]},		# 9
+		{"land": [], "water": [8, 9]},			# 10
+	],
+]
 
 # array of players, each element is a dictionary, eg
 # [
@@ -77,19 +108,7 @@ var players = []
 var board_state = {
 	"territory_points": [],
 	"territory_tally": [],
-	"territory_connections": [
-		{"land": [], "water": [1, 2, 3]},		# 0
-		{"land": [], "water": [0, 3, 4]},		# 1
-		{"land": [], "water": [0]},				# 2
-		{"land": [4], "water": [0, 1]},			# 3
-		{"land": [3, 5, 6], "water": [1]},		# 4
-		{"land": [4, 6, 7], "water": []},		# 5
-		{"land": [4, 5, 7, 9], "water": []},	# 6
-		{"land": [5, 6, 8, 9], "water": []},	# 7
-		{"land": [7, 9], "water": [10]},		# 8
-		{"land": [6, 7, 8], "water": []},		# 9
-		{"land": [], "water": [8]},				# 10
-	],
+	"territory_connections": MAPS[map_option],
 	"territory_winner": [],
 }
 var drawn_cards = []
@@ -134,6 +153,7 @@ func reset_all_states():
 	current_dice = []
 	
 	# reset board states
+	self.map_option = 0
 	initialize_board_state()
 	
 	# reset card states
@@ -177,6 +197,9 @@ func initialize_board_state():
 	
 	# self index to points array
 	self.board_state["territory_points"] = points
+	
+	# set the correct map
+	self.board_state["territory_connections"] = self.MAPS[self.map_option]
 	
 	# initialize board state
 	self.board_state["territory_tally"] = []

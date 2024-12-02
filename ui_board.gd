@@ -18,13 +18,19 @@ signal leader_target_selected(apply_to_leader: bool, territory_clicked: int)
 # piece drawing
 var player_piece_scale: Vector2 = Vector2(1.2, 1.2)
 var piece_offset = Vector2(15, 0)
-var player_piece_offset = Vector2(0, 30)
+var player_piece_offset = Vector2(0, 24)
 
 # drawing state for placement
 var last_hovered_territory: int = -1
 
 
 func _ready() -> void:
+
+	# get which map
+	if GameState.map_option == 0:
+		$"../Alt1Links".visible = false
+	elif GameState.map_option == 1:
+		$"../Alt1Links".visible = true
 	
 	# get tile map data for restoration
 	self.initial_tile_map_data = tilemap.get_tile_map_data_as_array()
@@ -57,6 +63,10 @@ func _physics_process(delta: float) -> void:
 	
 	hide_placement_popup()
 	
+	# skip if ai
+	if GameState.players[GameState.current_player]["is_ai"]:
+		return
+	
 	# if in reroll or place phase (ie we have dice results)
 	if (
 		GameState.current_phase == GameState.TurnPhase.REROLL or
@@ -79,6 +89,10 @@ func _physics_process(delta: float) -> void:
 
 
 func _input(event):
+	# skip if ai
+	if GameState.players[GameState.current_player]["is_ai"]:
+		return
+	
 	# on clicking the cell, emit signal on which territory is clicked and mouse position
 	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
 		var clicked_cell = tilemap_constant.local_to_map(tilemap_constant.get_local_mouse_position())
@@ -105,9 +119,15 @@ func show_territory_points():
 func update_piece_drawing_params_based_on_num_players():
 	"""Update how big the pieces should be based on number of players."""
 	match GameState.num_players:
-		2: self.player_piece_scale = Vector2(1.2, 1.2)
-		3: self.player_piece_scale = Vector2(1.2, 1.2)
-		4: self.player_piece_scale = Vector2(1, 1)
+		2: 
+			self.player_piece_scale = Vector2(1.2, 1.2)
+			self.player_piece_offset = Vector2(0, 30)
+		3: 
+			self.player_piece_scale = Vector2(1.2, 1.2)
+			self.player_piece_offset = Vector2(0, 30)
+		4: 
+			self.player_piece_scale = Vector2(1, 1)
+			self.player_piece_offset = Vector2(0, 24)
 
 
 func highlight_territories(territories: Array, player: int):
@@ -167,7 +187,7 @@ func draw_piece_sprites():
 				var players_on_territory = TerritoryHelper.get_players_on_territory(territory_index)
 				var num_vertical_offsets = Vector2(0, players_on_territory.find(player))
 				# only leave leader space if there is a leader
-				piece_sprite.position += (i + 2 * territory_tally[player]["leader"]) * piece_offset
+				piece_sprite.position += (i + 1.6 * territory_tally[player]["leader"]) * piece_offset
 				piece_sprite.position += num_vertical_offsets * player_piece_offset
 				piece_container.add_child(piece_sprite)
 
@@ -180,7 +200,7 @@ func draw_piece_sprites():
 					reinforce_sprite.texture = icon_reinforcement
 					var players_on_territory = TerritoryHelper.get_players_on_territory(territory_index)
 					var num_vertical_offsets = players_on_territory.find(player)
-					reinforce_sprite.position += (territory_tally[player]["soldier"] + 2 * territory_tally[player]["leader"]) * piece_offset
+					reinforce_sprite.position += (territory_tally[player]["soldier"] + 1.6 * territory_tally[player]["leader"]) * piece_offset
 					reinforce_sprite.position += i * piece_offset * 0.5
 					reinforce_sprite.position += num_vertical_offsets * player_piece_offset
 					piece_container.add_child(reinforce_sprite)
